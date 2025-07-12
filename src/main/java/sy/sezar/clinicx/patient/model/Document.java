@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import sy.sezar.clinicx.patient.model.enums.DocumentType;
 import sy.sezar.clinicx.staff.model.Staff;
 
 import java.time.Instant;
@@ -49,7 +50,8 @@ public class Document {
 
     @Size(max = 50)
     @Column(name = "type", length = 50)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private DocumentType type;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)

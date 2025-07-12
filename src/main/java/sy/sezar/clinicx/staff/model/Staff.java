@@ -11,6 +11,7 @@ import sy.sezar.clinicx.core.model.BaseEntity;
 
 import java.util.HashSet;
 import java.util.Set;
+import sy.sezar.clinicx.staff.model.enums.StaffRole;
 
 @Entity
 @Table(name = "staff")
@@ -26,7 +27,8 @@ public class Staff extends BaseEntity {
     @NotNull
     @Size(max = 50)
     @Column(name = "role", nullable = false, length = 50)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private StaffRole role;
 
     @Email
     @NotNull

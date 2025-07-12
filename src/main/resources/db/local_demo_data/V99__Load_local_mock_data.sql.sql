@@ -20,31 +20,31 @@ SET name = 'عيادة الأسنان المتقدمة',
 WHERE id = TRUE;
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'طبيب أسنان', 'doctor1@clinic.sa', '+966 571183769', TRUE);
+VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'DOCTOR', 'doctor1@clinic.sa', '+966 571183769', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'طبيب أسنان', 'doctor2@clinic.sa', '+966 534077971', TRUE);
+VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'DOCTOR', 'doctor2@clinic.sa', '+966 534077971', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'طبيب أسنان', 'doctor3@clinic.sa', '+966 560019543', TRUE);
+VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'DOCTOR', 'doctor3@clinic.sa', '+966 560019543', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'ممرضة', 'nurse1@clinic.sa', '+966 575896163', TRUE);
+VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'NURSE', 'nurse1@clinic.sa', '+966 575896163', TRUE);
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'ممرضة', 'nurse2@clinic.sa', '+966 595905431', TRUE);
+VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'NURSE', 'nurse2@clinic.sa', '+966 595905431', TRUE);
 
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'موظفة استقبال', 'reception@clinic.sa', '+966 548333325', TRUE);
+VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'RECEPTIONIST', 'reception@clinic.sa', '+966 548333325', TRUE);
 
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
@@ -80,7 +80,7 @@ VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
 
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
-        'XRAY', 'أشعة سينية', 'تصوير الأسنان بالأشعة', 100.0, 15);
+        'XRAY', 'X_RAY', 'تصوير الأسنان بالأشعة', 100.0, 15);
 
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
@@ -285,7 +285,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('14826bb3-2378-4c3f-a8b6-d704b45eb61a', 'ead9d6e7-2598-42a9-8867-7ae716ae339c', 'bd2e7d3e-1e92-4bf6-9ac2-f212dee320a2',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 43, 'COMPLETED',
-        95.10, 'علاج أشعة سينية - السن رقم 43', '2025-05-06',
+        95.10, 'علاج X_RAY - السن رقم 43', '2025-05-06',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
@@ -403,7 +403,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('37ccd9c3-1dab-4558-a13a-c5db4765a24e', 'e7ba18ae-0466-4a7f-aafc-5e52183660cf', '8b7a519e-6993-49a7-b712-6cfbcb387fae',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', NULL, 'COMPLETED',
-        118.43, 'علاج أشعة سينية', '2025-05-23',
+        118.43, 'علاج X_RAY', '2025-05-23',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
@@ -445,7 +445,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('26cabb43-7060-49eb-a31d-5530292b8e12', 'bed22cc1-228b-4006-a20f-7d8e932133d5', '2d467671-ea75-4f4d-af6a-76945d8445d0',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 41, 'COMPLETED',
-        88.79, 'علاج أشعة سينية - السن رقم 41', '2025-07-04',
+        88.79, 'علاج X_RAY - السن رقم 41', '2025-07-04',
         'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2');
 
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
@@ -459,7 +459,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('e7d74f22-f396-4c6f-8184-e53c0266a2b6', '86c2dd00-36b6-4e9e-95ae-6085a21192d5', '8a74df49-6cec-4cb8-b096-583f82568f50',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 13, 'COMPLETED',
-        91.22, 'علاج أشعة سينية - السن رقم 13', '2025-03-10',
+        91.22, 'علاج X_RAY - السن رقم 13', '2025-03-10',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
@@ -637,7 +637,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('ccc2e54b-11a6-4852-9400-2346a447d106', '63e08144-3533-429b-9384-46f5be171243', '3027c252-9e51-454a-b713-055b52fc9c5e',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 20, 'COMPLETED',
-        86.75, 'علاج أشعة سينية - السن رقم 20', '2025-03-04',
+        86.75, 'علاج X_RAY - السن رقم 20', '2025-03-04',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
@@ -909,7 +909,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('994d7c7b-1be3-4152-85e4-aca74b2e1567', 'c037c9a1-caa6-43ff-b275-724b0d86a6a2', 'ea5cb8ec-aec6-414c-9abe-1ac3b7f8e3ff',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03', NULL, 'COMPLETED',
-        111.43, 'علاج أشعة سينية', '2025-05-29',
+        111.43, 'علاج X_RAY', '2025-05-29',
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03');
 
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
@@ -1293,7 +1293,7 @@ INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('2fd4b927-e76f-44c2-b23e-33a3c30000ea', 'bac96a45-e987-4e9c-aaa6-0bcc00791fde', 'تاج الأسنان', 268.61);
 
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('ffbd7864-553c-4494-a5f7-078c5f5f0717', 'bac96a45-e987-4e9c-aaa6-0bcc00791fde', 'أشعة سينية', 268.61);
+VALUES ('ffbd7864-553c-4494-a5f7-078c5f5f0717', 'bac96a45-e987-4e9c-aaa6-0bcc00791fde', 'X_RAY', 268.61);
 
 INSERT INTO invoices (id, patient_id, invoice_number, issue_date, due_date,
                       total_amount, status, created_by)
@@ -1317,7 +1317,7 @@ VALUES ('2fa31d33-fc1c-4a21-8b19-12fe5f60a593', '50f029c1-5c9b-4d7c-af2a-ee3e9b4
         584.12, 'PAID', 'd7f81d26-ce95-4104-aafb-5a0e355621a4');
 
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('c9f62cf5-df81-475e-9b43-c38100fe4512', '2fa31d33-fc1c-4a21-8b19-12fe5f60a593', 'أشعة سينية', 584.12);
+VALUES ('c9f62cf5-df81-475e-9b43-c38100fe4512', '2fa31d33-fc1c-4a21-8b19-12fe5f60a593', 'X_RAY', 584.12);
 
 INSERT INTO payments (id, invoice_id, patient_id, payment_date, amount,
                       payment_method, type, description, created_by)
@@ -1376,7 +1376,7 @@ VALUES ('a5813cc9-6290-4683-ba87-c0db5bbac6a0', '3027c252-9e51-454a-b713-055b52f
         316.13, 'PAID', 'd7f81d26-ce95-4104-aafb-5a0e355621a4');
 
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('e8004de3-01cc-4e65-9117-e7be16f47918', 'a5813cc9-6290-4683-ba87-c0db5bbac6a0', 'أشعة سينية', 316.13);
+VALUES ('e8004de3-01cc-4e65-9117-e7be16f47918', 'a5813cc9-6290-4683-ba87-c0db5bbac6a0', 'X_RAY', 316.13);
 
 INSERT INTO payments (id, invoice_id, patient_id, payment_date, amount,
                       payment_method, type, description, created_by)
@@ -1563,33 +1563,33 @@ VALUES ('30638235-d344-420d-9bc9-afded597259f', 'ed000d0a-4263-4295-9a1e-50df1f5
 
 -- Additional Staff Members
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', 'د. محمد الجهني', 'طبيب أسنان', 'doctor4@clinic.sa', '+966 554184209', TRUE);
+VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', 'د. محمد الجهني', 'DOCTOR', 'doctor4@clinic.sa', '+966 554184209', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', 'د. ناصر الشامي', 'طبيب أسنان', 'doctor5@clinic.sa', '+966 535681234', TRUE);
+VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', 'د. ناصر الشامي', 'DOCTOR', 'doctor5@clinic.sa', '+966 535681234', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'د. عمر الأحمد', 'طبيب أسنان', 'doctor6@clinic.sa', '+966 510750284', TRUE);
+VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'د. عمر الأحمد', 'DOCTOR', 'doctor6@clinic.sa', '+966 510750284', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', 'د. راشد العنزي', 'طبيب أسنان', 'doctor7@clinic.sa', '+966 526360818', TRUE);
+VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', 'د. راشد العنزي', 'DOCTOR', 'doctor7@clinic.sa', '+966 526360818', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('089fece7-70fe-4058-8e9e-1f33b3d845dd', 'منى العمر', 'ممرضة', 'nurse5@clinic.sa', '+966 553546445', TRUE);
+VALUES ('089fece7-70fe-4058-8e9e-1f33b3d845dd', 'منى العمر', 'NURSE', 'nurse5@clinic.sa', '+966 553546445', TRUE);
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'زينب الخالد', 'ممرضة', 'nurse6@clinic.sa', '+966 533194371', TRUE);
+VALUES ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'زينب الخالد', 'NURSE', 'nurse6@clinic.sa', '+966 533194371', TRUE);
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('f9d0146d-56b1-496a-bd0f-870170858d82', 'سلمى العلي', 'ممرضة', 'nurse7@clinic.sa', '+966 576463868', TRUE);
+VALUES ('f9d0146d-56b1-496a-bd0f-870170858d82', 'سلمى العلي', 'NURSE', 'nurse7@clinic.sa', '+966 576463868', TRUE);
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('6f554213-30e0-4b77-adfa-99a9f7a7c01f', 'فاطمة الجهني', 'أخصائية صحة أسنان', 'hygienist1@clinic.sa', '+966 521911022', TRUE);
+VALUES ('6f554213-30e0-4b77-adfa-99a9f7a7c01f', 'فاطمة الجهني', 'ASSISTANT', 'hygienist1@clinic.sa', '+966 521911022', TRUE);
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'سلمى الشامي', 'أخصائية صحة أسنان', 'hygienist2@clinic.sa', '+966 543013406', TRUE);
+VALUES ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'سلمى الشامي', 'ASSISTANT', 'hygienist2@clinic.sa', '+966 543013406', TRUE);
 INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('42ca1b05-54de-419e-81f9-0bef64406c92', 'ليلى الجهني', 'مدير إداري', 'admin@clinic.sa', '+966 568017836', TRUE);
+VALUES ('42ca1b05-54de-419e-81f9-0bef64406c92', 'ليلى الجهني', 'ADMIN', 'admin@clinic.sa', '+966 568017836', TRUE);
 -- Additional Procedures
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
@@ -2366,7 +2366,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('ddce5e44-d8e2-4db7-a8f1-8f2822868402', 'b7558550-ad29-4407-bf7d-e0b32a6cf774', 'aadf80ef-bd99-4ecb-a1ff-653253e68df0',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 34, 'COMPLETED',
-        109.86, 'علاج أشعة سينية - السن رقم 34', '2024-11-09',
+        109.86, 'علاج X_RAY - السن رقم 34', '2024-11-09',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -3003,7 +3003,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('4fe57ebf-8878-4370-a71d-2a4b39d12f4b', 'bb65e34e-1453-478c-ba26-2d036504bb15', '33208c0c-cf5f-4fd4-9091-a6247d44f026',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 38, 'COMPLETED',
-        86.31, 'علاج أشعة سينية - السن رقم 38', '2024-09-29',
+        86.31, 'علاج X_RAY - السن رقم 38', '2024-09-29',
         'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -3117,7 +3117,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('1fe86e8a-f6a6-47a5-87b1-5299a07935d4', 'ea0289c5-dcf0-4415-b811-beb0a384dab0', '33208c0c-cf5f-4fd4-9091-a6247d44f026',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', NULL, 'COMPLETED',
-        109.36, 'علاج أشعة سينية', '2025-01-27',
+        109.36, 'علاج X_RAY', '2025-01-27',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -3543,7 +3543,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('81c61e1f-890f-45fd-8666-fda1444e50f6', '1025777f-bcae-4265-a49c-d0baac68ce39', 'c85699c1-ffc2-483b-8999-cacc91b76fa1',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '7e77e993-1599-497c-9a23-e5ea870a5d70', NULL, 'COMPLETED',
-        100.12, 'علاج أشعة سينية', '2024-08-08',
+        100.12, 'علاج X_RAY', '2024-08-08',
         '7e77e993-1599-497c-9a23-e5ea870a5d70');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -3827,7 +3827,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('b9ffd9ca-78fe-46d5-a60b-39c01ca79abf', '8568bbf1-1435-4ba3-8af8-70ebd2e0d8bd', '14d28cf4-88b5-41f5-98b2-926cb0f94ae9',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', 21, 'COMPLETED',
-        110.93, 'علاج أشعة سينية - السن رقم 21', '2025-04-26',
+        110.93, 'علاج X_RAY - السن رقم 21', '2025-04-26',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -3874,7 +3874,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('3873ee89-79f8-4fab-9f65-a112fee8fc23', '7d649a1c-3af4-4559-a046-7dc90f27fab4', '14d28cf4-88b5-41f5-98b2-926cb0f94ae9',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 17, 'COMPLETED',
-        82.36, 'علاج أشعة سينية - السن رقم 17', '2025-05-29',
+        82.36, 'علاج X_RAY - السن رقم 17', '2025-05-29',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -4255,7 +4255,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('3f96f7c3-ce08-4bcc-9a09-9f82dc842baf', '6dfed3ff-17a7-433d-a9a9-29d54da798a4', '3e8dcbc5-36b1-435b-bfef-356d7d615c73',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'a740d31b-41cc-4677-beac-f6bd82db089a', NULL, 'COMPLETED',
-        115.07, 'علاج أشعة سينية', '2025-05-04',
+        115.07, 'علاج X_RAY', '2025-05-04',
         'a740d31b-41cc-4677-beac-f6bd82db089a');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -4267,7 +4267,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('b032bb17-bb3b-43cb-943f-73c940cce657', 'fcef2e61-18cc-4f01-9590-3c52b5faade9', '3e8dcbc5-36b1-435b-bfef-356d7d615c73',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '7e77e993-1599-497c-9a23-e5ea870a5d70', NULL, 'COMPLETED',
-        92.97, 'علاج أشعة سينية', '2025-03-01',
+        92.97, 'علاج X_RAY', '2025-03-01',
         '7e77e993-1599-497c-9a23-e5ea870a5d70');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -4458,7 +4458,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('81d7142b-91b3-4511-b9e1-2f2d107e9c11', 'a82b5e40-915e-47cf-b7cf-8e678052e3f4', '0d8194ad-2d57-446b-b73d-1b8ec4993b84',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'a740d31b-41cc-4677-beac-f6bd82db089a', 41, 'COMPLETED',
-        111.48, 'علاج أشعة سينية - السن رقم 41', '2024-08-20',
+        111.48, 'علاج X_RAY - السن رقم 41', '2024-08-20',
         'a740d31b-41cc-4677-beac-f6bd82db089a');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -4572,7 +4572,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('3a83f9dc-28dd-4e06-afa6-15ab9727ab09', 'c0eef15f-83f8-4d72-affb-41a6d0958d40', 'e6b862ca-2f88-41e6-a7e2-6b2e39bb9797',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', NULL, 'COMPLETED',
-        89.32, 'علاج أشعة سينية', '2025-03-08',
+        89.32, 'علاج X_RAY', '2025-03-08',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -4625,7 +4625,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('8ae49140-350f-4de7-a440-9f0224f27838', '39984e1b-db68-4342-88c1-ca9e4a6d5217', 'b5ad516c-6b71-4416-b660-056ad1d34f79',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'a740d31b-41cc-4677-beac-f6bd82db089a', NULL, 'COMPLETED',
-        89.84, 'علاج أشعة سينية', '2025-03-03',
+        89.84, 'علاج X_RAY', '2025-03-03',
         'a740d31b-41cc-4677-beac-f6bd82db089a');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -5036,7 +5036,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('b3e98a23-cd56-467d-8015-70b833606786', '7725756d-bd2a-49af-a5af-f05b164f1828', '638b6b84-50f9-4861-b001-c86ad2188ef1',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', NULL, 'COMPLETED',
-        118.37, 'علاج أشعة سينية', '2025-01-01',
+        118.37, 'علاج X_RAY', '2025-01-01',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -5442,7 +5442,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('c13b0d27-0847-42de-9223-b6d445ce69de', '17590fd9-71e5-4505-8d16-1718f3055c29', 'e3e078df-a3c6-4446-900b-e3abe2ff19ff',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', NULL, 'COMPLETED',
-        89.20, 'علاج أشعة سينية', '2025-01-31',
+        89.20, 'علاج X_RAY', '2025-01-31',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -5468,7 +5468,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('774536bb-d82b-4988-b305-e3cc9bbf525d', '5a84c28a-41cb-405f-a34f-78e34d8e4191', 'e51d0c71-9df6-4c78-88c4-56f6b3ecc3fa',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', NULL, 'COMPLETED',
-        96.52, 'علاج أشعة سينية', '2024-11-23',
+        96.52, 'علاج X_RAY', '2024-11-23',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -5552,7 +5552,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('22df5e1b-9e04-43b5-892b-16f7b4bed472', 'a67c1909-149e-442d-bc97-b90ecea02db8', 'bd71e492-b94d-44b1-8c0b-1012177e68d4',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03', NULL, 'COMPLETED',
-        112.45, 'علاج أشعة سينية', '2025-06-26',
+        112.45, 'علاج X_RAY', '2025-06-26',
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -5899,7 +5899,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('484963bb-73eb-463d-b796-691dbb6e6548', 'b58ce7c5-727b-41dc-b234-ba209d155573', '12e8d048-1f45-4dfe-920b-b3b28507702a',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'a740d31b-41cc-4677-beac-f6bd82db089a', 13, 'COMPLETED',
-        105.19, 'علاج أشعة سينية - السن رقم 13', '2024-12-28',
+        105.19, 'علاج X_RAY - السن رقم 13', '2024-12-28',
         'a740d31b-41cc-4677-beac-f6bd82db089a');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -6277,7 +6277,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('05626e47-a241-44c2-8ad1-d29a6c5d0cc8', '6bd7dda3-a34f-4741-afbd-ba2cc5bd5731', 'c788722c-3a96-4bd5-9139-33a8d8e65565',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8', NULL, 'COMPLETED',
-        109.80, 'علاج أشعة سينية', '2024-09-15',
+        109.80, 'علاج X_RAY', '2024-09-15',
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -6732,7 +6732,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('03e177e7-8713-4c21-a358-aa28c58379fd', '18327a72-d00b-4d07-8c95-7ec321f01ed9', '810a56b5-6e4f-42d9-9aa8-e1d8a1477db7',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', NULL, 'COMPLETED',
-        97.69, 'علاج أشعة سينية', '2024-10-18',
+        97.69, 'علاج X_RAY', '2024-10-18',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -6804,7 +6804,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('10ce4417-7545-4a83-b4b9-b804011bd119', '30274492-6817-4762-ab92-c4c25becc8f7', '5747f021-7809-4e2d-856d-45ebdced300c',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 18, 'COMPLETED',
-        112.23, 'علاج أشعة سينية - السن رقم 18', '2025-04-07',
+        112.23, 'علاج X_RAY - السن رقم 18', '2025-04-07',
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7141,14 +7141,14 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('c4689d1a-d4aa-40b9-92a5-0baea00a9115', '8a70261a-cc96-4753-8c4a-25b10c2a1e53', 'b7fa9854-934d-4afa-862c-075bd03b04d0',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '7e77e993-1599-497c-9a23-e5ea870a5d70', 11, 'COMPLETED',
-        97.24, 'علاج أشعة سينية - السن رقم 11', '2024-08-18',
+        97.24, 'علاج X_RAY - السن رقم 11', '2024-08-18',
         '7e77e993-1599-497c-9a23-e5ea870a5d70');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
 VALUES ('3225dc15-8a8e-4071-958d-404283182d36', '8a70261a-cc96-4753-8c4a-25b10c2a1e53', 'b7fa9854-934d-4afa-862c-075bd03b04d0',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '7e77e993-1599-497c-9a23-e5ea870a5d70', 17, 'COMPLETED',
-        96.64, 'علاج أشعة سينية - السن رقم 17', '2024-08-18',
+        96.64, 'علاج X_RAY - السن رقم 17', '2024-08-18',
         '7e77e993-1599-497c-9a23-e5ea870a5d70');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7212,14 +7212,14 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('bcd74f6a-155a-4782-8f05-7525d97c29ab', '9d346563-504d-4bf5-9546-39f85b187ba6', '1d7de144-435b-4d30-aab6-6fb43d4ac723',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 25, 'COMPLETED',
-        82.77, 'علاج أشعة سينية - السن رقم 25', '2025-05-18',
+        82.77, 'علاج X_RAY - السن رقم 25', '2025-05-18',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
 VALUES ('5f5ca98e-061c-4234-a24a-9deaafc39704', '9d346563-504d-4bf5-9546-39f85b187ba6', '1d7de144-435b-4d30-aab6-6fb43d4ac723',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', NULL, 'COMPLETED',
-        111.42, 'علاج أشعة سينية', '2025-05-18',
+        111.42, 'علاج X_RAY', '2025-05-18',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7278,7 +7278,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('ed10da17-7d99-4e0c-9cd6-8a78c1bb421e', 'cffb7173-489a-4bb6-9c36-018fdf2382f1', '1d7de144-435b-4d30-aab6-6fb43d4ac723',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8', 42, 'COMPLETED',
-        89.14, 'علاج أشعة سينية - السن رقم 42', '2025-03-19',
+        89.14, 'علاج X_RAY - السن رقم 42', '2025-03-19',
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -7514,14 +7514,14 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('8b698897-5f70-48b7-8a34-08498bdd3e5e', '04eca1d3-6b22-414b-9f2b-de09b5bb358f', 'a84f91b9-21de-47fe-941e-023727b5a321',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 30, 'COMPLETED',
-        108.22, 'علاج أشعة سينية - السن رقم 30', '2024-12-21',
+        108.22, 'علاج X_RAY - السن رقم 30', '2024-12-21',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
 VALUES ('3613d0aa-ea81-42c3-9117-2bae435dcec0', '04eca1d3-6b22-414b-9f2b-de09b5bb358f', 'a84f91b9-21de-47fe-941e-023727b5a321',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 34, 'COMPLETED',
-        81.72, 'علاج أشعة سينية - السن رقم 34', '2024-12-21',
+        81.72, 'علاج X_RAY - السن رقم 34', '2024-12-21',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7559,7 +7559,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('d0e9ee62-f607-401e-b042-b769814d345d', '76bbc64e-466d-4f3a-8b97-c5947f1811f3', 'a84f91b9-21de-47fe-941e-023727b5a321',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8', NULL, 'COMPLETED',
-        115.67, 'علاج أشعة سينية', '2025-01-16',
+        115.67, 'علاج X_RAY', '2025-01-16',
         'cfb9217c-ca9d-4983-b4f0-66d4520641d8');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7704,7 +7704,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('75606c30-77da-435d-998e-7cac80ccc291', '7ab14eb1-a98b-4334-a004-c80b57745b84', '4beb4577-a28a-4ae6-bf53-400e18edccac',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '7e77e993-1599-497c-9a23-e5ea870a5d70', NULL, 'COMPLETED',
-        107.93, 'علاج أشعة سينية', '2025-03-10',
+        107.93, 'علاج X_RAY', '2025-03-10',
         '7e77e993-1599-497c-9a23-e5ea870a5d70');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -7924,7 +7924,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('7afdacb4-fd47-411a-b508-fe9c1e54f7e1', '6202d948-24c4-475a-8ac4-f3498c752e67', 'cffe62fb-dd1c-444d-b911-422ba6f25a81',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 46, 'COMPLETED',
-        86.96, 'علاج أشعة سينية - السن رقم 46', '2024-08-14',
+        86.96, 'علاج X_RAY - السن رقم 46', '2024-08-14',
         'b5ee786d-b86e-4ca3-a705-4417f1c65b03');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -7986,7 +7986,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('8400f3a1-c4b4-4561-9555-172657e6cc80', '98781eec-96c8-4e07-b907-fec6af29b60c', '61f80afa-ecc4-436d-918e-04afb7ef1a16',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021', NULL, 'COMPLETED',
-        101.25, 'علاج أشعة سينية', '2025-01-25',
+        101.25, 'علاج X_RAY', '2025-01-25',
         '3674d376-fca0-4d74-9aa4-bb2cc13b9021');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -8376,7 +8376,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('f6df0c9f-5e7d-4e31-805a-9bb2c3158a2c', 'eee827f8-9035-40e0-afc2-ab1d562fc385', '97a843e7-13f3-4a2e-9009-2f26025ffc08',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', NULL, 'COMPLETED',
-        103.03, 'علاج أشعة سينية', '2025-04-21',
+        103.03, 'علاج X_RAY', '2025-04-21',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id,
                           appointment_datetime, duration_minutes, status, notes, created_by)
@@ -8505,7 +8505,7 @@ INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
 VALUES ('69e34e1a-992a-4035-b1b6-b3da9403270d', '1190257e-2068-45e9-a37f-2392012ab10f', '93dc2d56-7b5e-4607-b3c8-6aa2773fcc52',
         (SELECT id FROM procedures WHERE procedure_code = 'XRAY'),
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 32, 'COMPLETED',
-        98.28, 'علاج أشعة سينية - السن رقم 32', '2024-07-22',
+        98.28, 'علاج X_RAY - السن رقم 32', '2024-07-22',
         '844e0809-f1e1-4f79-9c7c-d09754b25b6b');
 INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id,
                         tooth_number, status, cost, treatment_notes, treatment_date, created_by)
@@ -8922,7 +8922,7 @@ VALUES ('9498ea1b-33c1-4dbf-a048-0f3a66d2c62b', 'ff017e9b-b62f-4e74-b2a5-8db9e19
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('5d85fa12-c60a-47a2-a745-f23769952524', 'ff017e9b-b62f-4e74-b2a5-8db9e1990471', 'حشو الأسنان', 56.82);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('6f2c3be4-ec03-4d22-ad84-9787c6b9013b', 'ff017e9b-b62f-4e74-b2a5-8db9e1990471', 'أشعة سينية', 56.82);
+VALUES ('6f2c3be4-ec03-4d22-ad84-9787c6b9013b', 'ff017e9b-b62f-4e74-b2a5-8db9e1990471', 'X_RAY', 56.82);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('769eca74-9261-4785-bde6-c822d8f83f09', 'ff017e9b-b62f-4e74-b2a5-8db9e1990471', 'استشارة', 56.82);
 INSERT INTO payments (id, invoice_id, patient_id, payment_date, amount,
@@ -8954,7 +8954,7 @@ VALUES ('d9b98a36-aae6-4432-baf3-a9d087ea8db2', '27179679-b81c-45b0-b2d8-66aa98b
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('f5379583-652c-423f-926b-78550bdcff8b', '27179679-b81c-45b0-b2d8-66aa98bb1e3b', 'تقويم', 961.35);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('100da2bb-5fd2-4082-a42b-1d7f51e9489a', '27179679-b81c-45b0-b2d8-66aa98bb1e3b', 'أشعة سينية', 961.35);
+VALUES ('100da2bb-5fd2-4082-a42b-1d7f51e9489a', '27179679-b81c-45b0-b2d8-66aa98bb1e3b', 'X_RAY', 961.35);
 INSERT INTO invoices (id, patient_id, invoice_number, issue_date, due_date,
                       total_amount, status, created_by)
 VALUES ('e6c55eea-f0e9-41f7-8b67-bd76801c95b5', 'aadf80ef-bd99-4ecb-a1ff-653253e68df0', 'INV-1022',
@@ -9021,9 +9021,9 @@ VALUES ('26edd6ba-ef34-4071-a16b-18ec27ac0443', '61f80afa-ecc4-436d-918e-04afb7e
         '2025-05-31', '2025-06-30',
         3223.11, 'UNPAID', 'd7f81d26-ce95-4104-aafb-5a0e355621a4');
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('2ee78e8d-d9cc-4020-91e0-c2059621f966', '26edd6ba-ef34-4071-a16b-18ec27ac0443', 'أشعة سينية', 644.62);
+VALUES ('2ee78e8d-d9cc-4020-91e0-c2059621f966', '26edd6ba-ef34-4071-a16b-18ec27ac0443', 'X_RAY', 644.62);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('0861cf66-3637-4e9d-a1f4-3e82aa1b3bba', '26edd6ba-ef34-4071-a16b-18ec27ac0443', 'أشعة سينية', 644.62);
+VALUES ('0861cf66-3637-4e9d-a1f4-3e82aa1b3bba', '26edd6ba-ef34-4071-a16b-18ec27ac0443', 'X_RAY', 644.62);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('ea731a9f-b644-4fda-9331-d03e820fcc80', '26edd6ba-ef34-4071-a16b-18ec27ac0443', 'قشرة تجميلية', 644.62);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
@@ -9121,7 +9121,7 @@ VALUES ('20c7aa5f-639e-4259-b468-7f831810d3db', '66d56a9b-17c4-4183-aa15-2db3082
         '2025-02-13', '2025-03-15',
         2733.00, 'PAID', 'd7f81d26-ce95-4104-aafb-5a0e355621a4');
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('d7b33989-0aa4-4d33-91d0-cf11a6ecad66', '20c7aa5f-639e-4259-b468-7f831810d3db', 'أشعة سينية', 1366.50);
+VALUES ('d7b33989-0aa4-4d33-91d0-cf11a6ecad66', '20c7aa5f-639e-4259-b468-7f831810d3db', 'X_RAY', 1366.50);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('47827818-2fb6-49c2-bcba-66ecedc50cf1', '20c7aa5f-639e-4259-b468-7f831810d3db', 'طقم جزئي', 1366.50);
 INSERT INTO payments (id, invoice_id, patient_id, payment_date, amount,
@@ -9140,7 +9140,7 @@ VALUES ('d5af395a-ea4b-4d2f-bd5e-5d926fe2e08b', '2661ed19-357a-4d9c-82b9-6c7edae
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('84c56472-a0b6-4590-9e81-e7b18c86a1f9', '2661ed19-357a-4d9c-82b9-6c7edae2c6f8', 'تقويم', 1271.57);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('d8fe5e11-4cdc-458b-9a59-71eabca6a0ca', '2661ed19-357a-4d9c-82b9-6c7edae2c6f8', 'أشعة سينية', 1271.57);
+VALUES ('d8fe5e11-4cdc-458b-9a59-71eabca6a0ca', '2661ed19-357a-4d9c-82b9-6c7edae2c6f8', 'X_RAY', 1271.57);
 INSERT INTO invoices (id, patient_id, invoice_number, issue_date, due_date,
                       total_amount, status, created_by)
 VALUES ('79556ccf-339e-466a-8154-1532514255ed', '1d7de144-435b-4d30-aab6-6fb43d4ac723', 'INV-1034',
@@ -9151,7 +9151,7 @@ VALUES ('e5b69fce-fda1-4594-8f19-e138e433fa9c', '79556ccf-339e-466a-8154-1532514
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('c7009cf4-9950-467c-a7be-bcccea816cd7', '79556ccf-339e-466a-8154-1532514255ed', 'طقم جزئي', 910.84);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('31964491-e842-4609-af1e-593ee38a7b66', '79556ccf-339e-466a-8154-1532514255ed', 'أشعة سينية', 910.84);
+VALUES ('31964491-e842-4609-af1e-593ee38a7b66', '79556ccf-339e-466a-8154-1532514255ed', 'X_RAY', 910.84);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('c3ff0330-a3d1-4921-999f-451e3710a692', '79556ccf-339e-466a-8154-1532514255ed', 'تنظيف الأسنان', 910.84);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
@@ -9186,7 +9186,7 @@ VALUES ('7d4543fe-8709-4f9c-aba7-8da64ed00ea8', '333b8a78-694f-4636-825c-b76a973
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('886f596f-f323-46ef-95d0-37502541e648', '333b8a78-694f-4636-825c-b76a97368846', 'جسر الأسنان', 981.42);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('39da1d8f-5838-4356-878f-d684efe07e1d', '333b8a78-694f-4636-825c-b76a97368846', 'أشعة سينية', 981.42);
+VALUES ('39da1d8f-5838-4356-878f-d684efe07e1d', '333b8a78-694f-4636-825c-b76a97368846', 'X_RAY', 981.42);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('e2fb6e8b-8769-42e4-a8b1-f3f84a0a02b6', '333b8a78-694f-4636-825c-b76a97368846', 'حشو وقائي', 981.42);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
@@ -9478,7 +9478,7 @@ VALUES ('36ffc7e9-f69a-4fe2-aba3-d2bc907fb1e3', 'cc258293-8ffa-4168-86d5-1aed9bb
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('a7f78c11-6347-4da2-9f3d-03f3377c0f96', 'cc258293-8ffa-4168-86d5-1aed9bb0382e', 'خلع الأسنان', 198.81);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('c660e4e7-0c8e-4dc2-87e5-b0a861bbece1', 'cc258293-8ffa-4168-86d5-1aed9bb0382e', 'أشعة سينية', 198.81);
+VALUES ('c660e4e7-0c8e-4dc2-87e5-b0a861bbece1', 'cc258293-8ffa-4168-86d5-1aed9bb0382e', 'X_RAY', 198.81);
 INSERT INTO payments (id, invoice_id, patient_id, payment_date, amount,
                       payment_method, type, description, created_by)
 VALUES ('913369b7-4cd6-4fcd-9d54-fd9f99f90ca6', 'cc258293-8ffa-4168-86d5-1aed9bb0382e', '5747f021-7809-4e2d-856d-45ebdced300c',
@@ -9649,7 +9649,7 @@ VALUES ('9fddf87a-0dfa-4709-af1e-5c8f38928279', 'c85699c1-ffc2-483b-8999-cacc91b
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('e64ee25b-439e-4926-ad74-9c08b004832a', '9fddf87a-0dfa-4709-af1e-5c8f38928279', 'ترميم تجميلي', 817.66);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('9bd96ab9-aa7f-43fe-9929-97c1d5ccb48c', '9fddf87a-0dfa-4709-af1e-5c8f38928279', 'أشعة سينية', 817.66);
+VALUES ('9bd96ab9-aa7f-43fe-9929-97c1d5ccb48c', '9fddf87a-0dfa-4709-af1e-5c8f38928279', 'X_RAY', 817.66);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('d674ffb2-ea41-4c4f-8508-0a3515637dc2', '9fddf87a-0dfa-4709-af1e-5c8f38928279', 'خلع الأسنان', 817.66);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
@@ -9675,7 +9675,7 @@ VALUES ('6df1496d-2bc8-4731-8159-008fea03ee03', '9b943394-6c53-4566-8a1e-bd39eef
 INSERT INTO invoice_items (id, invoice_id, description, amount)
 VALUES ('33538d95-6b83-4f64-9936-623a443f56c5', '9b943394-6c53-4566-8a1e-bd39eefe2120', 'حشو وقائي', 83.43);
 INSERT INTO invoice_items (id, invoice_id, description, amount)
-VALUES ('6e6db22d-4c12-4103-8ee7-48475bd36b6c', '9b943394-6c53-4566-8a1e-bd39eefe2120', 'أشعة سينية', 83.43);
+VALUES ('6e6db22d-4c12-4103-8ee7-48475bd36b6c', '9b943394-6c53-4566-8a1e-bd39eefe2120', 'X_RAY', 83.43);
 INSERT INTO invoices (id, patient_id, invoice_number, issue_date, due_date,
                       total_amount, status, created_by)
 VALUES ('40779b1f-024e-4b6f-b57b-d68ca01f7b64', '7ecc8943-b925-4944-8e60-8c0570ad9404', 'INV-1073',
@@ -10036,56 +10036,56 @@ VALUES ('95d5d89f-4844-4d7a-89fa-76d8c1ee73ba', '060e5ecd-073f-4930-9a27-e7bfcf8
 -- Document Records
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('a6467e18-9deb-4957-b1fe-0a03a39ac19d', 'c99fc741-2b1d-405b-ac34-dd92212fbc99', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'صورة بعد العلاج_P2024054_9492.pdf',
-        '/documents/P2024054/صورة بعد العلاج_P2024054_9492.pdf', 3854570, 'application/pdf', 'صورة بعد العلاج');
+VALUES ('a6467e18-9deb-4957-b1fe-0a03a39ac19d', 'c99fc741-2b1d-405b-ac34-dd92212fbc99', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'TREATMENT_PHOTO_P2024054_9492.pdf',
+        '/documents/P2024054/TREATMENT_PHOTO_P2024054_9492.pdf', 3854570, 'application/pdf', 'TREATMENT_PHOTO');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('b56d32ed-4f67-4d92-a6ac-725eb46f4f3c', 'e6b862ca-2f88-41e6-a7e2-6b2e39bb9797', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'تقرير طبي_P2024050_8575.pdf',
-        '/documents/P2024050/تقرير طبي_P2024050_8575.pdf', 1899615, 'application/pdf', 'تقرير طبي');
+VALUES ('b56d32ed-4f67-4d92-a6ac-725eb46f4f3c', 'e6b862ca-2f88-41e6-a7e2-6b2e39bb9797', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'MEDICAL_REPORT_P2024050_8575.pdf',
+        '/documents/P2024050/MEDICAL_REPORT_P2024050_8575.pdf', 1899615, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('61f345d4-d833-4bc2-95d8-f61416eb505f', '517d1071-dde1-4d36-b1ef-5745264bf869', 'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'تقرير طبي_P2024024_5523.pdf',
-        '/documents/P2024024/تقرير طبي_P2024024_5523.pdf', 818411, 'application/pdf', 'تقرير طبي');
+VALUES ('61f345d4-d833-4bc2-95d8-f61416eb505f', '517d1071-dde1-4d36-b1ef-5745264bf869', 'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'MEDICAL_REPORT_P2024024_5523.pdf',
+        '/documents/P2024024/MEDICAL_REPORT_P2024024_5523.pdf', 818411, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('ac19fd96-1be2-4d5f-8c0c-550c248e3ed4', 'b9b53000-347b-499c-9259-a16709d58358', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'صورة بعد العلاج_P2024064_1100.pdf',
-        '/documents/P2024064/صورة بعد العلاج_P2024064_1100.pdf', 694288, 'application/pdf', 'صورة بعد العلاج');
+VALUES ('ac19fd96-1be2-4d5f-8c0c-550c248e3ed4', 'b9b53000-347b-499c-9259-a16709d58358', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'TREATMENT_PHOTO_P2024064_1100.pdf',
+        '/documents/P2024064/TREATMENT_PHOTO_P2024064_1100.pdf', 694288, 'application/pdf', 'TREATMENT_PHOTO');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('2121d550-1ff9-4919-9cb0-76d192b88bff', 'fb732ed6-a4cf-4db4-bf66-4f2b6c327b3e', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'أشعة سينية_P2024084_3759.pdf',
-        '/documents/P2024084/أشعة سينية_P2024084_3759.pdf', 132250, 'application/pdf', 'أشعة سينية');
+VALUES ('2121d550-1ff9-4919-9cb0-76d192b88bff', 'fb732ed6-a4cf-4db4-bf66-4f2b6c327b3e', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'X_RAY_P2024084_3759.pdf',
+        '/documents/P2024084/X_RAY_P2024084_3759.pdf', 132250, 'application/pdf', 'X_RAY');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
 VALUES ('c8ce0b25-b84a-446b-96d4-bf969939fdd6', '4beb4577-a28a-4ae6-bf53-400e18edccac', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'صورة قبل العلاج_P2024088_6877.pdf',
         '/documents/P2024088/صورة قبل العلاج_P2024088_6877.pdf', 622249, 'application/pdf', 'صورة قبل العلاج');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('db686c75-98e9-4f3e-844c-d7d878bb0d41', '81a36250-0264-4339-b35e-dd3786feca0e', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'تقرير طبي_P2024053_1301.pdf',
-        '/documents/P2024053/تقرير طبي_P2024053_1301.pdf', 3592304, 'application/pdf', 'تقرير طبي');
+VALUES ('db686c75-98e9-4f3e-844c-d7d878bb0d41', '81a36250-0264-4339-b35e-dd3786feca0e', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'MEDICAL_REPORT_P2024053_1301.pdf',
+        '/documents/P2024053/MEDICAL_REPORT_P2024053_1301.pdf', 3592304, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
 VALUES ('bb473bb4-7841-44e4-9994-1d2cc13a6483', '810a56b5-6e4f-42d9-9aa8-e1d8a1477db7', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'صورة قبل العلاج_P2024078_4747.pdf',
         '/documents/P2024078/صورة قبل العلاج_P2024078_4747.pdf', 1302388, 'application/pdf', 'صورة قبل العلاج');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('0bd55aeb-9fde-4305-af96-efddfc95de68', '5747f021-7809-4e2d-856d-45ebdced300c', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'صورة بعد العلاج_P2024079_2232.pdf',
-        '/documents/P2024079/صورة بعد العلاج_P2024079_2232.pdf', 2080189, 'application/pdf', 'صورة بعد العلاج');
+VALUES ('0bd55aeb-9fde-4305-af96-efddfc95de68', '5747f021-7809-4e2d-856d-45ebdced300c', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'TREATMENT_PHOTO_P2024079_2232.pdf',
+        '/documents/P2024079/TREATMENT_PHOTO_P2024079_2232.pdf', 2080189, 'application/pdf', 'TREATMENT_PHOTO');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('c61e54cc-674b-4e74-9ed1-54465a10bbd6', 'adcd0fd2-cfe1-4f19-ada9-f7dcb5e18aa6', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'تقرير طبي_P2024100_2998.pdf',
-        '/documents/P2024100/تقرير طبي_P2024100_2998.pdf', 1088927, 'application/pdf', 'تقرير طبي');
+VALUES ('c61e54cc-674b-4e74-9ed1-54465a10bbd6', 'adcd0fd2-cfe1-4f19-ada9-f7dcb5e18aa6', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'MEDICAL_REPORT_P2024100_2998.pdf',
+        '/documents/P2024100/MEDICAL_REPORT_P2024100_2998.pdf', 1088927, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('212e4504-4024-44a1-81c5-e83d35fff7b6', '81c2b2f8-63bb-488c-a276-d6766d4eae8a', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'موافقة علاج_P2024028_2708.pdf',
-        '/documents/P2024028/موافقة علاج_P2024028_2708.pdf', 162288, 'application/pdf', 'موافقة علاج');
+VALUES ('212e4504-4024-44a1-81c5-e83d35fff7b6', '81c2b2f8-63bb-488c-a276-d6766d4eae8a', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'TREATMENT_APPROVAL_P2024028_2708.pdf',
+        '/documents/P2024028/TREATMENT_APPROVAL_P2024028_2708.pdf', 162288, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('e3811bcd-991a-4bfe-ab91-6d0c6edb9ab3', '517d1071-dde1-4d36-b1ef-5745264bf869', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'صورة بعد العلاج_P2024024_3881.pdf',
-        '/documents/P2024024/صورة بعد العلاج_P2024024_3881.pdf', 4946132, 'application/pdf', 'صورة بعد العلاج');
+VALUES ('e3811bcd-991a-4bfe-ab91-6d0c6edb9ab3', '517d1071-dde1-4d36-b1ef-5745264bf869', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'TREATMENT_PHOTO_P2024024_3881.pdf',
+        '/documents/P2024024/TREATMENT_PHOTO_P2024024_3881.pdf', 4946132, 'application/pdf', 'TREATMENT_PHOTO');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('d8b9c8ea-cba6-4e91-869e-b2ce94692f72', '4c4eeae5-1844-4545-a6ce-2b8bbece8e88', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'تقرير طبي_P2024048_6005.pdf',
-        '/documents/P2024048/تقرير طبي_P2024048_6005.pdf', 225891, 'application/pdf', 'تقرير طبي');
+VALUES ('d8b9c8ea-cba6-4e91-869e-b2ce94692f72', '4c4eeae5-1844-4545-a6ce-2b8bbece8e88', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'MEDICAL_REPORT_P2024048_6005.pdf',
+        '/documents/P2024048/MEDICAL_REPORT_P2024048_6005.pdf', 225891, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
 VALUES ('fdd76190-9e03-4454-a247-971f6892cb7e', 'c788722c-3a96-4bd5-9139-33a8d8e65565', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'صورة قبل العلاج_P2024071_2800.pdf',
@@ -10096,63 +10096,63 @@ VALUES ('c3144d8f-80b4-4b78-86ea-47db9f8e0191', 'b9b53000-347b-499c-9259-a16709d
         '/documents/P2024064/صورة قبل العلاج_P2024064_4559.pdf', 3673458, 'application/pdf', 'صورة قبل العلاج');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('2907006c-fce8-4f07-9726-4d6b168a6034', '517d1071-dde1-4d36-b1ef-5745264bf869', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'أشعة سينية_P2024024_5027.pdf',
-        '/documents/P2024024/أشعة سينية_P2024024_5027.pdf', 3421397, 'application/pdf', 'أشعة سينية');
+VALUES ('2907006c-fce8-4f07-9726-4d6b168a6034', '517d1071-dde1-4d36-b1ef-5745264bf869', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'X_RAY_P2024024_5027.pdf',
+        '/documents/P2024024/X_RAY_P2024024_5027.pdf', 3421397, 'application/pdf', 'X_RAY');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('e5e0aff7-f80b-4486-8479-7c50cd9b649a', 'c788722c-3a96-4bd5-9139-33a8d8e65565', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'أشعة سينية_P2024071_6915.pdf',
-        '/documents/P2024071/أشعة سينية_P2024071_6915.pdf', 1782673, 'application/pdf', 'أشعة سينية');
+VALUES ('e5e0aff7-f80b-4486-8479-7c50cd9b649a', 'c788722c-3a96-4bd5-9139-33a8d8e65565', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'X_RAY_P2024071_6915.pdf',
+        '/documents/P2024071/X_RAY_P2024071_6915.pdf', 1782673, 'application/pdf', 'X_RAY');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
 VALUES ('97373807-e8d9-46fc-b3fe-11c248d3aebd', 'a84f91b9-21de-47fe-941e-023727b5a321', 'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'صورة قبل العلاج_P2024086_4915.pdf',
         '/documents/P2024086/صورة قبل العلاج_P2024086_4915.pdf', 3736898, 'application/pdf', 'صورة قبل العلاج');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('094e68d5-6a12-4170-9809-9288a368f65e', '51739c46-139f-499c-bec0-720560313310', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'أشعة سينية_P2024032_8175.pdf',
-        '/documents/P2024032/أشعة سينية_P2024032_8175.pdf', 3986699, 'application/pdf', 'أشعة سينية');
+VALUES ('094e68d5-6a12-4170-9809-9288a368f65e', '51739c46-139f-499c-bec0-720560313310', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'X_RAY_P2024032_8175.pdf',
+        '/documents/P2024032/X_RAY_P2024032_8175.pdf', 3986699, 'application/pdf', 'X_RAY');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('a1b2c7a9-df61-436b-85dc-3bc1d12a1c80', '998dbd19-94b9-4c62-9df1-202d06aa254a', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'موافقة علاج_P2024036_2420.pdf',
-        '/documents/P2024036/موافقة علاج_P2024036_2420.pdf', 4070746, 'application/pdf', 'موافقة علاج');
+VALUES ('a1b2c7a9-df61-436b-85dc-3bc1d12a1c80', '998dbd19-94b9-4c62-9df1-202d06aa254a', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'TREATMENT_APPROVAL_P2024036_2420.pdf',
+        '/documents/P2024036/TREATMENT_APPROVAL_P2024036_2420.pdf', 4070746, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
 VALUES ('aaad7c1b-0bd6-4a30-a104-cf1dbd2373ae', '9018a956-250f-40ca-be2c-bc6a37ec8b19', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'صورة قبل العلاج_P2024068_1545.pdf',
         '/documents/P2024068/صورة قبل العلاج_P2024068_1545.pdf', 4344671, 'application/pdf', 'صورة قبل العلاج');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('c91981ef-220b-4f2e-bfa2-b798c8cff7c5', '51739c46-139f-499c-bec0-720560313310', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'موافقة علاج_P2024032_6827.pdf',
-        '/documents/P2024032/موافقة علاج_P2024032_6827.pdf', 1241463, 'application/pdf', 'موافقة علاج');
+VALUES ('c91981ef-220b-4f2e-bfa2-b798c8cff7c5', '51739c46-139f-499c-bec0-720560313310', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'TREATMENT_APPROVAL_P2024032_6827.pdf',
+        '/documents/P2024032/TREATMENT_APPROVAL_P2024032_6827.pdf', 1241463, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('786c2f95-c0ba-4ece-bee8-bfd3b857e3a2', '4096b1dc-2e28-4fe4-a22c-b62c1ba7cb56', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'أشعة سينية_P2024023_1435.pdf',
-        '/documents/P2024023/أشعة سينية_P2024023_1435.pdf', 1003415, 'application/pdf', 'أشعة سينية');
+VALUES ('786c2f95-c0ba-4ece-bee8-bfd3b857e3a2', '4096b1dc-2e28-4fe4-a22c-b62c1ba7cb56', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'X_RAY_P2024023_1435.pdf',
+        '/documents/P2024023/X_RAY_P2024023_1435.pdf', 1003415, 'application/pdf', 'X_RAY');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('183d0053-8fcc-46f6-a816-fdccce3983b9', '81c2b2f8-63bb-488c-a276-d6766d4eae8a', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'موافقة علاج_P2024028_7474.pdf',
-        '/documents/P2024028/موافقة علاج_P2024028_7474.pdf', 4276599, 'application/pdf', 'موافقة علاج');
+VALUES ('183d0053-8fcc-46f6-a816-fdccce3983b9', '81c2b2f8-63bb-488c-a276-d6766d4eae8a', 'd7f81d26-ce95-4104-aafb-5a0e355621a4', 'TREATMENT_APPROVAL_P2024028_7474.pdf',
+        '/documents/P2024028/TREATMENT_APPROVAL_P2024028_7474.pdf', 4276599, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('b5c73141-1e28-4043-a5e1-8c2e3ad6ba2c', 'b25049f9-d533-495b-ba24-753998010265', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'صورة بعد العلاج_P2024080_6498.pdf',
-        '/documents/P2024080/صورة بعد العلاج_P2024080_6498.pdf', 3590113, 'application/pdf', 'صورة بعد العلاج');
+VALUES ('b5c73141-1e28-4043-a5e1-8c2e3ad6ba2c', 'b25049f9-d533-495b-ba24-753998010265', 'e9947118-bf36-494d-a826-eb6d6a0571ca', 'TREATMENT_PHOTO_P2024080_6498.pdf',
+        '/documents/P2024080/TREATMENT_PHOTO_P2024080_6498.pdf', 3590113, 'application/pdf', 'TREATMENT_PHOTO');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('7d7e4e0d-57c8-4317-9be0-fc73974c92d5', '8a77a5ce-84d2-4696-bbba-52f2304bdb8d', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'تقرير طبي_P2024026_1093.pdf',
-        '/documents/P2024026/تقرير طبي_P2024026_1093.pdf', 4145317, 'application/pdf', 'تقرير طبي');
+VALUES ('7d7e4e0d-57c8-4317-9be0-fc73974c92d5', '8a77a5ce-84d2-4696-bbba-52f2304bdb8d', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'MEDICAL_REPORT_P2024026_1093.pdf',
+        '/documents/P2024026/MEDICAL_REPORT_P2024026_1093.pdf', 4145317, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('20499268-9e01-4ff7-806e-d5f983256344', '578912a3-7404-4cc6-8ff7-d4c7332acc45', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'موافقة علاج_P2024052_7376.pdf',
-        '/documents/P2024052/موافقة علاج_P2024052_7376.pdf', 2263924, 'application/pdf', 'موافقة علاج');
+VALUES ('20499268-9e01-4ff7-806e-d5f983256344', '578912a3-7404-4cc6-8ff7-d4c7332acc45', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'TREATMENT_APPROVAL_P2024052_7376.pdf',
+        '/documents/P2024052/TREATMENT_APPROVAL_P2024052_7376.pdf', 2263924, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('f020dc68-85c3-4b6e-955f-4a5ac872e089', '688b05f6-aa01-4e29-8e46-92af09f92a12', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'تقرير طبي_P2024042_5635.pdf',
-        '/documents/P2024042/تقرير طبي_P2024042_5635.pdf', 1639980, 'application/pdf', 'تقرير طبي');
+VALUES ('f020dc68-85c3-4b6e-955f-4a5ac872e089', '688b05f6-aa01-4e29-8e46-92af09f92a12', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'MEDICAL_REPORT_P2024042_5635.pdf',
+        '/documents/P2024042/MEDICAL_REPORT_P2024042_5635.pdf', 1639980, 'application/pdf', 'MEDICAL_REPORT');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('329f75ff-2381-4dab-895d-851e5fc60742', 'f9e60397-26d4-4c86-98a7-d906d9359501', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'موافقة علاج_P2024040_5168.pdf',
-        '/documents/P2024040/موافقة علاج_P2024040_5168.pdf', 1933421, 'application/pdf', 'موافقة علاج');
+VALUES ('329f75ff-2381-4dab-895d-851e5fc60742', 'f9e60397-26d4-4c86-98a7-d906d9359501', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'TREATMENT_APPROVAL_P2024040_5168.pdf',
+        '/documents/P2024040/TREATMENT_APPROVAL_P2024040_5168.pdf', 1933421, 'application/pdf', 'TREATMENT_APPROVAL');
 INSERT INTO documents (id, patient_id, uploaded_by_staff_id, file_name,
                        file_path, file_size_bytes, mime_type, type)
-VALUES ('0ca0cf7a-2695-4276-abc4-0e990c6a8774', 'c788722c-3a96-4bd5-9139-33a8d8e65565', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'تقرير طبي_P2024071_5996.pdf',
-        '/documents/P2024071/تقرير طبي_P2024071_5996.pdf', 971107, 'application/pdf', 'تقرير طبي');
+VALUES ('0ca0cf7a-2695-4276-abc4-0e990c6a8774', 'c788722c-3a96-4bd5-9139-33a8d8e65565', 'a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'MEDICAL_REPORT_P2024071_5996.pdf',
+        '/documents/P2024071/MEDICAL_REPORT_P2024071_5996.pdf', 971107, 'application/pdf', 'MEDICAL_REPORT');
 
 COMMIT;

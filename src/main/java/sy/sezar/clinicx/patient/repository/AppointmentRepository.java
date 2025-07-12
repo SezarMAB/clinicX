@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import sy.sezar.clinicx.patient.model.Appointment;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,15 +14,18 @@ import java.util.UUID;
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
 
     /**
-     * Finds all appointments within a given date range, ordering them by date and start time.
+     * Finds all appointments within a given datetime range, ordering them by datetime.
      * It fetches the associated Patient to avoid N+1 queries in the appointment list view.
      *
-     * @param startDate The start date of the range.
-     * @param endDate   The end date of the range.
+     * @param startDateTime The start datetime of the range.
+     * @param endDateTime   The end datetime of the range.
      * @return A list of appointments with their patient data.
      */
-    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient WHERE a.appointmentDate BETWEEN :startDate AND :endDate ORDER BY a.appointmentDate, a.startTime")
-    List<Appointment> findByAppointmentDateBetweenOrderByAppointmentDateAscStartTimeAsc(LocalDate startDate, LocalDate endDate);
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient WHERE a.appointmentDatetime BETWEEN :startDateTime AND :endDateTime ORDER BY a.appointmentDatetime")
+    List<Appointment> findByAppointmentDatetimeBetweenOrderByAppointmentDatetimeAsc(
+        Instant startDateTime,
+        Instant endDateTime
+    );
 
     /**
      * Finds all appointments for a specific patient.
@@ -32,4 +35,3 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
      */
     List<Appointment> findByPatientId(UUID patientId);
 }
-

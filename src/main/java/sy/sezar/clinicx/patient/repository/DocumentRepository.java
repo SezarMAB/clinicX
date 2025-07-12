@@ -19,6 +19,5 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
      * @param pageable  Pagination and sorting information.
      * @return A Page of documents.
      */
-    Page<Document> findByPatientIdOrderByUploadDateDesc(UUID patientId, Pageable pageable);
+    Page<Document> findByPatientIdOrderByCreatedAtDesc(UUID patientId, Pageable pageable);
 }
-

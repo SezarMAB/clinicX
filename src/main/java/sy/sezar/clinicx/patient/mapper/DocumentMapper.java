@@ -18,5 +18,6 @@ public interface DocumentMapper {
     @Mapping(target = "uploadDate", source = "createdAt")
     @Mapping(target = "uploadedByStaffName", source = "uploadedByStaff.fullName")
     DocumentSummaryDto toDocumentSummaryDto(Document document);
+
     List<DocumentSummaryDto> toDocumentSummaryDtoList(List<Document> documents);
 }

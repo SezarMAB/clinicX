@@ -1,10 +1,16 @@
+rollback;
+begin ;
+
+-- STEP 1: Enable necessary extensions
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS btree_gist;    -- For GIST indexes on standard types
+
 CREATE SEQUENCE invoice_number_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
 -- ====================================================================
 --      CORE PLATFORM TABLES (ENHANCED)
 -- ====================================================================
@@ -118,6 +124,15 @@ CREATE TABLE procedures
 );
 
 -- ENHANCED: Appointments with conflict prevention
+-- First create an immutable function to calculate end time
+CREATE OR REPLACE FUNCTION appointment_end_time(start_time TIMESTAMPTZ, duration_mins INT)
+    RETURNS TIMESTAMPTZ AS $$
+BEGIN
+    RETURN start_time + (duration_mins * INTERVAL '1 minute');
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Then create the table using this function
 CREATE TABLE appointments
 (
     id                   UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
@@ -128,18 +143,18 @@ CREATE TABLE appointments
     duration_minutes     INT         NOT NULL,
     status               VARCHAR(50) NOT NULL,
     notes                TEXT,
-    confirmation_sent_at TIMESTAMPTZ,                                  -- NEW: Track confirmations
-    reminder_sent_at     TIMESTAMPTZ,                                  -- NEW: Track reminders
-    checked_in_at        TIMESTAMPTZ,                                  -- NEW: Track check-ins
+    confirmation_sent_at TIMESTAMPTZ,
+    reminder_sent_at     TIMESTAMPTZ,
+    checked_in_at        TIMESTAMPTZ,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by           UUID,                                          -- NEW: Audit field
-    updated_by           UUID,                                          -- NEW: Audit field
+    created_by           UUID,
+    updated_by           UUID,
     CONSTRAINT chk_appointment_duration CHECK (duration_minutes > 0),
-    -- NEW: Prevent double-booking using exclusion constraint
+    -- Prevent double-booking using exclusion constraint
     EXCLUDE USING gist (
         doctor_id WITH =,
-        tstzrange(appointment_datetime, appointment_datetime + (duration_minutes || ' minutes')::interval) WITH &&
+        tstzrange(appointment_datetime, appointment_end_time(appointment_datetime, duration_minutes)) WITH &&
         ) WHERE (status NOT IN ('CANCELLED', 'NO_SHOW'))
 );
 
@@ -169,16 +184,126 @@ CREATE TABLE treatments
     CONSTRAINT chk_tooth_number CHECK (tooth_number IS NULL OR tooth_number BETWEEN 1 AND 32)
 );
 
-CREATE TABLE dental_charts
-(
-    id         UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
-    patient_id UUID UNIQUE NOT NULL REFERENCES patients (id) ON DELETE CASCADE,
-    chart_data JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID,                                                    -- NEW: Audit field
-    updated_by UUID                                                     -- NEW: Audit field
+
+-- Tooth conditions/states that can be tracked
+CREATE TABLE tooth_conditions (
+                                  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                  code VARCHAR(20) UNIQUE NOT NULL,
+                                  name VARCHAR(100) NOT NULL,
+                                  description TEXT,
+                                  color_hex VARCHAR(7), -- For UI display
+                                  icon VARCHAR(50), -- For UI icons
+                                  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                                  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                  created_by UUID REFERENCES staff(id),
+                                  updated_by UUID REFERENCES staff(id)
 );
+
+-- Insert standard tooth conditions
+INSERT INTO tooth_conditions (code, name, description, color_hex) VALUES
+                                                                      ('HEALTHY', 'Healthy', 'Tooth is healthy with no issues', '#4CAF50'),
+                                                                      ('CAVITY', 'Cavity', 'Tooth has cavity/caries', '#FF5722'),
+                                                                      ('FILLED', 'Filled', 'Tooth has been filled', '#2196F3'),
+                                                                      ('CROWN', 'Crown', 'Tooth has a crown', '#9C27B0'),
+                                                                      ('ROOT_CANAL', 'Root Canal', 'Tooth has had root canal treatment', '#FF9800'),
+                                                                      ('EXTRACTED', 'Extracted', 'Tooth has been extracted', '#9E9E9E'),
+                                                                      ('MISSING', 'Missing', 'Tooth is congenitally missing', '#757575'),
+                                                                      ('IMPLANT', 'Implant', 'Dental implant', '#00BCD4'),
+                                                                      ('BRIDGE', 'Bridge', 'Part of dental bridge', '#3F51B5'),
+                                                                      ('IMPACTED', 'Impacted', 'Tooth is impacted', '#E91E63'),
+                                                                      ('FRACTURED', 'Fractured', 'Tooth is fractured', '#F44336');
+
+-- Current state of each tooth (one record per tooth per patient)
+CREATE TABLE patient_teeth (
+                               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                               patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+                               tooth_number INT NOT NULL CHECK (tooth_number BETWEEN 11 AND 48),
+                               current_condition_id UUID REFERENCES tooth_conditions(id),
+                               notes TEXT,
+    -- Denormalized fields for performance
+                               last_treatment_date DATE,
+                               next_scheduled_treatment_date DATE,
+                               is_monitored BOOLEAN NOT NULL DEFAULT FALSE, -- Flag for teeth requiring monitoring
+                               created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                               updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                               created_by UUID REFERENCES staff(id),
+                               updated_by UUID REFERENCES staff(id),
+                               UNIQUE(patient_id, tooth_number)
+);
+
+-- Complete history of tooth state changes
+CREATE TABLE tooth_history (
+                               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                               patient_tooth_id UUID NOT NULL REFERENCES patient_teeth(id) ON DELETE CASCADE,
+                               patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE, -- Denormalized for query performance
+                               tooth_number INT NOT NULL,
+                               condition_id UUID REFERENCES tooth_conditions(id),
+                               treatment_id UUID REFERENCES treatments(id), -- Link to treatment that caused the change
+                               change_date TIMESTAMPTZ NOT NULL,
+                               notes TEXT,
+    -- Additional clinical data
+                               mobility_score INT CHECK (mobility_score BETWEEN 0 AND 3), -- 0=none, 1=slight, 2=moderate, 3=severe
+                               pocket_depth_mm DECIMAL(3,1),
+                               bleeding_on_probing BOOLEAN,
+                               plaque_present BOOLEAN,
+    -- Who made the change
+                               recorded_by UUID NOT NULL REFERENCES staff(id),
+                               created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Tooth-specific clinical measurements over time
+CREATE TABLE tooth_measurements (
+                                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                    patient_tooth_id UUID NOT NULL REFERENCES patient_teeth(id) ON DELETE CASCADE,
+                                    measurement_date DATE NOT NULL,
+    -- Periodontal measurements (6 sites per tooth)
+                                    mesial_buccal_depth DECIMAL(3,1),
+                                    buccal_depth DECIMAL(3,1),
+                                    distal_buccal_depth DECIMAL(3,1),
+                                    mesial_lingual_depth DECIMAL(3,1),
+                                    lingual_depth DECIMAL(3,1),
+                                    distal_lingual_depth DECIMAL(3,1),
+    -- Recession measurements
+                                    recession_buccal DECIMAL(3,1),
+                                    recession_lingual DECIMAL(3,1),
+    -- Other measurements
+                                    furcation_involvement INT CHECK (furcation_involvement BETWEEN 0 AND 3),
+                                    mobility_score INT CHECK (mobility_score BETWEEN 0 AND 3),
+    -- Who recorded
+                                    recorded_by UUID NOT NULL REFERENCES staff(id),
+                                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                    UNIQUE(patient_tooth_id, measurement_date)
+);
+
+-- Tooth surfaces for detailed tracking
+CREATE TABLE tooth_surfaces (
+                                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                code VARCHAR(10) UNIQUE NOT NULL,
+                                name VARCHAR(50) NOT NULL
+);
+
+INSERT INTO tooth_surfaces (code, name) VALUES
+                                            ('M', 'Mesial'),
+                                            ('D', 'Distal'),
+                                            ('B', 'Buccal'),
+                                            ('L', 'Lingual'),
+                                            ('O', 'Occlusal'),
+                                            ('I', 'Incisal');
+
+-- Track conditions per tooth surface
+CREATE TABLE tooth_surface_conditions (
+                                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                          patient_tooth_id UUID NOT NULL REFERENCES patient_teeth(id) ON DELETE CASCADE,
+                                          surface_id UUID NOT NULL REFERENCES tooth_surfaces(id),
+                                          condition_id UUID REFERENCES tooth_conditions(id),
+                                          severity VARCHAR(20) CHECK (severity IN ('MILD', 'MODERATE', 'SEVERE')),
+                                          notes TEXT,
+                                          recorded_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                          recorded_by UUID NOT NULL REFERENCES staff(id),
+                                          UNIQUE(patient_tooth_id, surface_id)
+);
+
 
 -- ====================================================================
 --      SCHEDULING TABLES (ENHANCED)
@@ -506,6 +631,22 @@ CREATE INDEX idx_notes_pinned ON notes(patient_id) WHERE is_pinned = TRUE;
 CREATE INDEX idx_referrals_patient ON referrals(patient_id);
 CREATE INDEX idx_referrals_status ON referrals(status) WHERE status != 'COMPLETED';
 
+-- Teeth and conditions indexes
+
+CREATE INDEX idx_patient_teeth_patient ON patient_teeth(patient_id);
+CREATE INDEX idx_patient_teeth_condition ON patient_teeth(current_condition_id);
+CREATE INDEX idx_patient_teeth_monitored ON patient_teeth(patient_id) WHERE is_monitored = TRUE;
+
+CREATE INDEX idx_tooth_history_patient ON tooth_history(patient_id);
+CREATE INDEX idx_tooth_history_tooth ON tooth_history(patient_tooth_id);
+CREATE INDEX idx_tooth_history_date ON tooth_history(change_date);
+CREATE INDEX idx_tooth_history_treatment ON tooth_history(treatment_id) WHERE treatment_id IS NOT NULL;
+
+CREATE INDEX idx_tooth_measurements_tooth ON tooth_measurements(patient_tooth_id);
+CREATE INDEX idx_tooth_measurements_date ON tooth_measurements(measurement_date);
+
+CREATE INDEX idx_tooth_surface_conditions_tooth ON tooth_surface_conditions(patient_tooth_id);
+
 -- Audit indexes
 CREATE INDEX idx_audit_log_table_record ON audit_log(table_name, record_id);
 CREATE INDEX idx_audit_log_changed_by ON audit_log(changed_by);
@@ -513,8 +654,68 @@ CREATE INDEX idx_audit_log_changed_at ON audit_log(changed_at);
 CREATE INDEX idx_login_attempts_email ON login_attempts(email);
 CREATE INDEX idx_login_attempts_time ON login_attempts(attempted_at);
 
--- JSON indexes
-CREATE INDEX idx_dental_charts_data ON dental_charts USING GIN (chart_data);
+-- ====================================================================
+--      VIEWS FOR COMMON QUERIES
+-- ====================================================================
+
+-- Current dental chart view
+CREATE VIEW v_dental_chart AS
+SELECT
+    pt.patient_id,
+    pt.tooth_number,
+    tc.code as condition_code,
+    tc.name as condition_name,
+    tc.color_hex,
+    pt.notes,
+    pt.is_monitored,
+    pt.last_treatment_date,
+    pt.next_scheduled_treatment_date,
+    pt.updated_at as last_updated
+FROM patient_teeth pt
+         LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
+ORDER BY pt.tooth_number;
+
+-- Teeth requiring attention
+CREATE VIEW v_teeth_requiring_attention AS
+SELECT
+    p.id as patient_id,
+    p.full_name as patient_name,
+    p.public_facing_id,
+    pt.tooth_number,
+    tc.name as condition_name,
+    pt.notes,
+    pt.last_treatment_date,
+    CASE
+        WHEN tc.code IN ('CAVITY', 'FRACTURED') THEN 'HIGH'
+        WHEN pt.is_monitored THEN 'MEDIUM'
+        ELSE 'LOW'
+        END as priority
+FROM patient_teeth pt
+         JOIN patients p ON pt.patient_id = p.id
+         JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
+WHERE (tc.code IN ('CAVITY', 'FRACTURED', 'IMPACTED')
+    OR pt.is_monitored = TRUE
+    OR pt.next_scheduled_treatment_date < CURRENT_DATE)
+  AND p.deleted_at IS NULL
+ORDER BY priority DESC, p.full_name;
+
+-- Patient dental chart summary
+CREATE VIEW v_patient_dental_summary AS
+SELECT
+    p.id as patient_id,
+    p.full_name,
+    p.public_facing_id,
+    COUNT(DISTINCT pt.id) FILTER (WHERE tc.code = 'HEALTHY') as healthy_teeth,
+    COUNT(DISTINCT pt.id) FILTER (WHERE tc.code = 'CAVITY') as cavities,
+    COUNT(DISTINCT pt.id) FILTER (WHERE tc.code = 'FILLED') as filled_teeth,
+    COUNT(DISTINCT pt.id) FILTER (WHERE tc.code IN ('EXTRACTED', 'MISSING')) as missing_teeth,
+    COUNT(DISTINCT pt.id) FILTER (WHERE pt.is_monitored = TRUE) as monitored_teeth,
+    MAX(pt.last_treatment_date) as last_dental_treatment
+FROM patients p
+         LEFT JOIN patient_teeth pt ON p.id = pt.patient_id
+         LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
+WHERE p.deleted_at IS NULL
+GROUP BY p.id, p.full_name, p.public_facing_id;
 
 -- ====================================================================
 --      ENHANCED TRIGGERS AND FUNCTIONS
@@ -776,3 +977,249 @@ CREATE TRIGGER trg_prevent_last_specialty
     FOR EACH ROW
     WHEN (OLD.is_active = TRUE AND NEW.is_active = FALSE)
 EXECUTE FUNCTION prevent_last_specialty_deletion();
+
+
+-- ====================================================================
+--     Teeth FUNCTIONS AND TRIGGERS
+-- ====================================================================
+
+-- Function to initialize patient teeth records
+CREATE OR REPLACE FUNCTION initialize_patient_teeth()
+    RETURNS TRIGGER AS $$
+DECLARE
+    tooth_numbers INT[] := ARRAY[
+        11,12,13,14,15,16,17,18,  -- Upper right
+        21,22,23,24,25,26,27,28,  -- Upper left
+        31,32,33,34,35,36,37,38,  -- Lower left
+        41,42,43,44,45,46,47,48   -- Lower right
+        ];
+    tooth INT;
+    healthy_condition_id UUID;
+BEGIN
+    -- Get the ID for healthy condition
+    SELECT id INTO healthy_condition_id FROM tooth_conditions WHERE code = 'HEALTHY';
+
+    -- Create a record for each tooth
+    FOREACH tooth IN ARRAY tooth_numbers
+        LOOP
+            INSERT INTO patient_teeth (patient_id, tooth_number, current_condition_id, created_by)
+            VALUES (NEW.id, tooth, healthy_condition_id, NEW.created_by)
+            ON CONFLICT (patient_id, tooth_number) DO NOTHING;
+        END LOOP;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to initialize teeth when patient is created
+CREATE TRIGGER trg_initialize_patient_teeth
+    AFTER INSERT ON patients
+    FOR EACH ROW EXECUTE FUNCTION initialize_patient_teeth();
+
+-- Function to track tooth history changes
+CREATE OR REPLACE FUNCTION track_tooth_history()
+    RETURNS TRIGGER AS $$
+BEGIN
+    -- Only track if condition actually changed
+    IF OLD.current_condition_id IS DISTINCT FROM NEW.current_condition_id THEN
+        INSERT INTO tooth_history (
+            patient_tooth_id,
+            patient_id,
+            tooth_number,
+            condition_id,
+            change_date,
+            notes,
+            recorded_by
+        ) VALUES (
+                     NEW.id,
+                     NEW.patient_id,
+                     NEW.tooth_number,
+                     NEW.current_condition_id,
+                     NOW(),
+                     NEW.notes,
+                     COALESCE(NEW.updated_by, NEW.created_by)
+                 );
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to track history
+CREATE TRIGGER trg_track_tooth_history
+    AFTER UPDATE ON patient_teeth
+    FOR EACH ROW EXECUTE FUNCTION track_tooth_history();
+
+-- Function to update tooth condition from treatment
+CREATE OR REPLACE FUNCTION update_tooth_from_treatment()
+    RETURNS TRIGGER AS $$
+DECLARE
+    v_condition_id UUID;
+    v_procedure_name VARCHAR(255);
+BEGIN
+    -- Only process if tooth_number is specified
+    IF NEW.tooth_number IS NOT NULL THEN
+        -- Get the procedure name
+        SELECT name INTO v_procedure_name
+        FROM procedures
+        WHERE id = NEW.procedure_id;
+
+        -- Map procedure to tooth condition
+        -- This is a simplified mapping - you might want to create a mapping table
+        SELECT id INTO v_condition_id
+        FROM tooth_conditions
+        WHERE code = CASE
+                         WHEN v_procedure_name ILIKE '%filling%' OR v_procedure_name ILIKE '%restoration%' THEN 'FILLED'
+                         WHEN v_procedure_name ILIKE '%extraction%' THEN 'EXTRACTED'
+                         WHEN v_procedure_name ILIKE '%root canal%' THEN 'ROOT_CANAL'
+                         WHEN v_procedure_name ILIKE '%crown%' THEN 'CROWN'
+                         WHEN v_procedure_name ILIKE '%implant%' THEN 'IMPLANT'
+                         ELSE NULL
+            END;
+
+        -- Update tooth condition if mapping found
+        IF v_condition_id IS NOT NULL THEN
+            UPDATE patient_teeth
+            SET current_condition_id = v_condition_id,
+                updated_at = NOW(),
+                updated_by = NEW.created_by
+            WHERE patient_id = NEW.patient_id
+              AND tooth_number = NEW.tooth_number;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_tooth_from_treatment
+    AFTER INSERT ON treatments
+    FOR EACH ROW EXECUTE FUNCTION update_tooth_from_treatment();
+
+-- Add audit triggers for dental tables
+CREATE TRIGGER audit_patient_teeth AFTER INSERT OR UPDATE OR DELETE ON patient_teeth
+    FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();
+
+CREATE TRIGGER audit_tooth_history AFTER INSERT OR UPDATE OR DELETE ON tooth_history
+    FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();
+
+-- ====================================================================
+--      HELPER FUNCTIONS FOR DENTAL CHART OPERATIONS
+-- ====================================================================
+
+-- Function to get complete tooth history for a patient
+CREATE OR REPLACE FUNCTION get_patient_tooth_history(
+    p_patient_id UUID,
+    p_tooth_number INT DEFAULT NULL
+)
+    RETURNS TABLE (
+                      tooth_number INT,
+                      condition_name VARCHAR(100),
+                      change_date TIMESTAMPTZ,
+                      treatment_description VARCHAR(255),
+                      notes TEXT,
+                      recorded_by_name VARCHAR(100)
+                  ) AS $$
+BEGIN
+    RETURN QUERY
+        SELECT
+            th.tooth_number,
+            tc.name as condition_name,
+            th.change_date,
+            p.name as treatment_description,
+            th.notes,
+            s.full_name as recorded_by_name
+        FROM tooth_history th
+                 LEFT JOIN tooth_conditions tc ON th.condition_id = tc.id
+                 LEFT JOIN treatments t ON th.treatment_id = t.id
+                 LEFT JOIN procedures p ON t.procedure_id = p.id
+                 LEFT JOIN staff s ON th.recorded_by = s.id
+        WHERE th.patient_id = p_patient_id
+          AND (p_tooth_number IS NULL OR th.tooth_number = p_tooth_number)
+        ORDER BY th.change_date DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to get dental chart summary for UI
+CREATE OR REPLACE FUNCTION get_dental_chart_for_ui(p_patient_id UUID)
+    RETURNS JSON AS $$
+DECLARE
+    v_result JSON;
+BEGIN
+    SELECT json_build_object(
+                   'teeth', json_agg(
+                    json_build_object(
+                            'toothNumber', pt.tooth_number,
+                            'condition', tc.code,
+                            'conditionName', tc.name,
+                            'colorHex', tc.color_hex,
+                            'notes', pt.notes,
+                            'isMonitored', pt.is_monitored,
+                            'lastTreatmentDate', pt.last_treatment_date,
+                            'nextScheduledDate', pt.next_scheduled_treatment_date
+                    ) ORDER BY pt.tooth_number
+                            )
+           ) INTO v_result
+    FROM patient_teeth pt
+             LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
+    WHERE pt.patient_id = p_patient_id;
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ====================================================================
+--      INITIALIZE EXISTING PATIENTS
+-- ====================================================================
+
+-- Initialize teeth for all existing patients
+DO $$
+    DECLARE
+        patient_record RECORD;
+        tooth_numbers INT[] := ARRAY[
+            11,12,13,14,15,16,17,18,
+            21,22,23,24,25,26,27,28,
+            31,32,33,34,35,36,37,38,
+            41,42,43,44,45,46,47,48
+            ];
+        tooth INT;
+        healthy_condition_id UUID;
+    BEGIN
+        -- Get healthy condition ID
+        SELECT id INTO healthy_condition_id FROM tooth_conditions WHERE code = 'HEALTHY';
+
+        -- Loop through all active patients
+        FOR patient_record IN SELECT id FROM patients WHERE deleted_at IS NULL
+            LOOP
+                -- Create teeth records for each patient
+                FOREACH tooth IN ARRAY tooth_numbers
+                    LOOP
+                        INSERT INTO patient_teeth (patient_id, tooth_number, current_condition_id)
+                        VALUES (patient_record.id, tooth, healthy_condition_id)
+                        ON CONFLICT (patient_id, tooth_number) DO NOTHING;
+                    END LOOP;
+            END LOOP;
+    END $$;
+
+-- ====================================================================
+--      SAMPLE QUERIES FOR COMMON OPERATIONS
+-- ====================================================================
+
+-- Get all teeth requiring attention across all patients
+-- SELECT * FROM v_teeth_requiring_attention;
+
+-- Get dental chart for a specific patient
+-- SELECT * FROM v_dental_chart WHERE patient_id = 'patient-uuid-here';
+
+-- Get tooth history for a specific patient
+-- SELECT * FROM get_patient_tooth_history('patient-uuid-here');
+
+-- Get dental chart JSON for UI
+-- SELECT get_dental_chart_for_ui('patient-uuid-here');
+
+-- Update a tooth condition
+-- UPDATE patient_teeth
+-- SET current_condition_id = (SELECT id FROM tooth_conditions WHERE code = 'CAVITY'),
+--     notes = 'Cavity detected on mesial surface',
+--     is_monitored = TRUE,
+--     updated_by = 'staff-uuid-here'
+-- WHERE patient_id = 'patient-uuid-here' AND tooth_number = 14;
+commit ;

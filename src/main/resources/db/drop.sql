@@ -133,6 +133,9 @@ DROP TABLE IF EXISTS staff CASCADE;
 DROP TABLE IF EXISTS specialties CASCADE;
 DROP TABLE IF EXISTS clinic_info CASCADE;
 
+
+DROP TABLE IF EXISTS flyway_schema_history CASCADE;
+
 -- ====================================================================
 -- STEP 6: DROP SEQUENCES
 -- ====================================================================

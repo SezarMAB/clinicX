@@ -23,24 +23,54 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	mapstructVersion = '1.6.3'
+}
+
 dependencies {
+	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation("org.flywaydb:flyway-core:11.10.1")
-	implementation("org.mapstruct:mapstruct:1.6.3")
-	implementation("org.springframework.hateoas:spring-hateoas:3.0.0-M3")
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	
+	// Database
 	runtimeOnly 'org.postgresql:postgresql'
-	runtimeOnly("org.flywaydb:flyway-database-postgresql:11.10.1")
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	
+	// Flyway
+	implementation "org.flywaydb:flyway-core:11.10.1"
+	runtimeOnly "org.flywaydb:flyway-database-postgresql:11.10.1"
+	
+	// MapStruct
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	
+	// Lombok-MapStruct binding
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	
+	// OpenAPI / Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	
+	// Development tools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	
+	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.testcontainers:testcontainers:1.19.0'
+	testImplementation 'org.testcontainers:postgresql:1.19.0'
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Ensure annotation processors run in correct order
+compileJava {
+	options.annotationProcessorPath = configurations.annotationProcessor
 }

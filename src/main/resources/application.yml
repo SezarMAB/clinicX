@@ -17,7 +17,7 @@ spring:
     baselineOnMigrate: true
     baseline-version: 0
     out-of-order: true # NOTE only for local development
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/local_demo_data
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}

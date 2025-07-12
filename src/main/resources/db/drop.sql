@@ -1,9 +1,11 @@
+-- DROP SCRIPT FOR MULTI-SPECIALTY CLINIC DATABASE SCHEMA (WITH CASCADE)
 -- ====================================================================
--- DROP SCRIPT FOR MULTI-SPECIALTY CLINIC DATABASE SCHEMA
+-- This script drops all database objects using CASCADE for tables
+-- CASCADE will automatically drop all dependent objects
+-- WARNING: Use with caution as CASCADE is destructive!
+-- Updated: Added missing functions from routines
 -- ====================================================================
--- This script drops all database objects in the correct order to handle dependencies
--- Run this script to completely remove the schema
-
+rollback ;
 BEGIN;
 
 -- ====================================================================
@@ -36,12 +38,20 @@ DROP TRIGGER IF EXISTS trg_invoices_balance_update ON invoices;
 -- STEP 2: DROP FUNCTIONS
 -- ====================================================================
 
+-- Drop utility functions
+DROP FUNCTION IF EXISTS appointment_end_time(timestamp with time zone, integer) CASCADE;
+DROP FUNCTION IF EXISTS archive_old_appointments(integer);
+DROP FUNCTION IF EXISTS cleanup_old_audit_logs(integer);
+
+-- Drop dental functions
 DROP FUNCTION IF EXISTS get_dental_chart_for_ui(UUID);
 DROP FUNCTION IF EXISTS get_patient_tooth_history(UUID, INT);
 DROP FUNCTION IF EXISTS update_tooth_from_treatment();
 DROP FUNCTION IF EXISTS link_treatment_to_tooth();
 DROP FUNCTION IF EXISTS track_tooth_history();
 DROP FUNCTION IF EXISTS initialize_patient_teeth();
+
+-- Drop other functions
 DROP FUNCTION IF EXISTS prevent_last_specialty_deletion();
 DROP FUNCTION IF EXISTS audit_trigger_function();
 DROP FUNCTION IF EXISTS validate_appointment_schedule();
@@ -49,9 +59,12 @@ DROP FUNCTION IF EXISTS update_appointment_slot();
 DROP FUNCTION IF EXISTS update_patient_balance();
 
 -- ====================================================================
--- STEP 3: DROP VIEWS
+-- STEP 3: DROP VIEWS (Optional - CASCADE on tables will drop these too)
 -- ====================================================================
+-- These views will be automatically dropped by CASCADE when dropping tables
+-- But we'll keep them here for clarity and in case tables don't exist
 
+DROP VIEW IF EXISTS v_referral_tracking;
 DROP VIEW IF EXISTS v_staff_availability_today;
 DROP VIEW IF EXISTS v_patient_financial_summary;
 DROP VIEW IF EXISTS v_upcoming_appointments;
@@ -63,63 +76,62 @@ DROP VIEW IF EXISTS v_dental_chart;
 -- STEP 4: DROP INDEXES (that aren't automatically dropped with tables)
 -- ====================================================================
 
--- Note: Most indexes will be automatically dropped with their tables
--- Only drop indexes that might have been created separately
 DROP INDEX IF EXISTS idx_dental_charts_data;
 
 -- ====================================================================
--- STEP 5: DROP TABLES (in dependency order)
+-- STEP 5: DROP TABLES WITH CASCADE
 -- ====================================================================
+-- CASCADE will automatically drop all dependent objects (views, foreign keys, etc.)
 
 -- Drop audit and security tables
-DROP TABLE IF EXISTS login_attempts;
-DROP TABLE IF EXISTS audit_log;
+DROP TABLE IF EXISTS login_attempts CASCADE;
+DROP TABLE IF EXISTS audit_log CASCADE;
 
 -- Drop referral table
-DROP TABLE IF EXISTS referrals;
+DROP TABLE IF EXISTS referrals CASCADE;
 
 -- Drop supporting tables
-DROP TABLE IF EXISTS notes;
-DROP TABLE IF EXISTS tasks;
-DROP TABLE IF EXISTS documents;
-DROP TABLE IF EXISTS lab_requests;
-DROP TABLE IF EXISTS patient_tags;
-DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS notes CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS documents CASCADE;
+DROP TABLE IF EXISTS lab_requests CASCADE;
+DROP TABLE IF EXISTS patient_tags CASCADE;
+DROP TABLE IF EXISTS tags CASCADE;
 
 -- Drop financial tables
-DROP TABLE IF EXISTS insurance_authorizations;
-DROP TABLE IF EXISTS payments;
-DROP TABLE IF EXISTS invoice_items;
-DROP TABLE IF EXISTS invoices;
+DROP TABLE IF EXISTS insurance_authorizations CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS invoice_items CASCADE;
+DROP TABLE IF EXISTS invoices CASCADE;
 
 -- Drop scheduling tables
-DROP TABLE IF EXISTS appointment_slots;
-DROP TABLE IF EXISTS schedule_overrides;
-DROP TABLE IF EXISTS staff_schedules;
+DROP TABLE IF EXISTS appointment_slots CASCADE;
+DROP TABLE IF EXISTS schedule_overrides CASCADE;
+DROP TABLE IF EXISTS staff_schedules CASCADE;
 
 -- Drop tooth-related tables
-DROP TABLE IF EXISTS tooth_surface_conditions;
-DROP TABLE IF EXISTS tooth_surfaces;
-DROP TABLE IF EXISTS tooth_measurements;
-DROP TABLE IF EXISTS tooth_history;
-DROP TABLE IF EXISTS patient_teeth;
-DROP TABLE IF EXISTS tooth_conditions;
+DROP TABLE IF EXISTS tooth_surface_conditions CASCADE;
+DROP TABLE IF EXISTS tooth_surfaces CASCADE;
+DROP TABLE IF EXISTS tooth_measurements CASCADE;
+DROP TABLE IF EXISTS tooth_history CASCADE;
+DROP TABLE IF EXISTS patient_teeth CASCADE;
+DROP TABLE IF EXISTS tooth_conditions CASCADE;
 
 -- Drop medical records tables
-DROP TABLE IF EXISTS treatments;
-DROP TABLE IF EXISTS appointments;
-DROP TABLE IF EXISTS procedures;
+DROP TABLE IF EXISTS treatments CASCADE;
+DROP TABLE IF EXISTS appointments CASCADE;
+DROP TABLE IF EXISTS procedures CASCADE;
 
 -- Drop patient tables
-DROP TABLE IF EXISTS patients;
+DROP TABLE IF EXISTS patients CASCADE;
 
 -- Drop staff tables
-DROP TABLE IF EXISTS staff_specialties;
-DROP TABLE IF EXISTS staff;
+DROP TABLE IF EXISTS staff_specialties CASCADE;
+DROP TABLE IF EXISTS staff CASCADE;
 
 -- Drop core tables
-DROP TABLE IF EXISTS specialties;
-DROP TABLE IF EXISTS clinic_info;
+DROP TABLE IF EXISTS specialties CASCADE;
+DROP TABLE IF EXISTS clinic_info CASCADE;
 
 -- ====================================================================
 -- STEP 6: DROP SEQUENCES
@@ -131,6 +143,7 @@ DROP SEQUENCE IF EXISTS invoice_number_seq;
 -- STEP 7: DROP EXTENSIONS (optional - comment out if used by other schemas)
 -- ====================================================================
 
+-- Uncomment these lines only if you're sure no other schemas use these extensions
 DROP EXTENSION IF EXISTS btree_gist;
 DROP EXTENSION IF EXISTS pgcrypto;
 
@@ -141,24 +154,40 @@ COMMIT;
 -- ====================================================================
 
 -- Check for remaining tables
--- SELECT table_name FROM information_schema.tables
--- WHERE table_schema = 'public'
--- AND table_type = 'BASE TABLE';
+SELECT 'Tables:', COUNT(*) as count FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE';
 
 -- Check for remaining views
--- SELECT table_name FROM information_schema.views
--- WHERE table_schema = 'public';
+SELECT 'Views:', COUNT(*) as count FROM information_schema.views
+WHERE table_schema = 'public';
 
 -- Check for remaining functions
--- SELECT routine_name FROM information_schema.routines
--- WHERE routine_schema = 'public'
--- AND routine_type = 'FUNCTION';
+SELECT 'Functions:', COUNT(*) as count FROM information_schema.routines
+WHERE routine_schema = 'public'
+  AND routine_type = 'FUNCTION';
 
 -- Check for remaining triggers
--- SELECT trigger_name, event_object_table
--- FROM information_schema.triggers
--- WHERE trigger_schema = 'public';
+SELECT 'Triggers:', COUNT(*) as count FROM information_schema.triggers
+WHERE trigger_schema = 'public';
 
 -- Check for remaining sequences
--- SELECT sequence_name FROM information_schema.sequences
--- WHERE sequence_schema = 'public';
+SELECT 'Sequences:', COUNT(*) as count FROM information_schema.sequences
+WHERE sequence_schema = 'public';
+
+-- List any remaining functions (for debugging)
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+ORDER BY routine_type, routine_name;
+
+-- ====================================================================
+-- NUCLEAR OPTION: Drop entire schema and recreate
+-- ====================================================================
+-- If you want to completely wipe everything in the public schema:
+-- WARNING: This will drop EVERYTHING in the public schema!
+--
+-- DROP SCHEMA public CASCADE;
+-- CREATE SCHEMA public;
+-- GRANT ALL ON SCHEMA public TO postgres;
+-- GRANT ALL ON SCHEMA public TO public;

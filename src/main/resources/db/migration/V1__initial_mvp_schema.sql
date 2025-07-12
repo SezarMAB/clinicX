@@ -55,7 +55,6 @@ CREATE TABLE staff (
                        email        VARCHAR(100) UNIQUE NOT NULL,
                        phone_number VARCHAR(30),
                        is_active    BOOLEAN                      DEFAULT TRUE,
-                       password_hash VARCHAR(255),  -- For authentication
                        created_at   TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
                        updated_at   TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
                        CONSTRAINT chk_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')

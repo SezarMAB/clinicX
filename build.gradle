@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation("org.flywaydb:flyway-core:11.10.1")
 	implementation("org.mapstruct:mapstruct:1.6.3")
+	implementation("org.springframework.hateoas:spring-hateoas:3.0.0-M3")
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'org.postgresql:postgresql'

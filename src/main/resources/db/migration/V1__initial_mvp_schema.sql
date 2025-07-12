@@ -277,7 +277,7 @@ CREATE TABLE notes (
                        created_by  UUID        REFERENCES staff (id) ON DELETE SET NULL,
                        note_date   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                        created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                       updated_at     TIMESTAMPTZ        NOT NULL
+                       updated_at     TIMESTAMPTZ        NOT NULL DEFAULT NOW()
 );
 
 -- ====================================================================

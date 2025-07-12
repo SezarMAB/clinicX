@@ -25,7 +25,6 @@ repositories {
 
 ext {
 	mapstructVersion = '1.6.3'
-	jakartaPersistenceVersion = '3.2.0'
 }
 
 dependencies {
@@ -34,13 +33,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation("jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceVersion}")
 	// Database
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// Flyway
-	implementation "org.flywaydb:flyway-core:11.10.1"
-	runtimeOnly "org.flywaydb:flyway-database-postgresql:11.10.1"
+	implementation "org.flywaydb:flyway-core"
+	implementation "org.flywaydb:flyway-database-postgresql"
 
 	// MapStruct
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"

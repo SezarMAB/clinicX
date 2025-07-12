@@ -25,6 +25,7 @@ repositories {
 
 ext {
 	mapstructVersion = '1.6.3'
+	jakartaPersistenceVersion = '3.2.0'
 }
 
 dependencies {
@@ -33,31 +34,31 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	
+	implementation("jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceVersion}")
 	// Database
 	runtimeOnly 'org.postgresql:postgresql'
-	
+
 	// Flyway
 	implementation "org.flywaydb:flyway-core:11.10.1"
 	runtimeOnly "org.flywaydb:flyway-database-postgresql:11.10.1"
-	
+
 	// MapStruct
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	
+
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	
+
 	// Lombok-MapStruct binding
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	
+
 	// OpenAPI / Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-	
+
 	// Development tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	
+
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.testcontainers:testcontainers:1.19.0'

@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
+import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
 
 import java.util.UUID;
 
@@ -36,4 +37,9 @@ public interface TreatmentService {
      * Deletes a treatment record.
      */
     void deleteTreatment(UUID treatmentId);
+
+    /**
+     * Advanced search for treatments with multiple criteria.
+     */
+    Page<TreatmentLogDto> searchTreatments(TreatmentSearchCriteria criteria, Pageable pageable);
 }

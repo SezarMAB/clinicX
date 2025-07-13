@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
+import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
 import sy.sezar.clinicx.patient.mapper.TreatmentMapper;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Procedure;
@@ -17,6 +19,7 @@ import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.repository.ProcedureRepository;
 import sy.sezar.clinicx.patient.repository.TreatmentRepository;
 import sy.sezar.clinicx.patient.service.TreatmentService;
+import sy.sezar.clinicx.patient.spec.TreatmentSpecifications;
 import sy.sezar.clinicx.staff.model.Staff;
 import sy.sezar.clinicx.patient.repository.StaffRepository;
 
@@ -121,5 +124,13 @@ public class TreatmentServiceImpl implements TreatmentService {
         }
 
         treatmentRepository.deleteById(treatmentId);
+    }
+
+    @Override
+    public Page<TreatmentLogDto> searchTreatments(TreatmentSearchCriteria criteria, Pageable pageable) {
+        log.info("Searching treatments with criteria: {}", criteria);
+        Specification<Treatment> spec = TreatmentSpecifications.byAdvancedCriteria(criteria);
+        Page<Treatment> treatments = treatmentRepository.findAll(spec, pageable);
+        return treatments.map(treatmentMapper::toTreatmentLogDto);
     }
 }

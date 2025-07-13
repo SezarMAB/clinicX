@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialDto;
+import sy.sezar.clinicx.patient.dto.TreatmentMaterialSearchCriteria;
 import sy.sezar.clinicx.patient.service.TreatmentMaterialService;
 
 import java.math.BigDecimal;
@@ -173,5 +174,19 @@ public class TreatmentMaterialController {
         log.info("Calculating total material cost for patient ID: {}", patientId);
         BigDecimal totalCost = treatmentMaterialService.getTotalMaterialCostByPatientId(patientId);
         return ResponseEntity.ok(totalCost);
+    }
+
+    @PostMapping("/search")
+    @Operation(
+        summary = "Advanced material search",
+        description = "Search treatment materials with multiple criteria and filters."
+    )
+    @ApiResponse(responseCode = "200", description = "Materials retrieved")
+    public ResponseEntity<Page<TreatmentMaterialDto>> searchMaterials(
+            @Valid @RequestBody TreatmentMaterialSearchCriteria criteria,
+            Pageable pageable) {
+        log.info("Advanced search for treatment materials with criteria: {}", criteria);
+        Page<TreatmentMaterialDto> materials = treatmentMaterialService.searchMaterials(criteria, pageable);
+        return ResponseEntity.ok(materials);
     }
 }

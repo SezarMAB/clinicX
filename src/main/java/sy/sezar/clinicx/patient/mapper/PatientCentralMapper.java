@@ -39,6 +39,7 @@ public interface PatientCentralMapper {
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
     @Mapping(target = "patientTeeth", ignore = true)
+    @Mapping(target = "treatments", ignore = true)
     Patient toPatient(PatientCreateRequest request);
 
     // Patient <-> PatientUpdateRequest

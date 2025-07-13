@@ -10,6 +10,8 @@ import sy.sezar.clinicx.staff.model.Staff;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "treatments")
@@ -58,5 +60,8 @@ public class Treatment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Staff createdBy;
+
+    @OneToMany(mappedBy = "treatment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<TreatmentMaterial> materials = new HashSet<>();
 }
 

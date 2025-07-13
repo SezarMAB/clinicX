@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialDto;
+import sy.sezar.clinicx.patient.dto.TreatmentMaterialSearchCriteria;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,4 +31,6 @@ public interface TreatmentMaterialService {
     BigDecimal getTotalMaterialCostByTreatmentId(UUID treatmentId);
     
     BigDecimal getTotalMaterialCostByPatientId(UUID patientId);
+    
+    Page<TreatmentMaterialDto> searchMaterials(TreatmentMaterialSearchCriteria criteria, Pageable pageable);
 }

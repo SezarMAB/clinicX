@@ -3,17 +3,20 @@ package sy.sezar.clinicx.patient.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialDto;
+import sy.sezar.clinicx.patient.dto.TreatmentMaterialSearchCriteria;
 import sy.sezar.clinicx.patient.mapper.TreatmentMaterialMapper;
 import sy.sezar.clinicx.patient.model.Treatment;
 import sy.sezar.clinicx.patient.model.TreatmentMaterial;
 import sy.sezar.clinicx.patient.repository.TreatmentMaterialRepository;
 import sy.sezar.clinicx.patient.repository.TreatmentRepository;
 import sy.sezar.clinicx.patient.service.TreatmentMaterialService;
+import sy.sezar.clinicx.patient.spec.TreatmentMaterialSpecifications;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -111,5 +114,12 @@ public class TreatmentMaterialServiceImpl implements TreatmentMaterialService {
     @Override
     public BigDecimal getTotalMaterialCostByPatientId(UUID patientId) {
         return treatmentMaterialRepository.getTotalMaterialCostByPatientId(patientId);
+    }
+
+    @Override
+    public Page<TreatmentMaterialDto> searchMaterials(TreatmentMaterialSearchCriteria criteria, Pageable pageable) {
+        Specification<TreatmentMaterial> spec = TreatmentMaterialSpecifications.byAdvancedCriteria(criteria);
+        Page<TreatmentMaterial> materials = treatmentMaterialRepository.findAll(spec, pageable);
+        return materials.map(treatmentMaterialMapper::toDto);
     }
 }

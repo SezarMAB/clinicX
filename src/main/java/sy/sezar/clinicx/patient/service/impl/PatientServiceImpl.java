@@ -99,6 +99,13 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    public Page<PatientSummaryDto> searchPatients(PatientSearchCriteria criteria, Pageable pageable) {
+        Specification<Patient> spec = PatientSpecifications.byAdvancedCriteria(criteria);
+        Page<Patient> patients = patientRepository.findAll(spec, pageable);
+        return patients.map(patientMapper::toPatientSummaryDto);
+    }
+
+    @Override
     public PatientBalanceSummaryDto getPatientBalance(UUID patientId) {
         Patient patient = findPatientEntityById(patientId);
         return patientMapper.toPatientBalanceSummaryDto(patient);

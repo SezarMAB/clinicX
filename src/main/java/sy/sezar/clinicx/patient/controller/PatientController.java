@@ -95,6 +95,20 @@ public class PatientController {
         return ResponseEntity.ok(patients);
     }
 
+    @PostMapping("/search")
+    @Operation(
+        summary = "Advanced patient search",
+        description = "Search patients with multiple criteria and filters."
+    )
+    @ApiResponse(responseCode = "200", description = "Patients retrieved")
+    public ResponseEntity<Page<PatientSummaryDto>> searchPatients(
+            @Valid @RequestBody PatientSearchCriteria criteria,
+            Pageable pageable) {
+        log.info("Advanced search for patients with criteria: {}", criteria);
+        Page<PatientSummaryDto> patients = patientService.searchPatients(criteria, pageable);
+        return ResponseEntity.ok(patients);
+    }
+
     @GetMapping("/{id}/balance")
     @Operation(
         summary = "Get patient balance summary",

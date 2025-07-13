@@ -34,6 +34,11 @@ public interface PatientService {
     Page<PatientSummaryDto> findAllPatients(String searchTerm, Pageable pageable);
 
     /**
+     * Advanced search for patients with multiple criteria.
+     */
+    Page<PatientSummaryDto> searchPatients(PatientSearchCriteria criteria, Pageable pageable);
+
+    /**
      * Gets the patient's balance summary.
      */
     PatientBalanceSummaryDto getPatientBalance(UUID patientId);

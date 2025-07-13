@@ -38,5 +38,6 @@ public interface TreatmentMapper {
     @Mapping(target = "procedure", ignore = true)
     @Mapping(target = "doctor", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "materials", ignore = true)
     Treatment toTreatment(TreatmentCreateRequest request);
 }

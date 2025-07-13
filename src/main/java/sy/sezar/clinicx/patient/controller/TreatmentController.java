@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
+import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
 import sy.sezar.clinicx.patient.service.TreatmentService;
 
 import java.util.UUID;
@@ -112,5 +113,19 @@ public class TreatmentController {
         log.info("Deleting treatment with ID: {}", id);
         treatmentService.deleteTreatment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/search")
+    @Operation(
+        summary = "Advanced treatment search",
+        description = "Search treatments with multiple criteria and filters."
+    )
+    @ApiResponse(responseCode = "200", description = "Treatments retrieved")
+    public ResponseEntity<Page<TreatmentLogDto>> searchTreatments(
+            @Valid @RequestBody TreatmentSearchCriteria criteria,
+            Pageable pageable) {
+        log.info("Advanced search for treatments with criteria: {}", criteria);
+        Page<TreatmentLogDto> treatments = treatmentService.searchTreatments(criteria, pageable);
+        return ResponseEntity.ok(treatments);
     }
 }

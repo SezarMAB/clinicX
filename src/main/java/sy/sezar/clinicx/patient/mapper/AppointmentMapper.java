@@ -4,6 +4,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
+import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
 import sy.sezar.clinicx.patient.model.Appointment;
 
@@ -35,6 +36,17 @@ public interface AppointmentMapper {
     UpcomingAppointmentDto toUpcomingAppointmentDto(Appointment appointment);
 
     List<UpcomingAppointmentDto> toUpcomingAppointmentDtoList(List<Appointment> appointments);
+
+    // AppointmentCreateRequest -> Appointment
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "specialty", ignore = true)
+    @Mapping(target = "patient", ignore = true)
+    @Mapping(target = "doctor", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "treatments", ignore = true)
+    Appointment toEntity(AppointmentCreateRequest request);
 
     default String determineTreatmentType(Appointment appointment) {
         // Logic to determine treatment type based on appointment

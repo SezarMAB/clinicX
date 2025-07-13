@@ -19,6 +19,7 @@ public interface InvoiceMapper {
      * Maps Invoice entity to FinancialRecordDto.
      */
     @Mapping(target = "recordId", source = "id")
+    @Mapping(target = "amount", source = "totalAmount")
     @Mapping(target = "installments", source = "payments")
     FinancialRecordDto toFinancialRecordDto(Invoice invoice);
 

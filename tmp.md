@@ -1,88 +1,92 @@
 **LLM CODE-GENERATION PROMPT
-(Produce Java DTO records straight from an HTML mock-up)**
+(Create Spring-Boot JPA mappings for every SQL VIEW in a supplied script)**
 
 ---
 
-### 0 ️⃣ Objective
+### 0 ️⃣  Mission
 
-> **Task for the LLM:** You will receive a *single HTML file* that represents a screen (or set of screens) of a web UI.
-> Your job is to **derive and output all Java DTO records**—request, response, and list/projection objects—needed to move the exact data shown in the UI between a Spring-Boot backend and a frontend.
-> No entities, no controllers, just the DTO layer.
-
----
-
-### 1 ️⃣ Input
-
-* **File:** `ui-mockup.html` (pasted in §5 at run time).
-* The HTML uses semantic tags, `data-*` attributes, and meaningful class names; treat those as hints for field names.
+> You are a senior Java / Spring Boot engineer.
+> Given an SQL file that contains one or more **`CREATE VIEW …`** statements, generate Java source code that lets a Spring-Boot application read from those views via Spring Data JPA.
 
 ---
 
-### 2 ️⃣ Output requirements
+### 1 ️⃣  Input
 
-1. **DTO Java records only** – each inside its own `java` fenced block, nothing else inside the code block.
-2. Organise records in a logical hierarchy:
-
-   * `…CreateRequest`, `…UpdateRequest` – for forms or editable panels.
-   * `…SummaryDto` – for table/list rows.
-   * `…DetailsDto` / `…Response` – for full-screen or tabbed detail views.
-   * Nest DTOs as appropriate (e.g., `PatientDetailsDto` contains `List<TreatmentLogDto>`).
-3. **Field naming rules**
-
-   * Camel-case, English, no abbreviations unless standard (`id`, `dob`).
-   * Infer types:
-
-     | UI pattern                 | Java type    |
-          | -------------------------- | ------------ |
-     | Date (YYYY-MM-DD)          | `LocalDate`  |
-     | ISO date-time or timestamp | `Instant`    |
-     | Currency or decimal        | `BigDecimal` |
-     | Checkbox / toggle          | `Boolean`    |
-     | Key, foreign key           | `UUID`       |
-   * If a column clearly shows status (badge, colour, icon), represent it with an **enum** (`Status`, `InvoiceState`, etc.) and emit the enum in addition to the DTOs.
-4. **Validation** – add `jakarta.validation` annotations (`@NotNull`, `@Size`, `@Email`, `@Positive`) on *request* DTOs where obvious.
-5. **Javadoc** – a one-line comment atop every record explaining where it is used in the UI (“Used in Finance tab invoice list”).
-6. **Package hint** – add a comment above each code block suggesting its target package (e.g., `// package: com.example.clinic.dto.patient`).
-7. **No dependencies** other than JDK + Jakarta Validation.
+* **File:** `views.sql` (full text pasted in §6 of this prompt at runtime).
+* Target stack: **Java 21, Spring Boot 3.3+, Spring Data JPA, Lombok, Hibernate 6**.
 
 ---
 
-### 3 ️⃣ Quality checklist (self-evaluation)
+### 2 ️⃣  Output requirements
 
-* Every distinct piece of visible data in the HTML has a field.
-* No redundant or backend-specific fields (e.g., `createdAt`) that are not shown or editable.
-* Enums are used wherever the UI clearly limits the possible values.
-* Nested DTOs reflect the containment seen in the UI (cards, tabs, expandable rows).
-* No business logic, no Lombok, no Spring annotations.
+For **each view** in `views.sql` produce:
+
+1. **Immutable Entity class**
+
+   * Annotated with `@Entity` and `@Table(name = "<view_name>")`.
+   * Marked **read-only** using `@Immutable` (Hibernate) *or* `@Subselect` if you prefer the alternate pattern.
+   * Supply at least one `@Id` column. If the view lacks a natural PK, create a **composite key** via `@IdClass` or `@EmbeddedId`. Use the smallest column set that uniquely identifies a row (derive from `PRIMARY KEY` of the underlying table if obvious, else choose sensible columns).
+   * Map every column with the correct Java type.
+   * No setters except for testing (mark with Lombok’s `@Getter` only or `@AllArgsConstructor`).
+   * Place in package `com.example.<feature>.view`.
+
+2. **Repository interface**
+
+   * `public interface <ViewName>Repository extends JpaRepository<<Entity>, <IdType>>`
+   * Provide at least one query method that is useful, e.g. `findBy<FirstNonIdColumn>()`.
+   * Package: `com.example.<feature>.repository`.
+
+3. **DTO record** *(optional but encouraged)*
+
+   * If the entity contains many columns, create a slim projection DTO for typical UI needs.
+   * Map via MapStruct if convenient.
+
+4. **Unit test stub** for one generated view to illustrate usage (JUnit 5, `@DataJpaTest`).
+
+5. **No schema-altering code** – entities must not try to create or drop the view.
+   Ensure users keep `spring.jpa.hibernate.ddl-auto` set to `none` or `validate`.
 
 ---
 
-### 4 ️⃣ Example snippet (do **not** copy verbatim)
+### 3 ️⃣  General conventions
 
-```java
-// package: com.example.clinic.dto.finance
+| Topic              | Rule                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| **Packages**       | `com.example.<feature>.view` · `…repository` · `…dto`                                  |
+| **Lombok**         | `@Getter`, `@NoArgsConstructor(access = PROTECTED)` for entities                       |
+| **Java types**     | Use `java.time` (`Instant`, `LocalDate`, `LocalDateTime`)                              |
+| **Composite keys** | Implement `Serializable`, override `equals`/`hashCode` (Lombok’s `@EqualsAndHashCode`) |
+| **Column names**   | Use `@Column(name = "…")` when camel case deviates                                     |
+| **Read-only**      | Add `updatable = false, insertable = false` on all columns for extra safety            |
+| **Docs**           | Javadoc block on each entity describing the purpose of the view                        |
 
-/**
- * Line item in the invoice table of the Finance tab.
- */
-public record InvoiceRowDto(
-        UUID id,
-        String invoiceNumber,
-        LocalDate issueDate,
-        BigDecimal totalAmount,
-        InvoiceStatus status) { }
+---
 
-public enum InvoiceStatus { UNPAID, PARTIALLY_PAID, PAID }
+### 4 ️⃣  File & code-block format
+
+* Output each Java file inside its own triple-backtick <code>`java … `</code> block, **no explanatory prose inside code blocks**.
+* Order: entity → repository → (optional) mapper → (optional) DTO → (optional) test.
+* Prefix every group of files for one view with a simple markdown heading `#### <view_name>` so the reader can navigate easily.
+
+---
+
+### 5 ️⃣  Quality bar
+
+* Must compile with Maven coordinates:
+  `spring-boot-starter-data-jpa`, `lombok`, `postgresql` driver, `hibernate-core`.
+* No setter methods on view entities.
+* No accidental write operations (verify `@Immutable`).
+* Id choice clearly reflects uniqueness; avoid UUID generation hacks.
+* Static imports, unused code, and wildcard imports are forbidden.
+
+---
+
+### 6 ️⃣  SQL source (inserted at run-time)
+
+```sql
+-- the user will paste or attach the full `views.sql` here
 ```
 
 ---
 
-### 5 ️⃣ HTML mock-up (inserted at run-time)
-
-```html
-<!-- The full mockup will appear here -->
-```
-
----
-
-**➡️ Generate the complete set of Java DTO records (and any enums) required to support the entire UI.**
+**➡️  Now generate the Java source files that fulfil all requirements for every view present in the supplied SQL.**

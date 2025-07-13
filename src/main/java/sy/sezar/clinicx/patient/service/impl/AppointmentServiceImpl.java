@@ -60,8 +60,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public Page<AppointmentCardDto> getPatientAppointments(UUID patientId, Pageable pageable) {
-        // TODO: Implement when AppointmentRepository has findByPatientId with Pageable
-        throw new UnsupportedOperationException("Patient appointments pagination not yet implemented");
+        log.debug("Getting patient appointments with pagination for patient: {}", patientId);
+
+        Page<Appointment> appointments = appointmentRepository.findByPatientIdOrderByAppointmentDatetimeDesc(patientId, pageable);
+        return appointments.map(appointmentMapper::toAppointmentCardDto);
     }
 
     @Override

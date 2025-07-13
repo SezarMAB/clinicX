@@ -13,9 +13,9 @@ import java.util.UUID;
 public interface TreatmentService {
 
     /**
-     * Creates a new treatment record.
+     * Creates a new treatment record for a specific patient.
      */
-    TreatmentLogDto createTreatment(TreatmentCreateRequest request);
+    TreatmentLogDto createTreatment(UUID patientId, TreatmentCreateRequest request);
 
     /**
      * Gets treatment history for a patient with pagination.

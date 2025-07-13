@@ -34,6 +34,9 @@ public class PatientServiceImpl implements PatientService {
     private final DocumentRepository documentRepository;
     private final TreatmentRepository treatmentRepository;
     private final AppointmentRepository appointmentRepository;
+    private final NoteRepository noteRepository;
+    private final LabRequestRepository labRequestRepository;
+    private final InvoiceRepository invoiceRepository;
     private final UpcomingAppointmentsViewRepository upcomingAppointmentsViewRepository;
     private final DentalChartViewRepository dentalChartViewRepository;
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
@@ -118,26 +121,26 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Page<NoteSummaryDto> getPatientNotes(UUID patientId, Pageable pageable) {
-        // TODO: Implement when NoteRepository is available
-        throw new UnsupportedOperationException("Note repository not yet implemented");
+        Page<Note> notes = noteRepository.findByPatientIdOrderByNoteDateDesc(patientId, pageable);
+        return notes.map(noteSummaryMapper::toNoteSummaryDto);
     }
 
     @Override
     public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
-        // TODO: Implement when TreatmentRepository has findByPatientId method
-        throw new UnsupportedOperationException("Treatment history not yet implemented");
+        Page<Treatment> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
+        return treatments.map(treatmentMapper::toTreatmentLogDto);
     }
 
     @Override
     public Page<LabRequestDto> getPatientLabRequests(UUID patientId, Pageable pageable) {
-        // TODO: Implement when LabRequestRepository is available
-        throw new UnsupportedOperationException("Lab request repository not yet implemented");
+        Page<LabRequest> labRequests = labRequestRepository.findByPatientIdOrderByDateSentDesc(patientId, pageable);
+        return labRequests.map(labRequestMapper::toLabRequestDto);
     }
 
     @Override
     public Page<FinancialRecordDto> getPatientFinancialRecords(UUID patientId, Pageable pageable) {
-        // TODO: Implement when InvoiceMapper is available
-        throw new UnsupportedOperationException("Financial records not yet implemented");
+        Page<Invoice> invoices = invoiceRepository.findByPatientId(patientId, pageable);
+        return invoices.map(this::mapToFinancialRecordDto);
     }
 
     @Override
@@ -173,5 +176,17 @@ public class PatientServiceImpl implements PatientService {
 
         // TODO: Save teeth when PatientToothRepository is available
         log.debug("Patient teeth initialization completed for patient ID: {}", patient.getId());
+    }
+
+    private FinancialRecordDto mapToFinancialRecordDto(Invoice invoice) {
+        return new FinancialRecordDto(
+                invoice.getId(),
+                invoice.getInvoiceNumber(),
+                invoice.getIssueDate(),
+                invoice.getDueDate(),
+                invoice.getTotalAmount(),
+                invoice.getStatus(),
+                null // installments will be mapped when needed
+        );
     }
 }

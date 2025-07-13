@@ -14,6 +14,7 @@ import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Payment;
 import sy.sezar.clinicx.patient.repository.InvoiceRepository;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
+import sy.sezar.clinicx.patient.repository.PaymentRepository;
 import sy.sezar.clinicx.patient.service.InvoiceService;
 
 import jakarta.persistence.EntityManager;
@@ -33,6 +34,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final PatientRepository patientRepository;
+    private final PaymentRepository paymentRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -90,8 +92,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Page<PaymentInstallmentDto> getInvoicePayments(UUID invoiceId, Pageable pageable) {
-        // TODO: Implement when PaymentRepository is available with findByInvoiceId method
-        throw new UnsupportedOperationException("Payment installments not yet implemented");
+        log.debug("Getting payment installments for invoice: {}", invoiceId);
+
+        Page<Payment> payments = paymentRepository.findByInvoiceIdOrderByPaymentDateDesc(invoiceId, pageable);
+        return payments.map(this::mapToPaymentInstallmentDto);
     }
 
     @Override
@@ -152,6 +156,14 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.getTotalAmount(),
                 invoice.getStatus(),
                 null // installments will be mapped when PaymentMapper is available
+        );
+    }
+
+    private PaymentInstallmentDto mapToPaymentInstallmentDto(Payment payment) {
+        return new PaymentInstallmentDto(
+                payment.getPaymentMethod(), // description
+                payment.getPaymentDate(),
+                payment.getAmount()
         );
     }
 

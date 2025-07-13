@@ -1,4 +1,7 @@
+**LLM CODE-GENERATION PROMPT
+(Build the complete *service layer* from the current codebase + UI)**
 
+---
 
 ### 0️⃣ Mission
 

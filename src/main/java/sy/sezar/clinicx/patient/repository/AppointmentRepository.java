@@ -1,5 +1,7 @@
 package sy.sezar.clinicx.patient.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import sy.sezar.clinicx.patient.model.Appointment;
@@ -34,4 +36,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
      * @return A list of appointments for the given patient.
      */
     List<Appointment> findByPatientId(UUID patientId);
+
+    /**
+     * Finds all appointments for a specific patient with pagination.
+     *
+     * @param patientId The ID of the patient.
+     * @param pageable  Pagination and sorting information.
+     * @return A Page of appointments for the given patient.
+     */
+    Page<Appointment> findByPatientIdOrderByAppointmentDatetimeDesc(UUID patientId, Pageable pageable);
 }

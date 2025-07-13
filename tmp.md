@@ -1,79 +1,72 @@
 
+### 0️⃣ Mission
+
 > You are a **senior Spring-Boot engineer**.
-> The project already contains fully-implemented **service interfaces & implementations** in `src/main/java`.
-> **Analyse those services** and generate a set of **REST controllers** that expose *every public service method* as a clean, versioned HTTP API—complete with Swagger / OpenAPI annotations.
+> **Analyse** the entire project source tree (entities, DTOs, repositories, projections, specs) **and** the screen requirements expressed in `ui-mockup.html`.
+> Produce every **service interface + implementation** required for the MVP so that the UI can work end-to-end.
 
 ---
 
-### 1️⃣ Controller requirements
+### 1️⃣ Scope & Responsibilities
 
-| Topic              | Spec                                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Package**        | `com.example.<feature>.controller`                                                                                                               |
-| **Class name**     | `<Aggregate>Controller` (e.g., `PatientController`)                                                                                              |
-| **Base path**      | `/api/v1/<plural-kebab>` (e.g., `/api/v1/patients`)                                                                                              |
-| **Annotations**    | `@RestController`, `@RequestMapping`, `@Validated`, Lombok `@RequiredArgsConstructor`, `@Slf4j`                                                  |
-| **Swagger**        | Use `@Tag`, `@Operation`, `@ApiResponse`, `@Parameter`, `@RequestBody`, `@Schema` from **springdoc-openapi** (`io.swagger.v3.oas.annotations.*`) |
-| **Validation**     | Annotate request DTO params with `@Valid` / `@NotNull` as required                                                                               |
-| **Error handling** | Rely on existing `@ControllerAdvice` (if present) or throw project’s custom exceptions                                                           |
-| **Return types**   | • Single resources → `ResponseEntity<Dto>`  <br>• Lists → `Page<Dto>` (with `Pageable` param)                                                    |
-| **Mapping rules**  | • `GET` for read, `POST` create, `PUT`/`PATCH` update, `DELETE` delete <br>• Path variables are UUIDs                                            |
-| **Security**       | Do **not** add Spring Security annotations (out of MVP scope)                                                                                    |
-| **Content-type**   | Controllers accept/produce `application/json`                                                                                                    |
-| **HATEOAS**        | Omit unless service already returns it                                                                                                           |
+For each aggregate that **already exists** in the project **and** is referenced by the UI:
+
+| Layer                    | What to generate                                                                                                  | Key points                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Service interface**    | `FooService`                                                                                                      | *Pure contract* (`create…`, `update…`, `find…`, etc.)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Service impl**         | `FooServiceImpl`                                                                                                  | • Annotate `@Service`, implement interface<br>• Wrap write methods in `@Transactional` (class-level or method-level)<br>• Inject repositories & mappers via constructor                                                                                                                                                                                                                                                                                                                                                            |
+| **Business rules**       | Implement once, centrally                                                                                         | 1. **Generate `publicFacingId`** on patient creation (human-readable, unique)<br>2. **Allocate sequential `invoiceNumber`** via DB sequence `invoice_number_seq` (use `@Transactional` + `@Query(value="SELECT nextval('invoice_number_seq')", nativeQuery=true)` inside a helper)<br>3. **Re-calculate patient balance** on every invoice/payment mutation (reuse repository methods; mimic trigger logic)<br>4. **Auto-initialise 32 `PatientTeeth` rows** immediately after patient creation (mimic `initialize_patient_teeth`) |
+| **DTO ↔ Entity mapping** | MapStruct preferred (`@Mapper(componentModel = "spring")`), fallback to manual                                    | Create new mappers only if not already present.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Validation**           | Use `jakarta.validation` on *request* DTOs, enforce in service before save.                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Error handling**       | Throw custom exceptions (`NotFoundException`, `BusinessRuleException`) located in `com.example.shared.exception`. |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ---
 
-### 2️⃣ Output format
+### 2️⃣ Implementation conventions
 
-For **each service interface** found:
+* **Packages**
 
-1. Markdown heading `#### <ServiceName> → Controller`
-2. One `java` fenced block containing the complete controller source.
-
-    * No explanatory prose **inside** the code block.
-    * Include all necessary imports—code must compile.
-
-Repeat until every service is covered.
-
----
-
-### 3️⃣ Swagger conventions quick reference
-
-```java
-@Tag(name = "Patients", description = "Operations related to patient management")
-@Operation(
-    summary = "Create a new patient",
-    description = "Generates a publicFacingId, initialises dental chart records, and returns the created patient."
-)
-@ApiResponse(responseCode = "201", description = "Patient created", content = @Content(schema = @Schema(implementation = PatientDetailsDto.class)))
-@ApiResponse(responseCode = "400", description = "Validation error")
-```
-
-*Parameter examples*
-
-```java
-@Parameter(name = "id", description = "Patient UUID", required = true)
-@PathVariable UUID id
-```
+   * `com.example.<feature>.service` – interfaces
+   * `com.example.<feature>.service.impl` – implementations
+   * `com.example.<feature>.mapper` – MapStruct mappers (if new)
+* **Logging** – `@Slf4j` on implementations.
+* **Constructor injection** – no `@Autowired` on fields.
+* **Read-only methods** – annotate with `@Transactional(readOnly=true)`.
+* **Return types** – DTOs (never entities) or `Page<Dto>` for lists.
 
 ---
 
-### 4️⃣ Quality checklist
+### 3️⃣ Deliverables / Output format
 
-* Every public service method is reachable via at least one endpoint.
-* HTTP verbs and status codes follow REST best practices (`201 CREATED` on POST, etc.).
-* Pagination parameters (`page`, `size`, `sort`) accepted where list endpoints exist.
-* Swagger annotations accurately reflect path, params, request body, and response.
-* Controllers delegate *directly* to services—**no business logic**.
-* Code compiles with Java 21 + Spring Boot 3.3 + springdoc-openapi-ui.
+For **each** service:
+
+1. `#### <Aggregate> Service` (markdown heading)
+2. `java` blocks in this order:
+
+   1. Service interface
+   2. Implementation class
+   3. (If new) Mapper interface
+   4. (If new) Exception class
+
+*No explanatory prose inside code blocks.*
 
 ---
 
-### 5️⃣ Available context at run-time
+### 4️⃣ Quality checklist (self-evaluation)
 
-* Full source tree under `src/main/java` (services + DTOs + entities).
+* All UI use-cases can be fulfilled by calling generated services.
+* Business-rule code is covered by unit-test hints (`TODO write tests`).
+* No duplicate logic; helper methods are `private`.
+* Sequence fetch & balance recalculation run inside the same transaction that persists the invoice/payment.
+* Patient-teeth initialisation runs only once per patient.
 
 ---
 
-**➡️ Generate the controllers (with Swagger docs) for every implemented service.**
+### 5️⃣ Input files available at run-time
+
+* `ui-mockup.html` – full HTML of the MVP screen(s).
+* **Project sources** – everything under `src/main/java`.
+
+---
+
+**➡️ Generate the complete set of Spring-Boot service interfaces, implementations, mappers, and any supporting classes exactly as specified. Skip features tied to entities not present in the current MVP.**

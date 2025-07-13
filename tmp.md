@@ -1,77 +1,86 @@
-**LLM CODE-GENERATION PROMPT
-(Build Spring-Data JPA repositories from the existing codebase + UI needs)**
+
+
+### 0 ️⃣ Objective
+
+> **Task for the LLM:** You will receive a *single HTML file* that represents one or more screens of a web UI.
+> Your job is to **derive and output all Java DTO records**—request, response, list/projection objects—needed for a **minimum-viable-product (MVP)** Spring-Boot backend to drive that UI.
+> **⚠️  Scope guard:** If the HTML references data that would rely on *backend entities not yet part of the MVP*, simply **ignore** that slice of UI for now. Do **not** invent placeholder entities or DTOs beyond what already exists in the project.
 
 ---
 
-### 0 ️⃣ Mission
+### 1 ️⃣ Input
 
-> You are a senior Spring-Boot engineer.
-> **Analyse** the current project (all Java *entities* and *DTOs*) **plus** the screen requirements expressed in `ui-mockup.html`.
-> For every aggregate that is both **implemented in the project** *and* **displayed / queried in the mock-up**, generate a *production-ready* Spring-Data JPA repository interface that fully supports the UI’s data-access needs.
-
----
-
-### 1 ️⃣ Repository requirements
-
-For each eligible entity:
-
-1. **Extend** the correct Spring-Data base:
-   `JpaRepository<Entity, IdType>`
-   Add `JpaSpecificationExecutor<Entity>` when complex filtering is useful.
-2. **Custom query methods**
-
-   * Use JPQL or native `@Query` where derived-query names become unreadable.
-   * Optimise with **`LEFT JOIN FETCH`** or `EntityGraph` to prevent N+1 problems shown in the UI.
-3. **Projections & slices**
-
-   * Provide **interface-based projections** for list/table views (only the columns the UI renders).
-   * Expose methods like `Page<PatientListProjection> findAllProjectedBy(Pageable pageable);`
-4. **Specifications**
-
-   * Create a `…Specifications` helper class per aggregate (e.g., `PatientSpecifications.bySearchTerm()`), enabling free-text search & filter chips visible in the mock-up.
-5. **Pagination & Sorting**
-
-   * Every list method must accept a `Pageable` argument and return `Page<…>` or `Slice<…>`.
-6. **Naming & packaging**
-
-   * Place interfaces in `com.example.<feature>.repository`.
-   * Projections in `com.example.<feature>.projection`.
-   * Specifications in `com.example.<feature>.spec`.
-7. **Skip** entities that are **not part of the current MVP codebase**, even if referenced in the HTML.
+* **File:** `ui-mockup.html` (pasted in §5 at run time).
+* The HTML uses semantic tags, `data-*` attributes, and meaningful class names; treat those as hints for field names.
 
 ---
 
-### 2 ️⃣ Deliverables / Output format
+### 2 ️⃣ Output requirements
 
-Produce for **each** repository:
+1. **DTO Java records only** – each inside its own `java` fenced block, nothing else inside the code block.
+2. Organise records in a logical hierarchy:
 
-* `#### <EntityName>` (markdown heading)
-* `java blocks` in this order:
+   * `…CreateRequest`, `…UpdateRequest` – for forms or editable panels.
+   * `…SummaryDto` – for table/list rows.
+   * `…DetailsDto` / `…Response` – for full-screen or tabbed detail views.
+   * Nest DTOs as appropriate (e.g., `PatientDetailsDto` contains `List<TreatmentLogDto>`).
+3. **Field naming rules**
 
-   1. Projection interface(s) (if any)
-   2. Specifications class (if any)
-   3. Repository interface
+   * Camel-case, English, no abbreviations unless standard (`id`, `dob`).
+   * Infer types:
 
-No explanatory prose inside code blocks.
+     | UI pattern                 | Java type    |
+          | -------------------------- | ------------ |
+     | Date (YYYY-MM-DD)          | `LocalDate`  |
+     | ISO date-time or timestamp | `Instant`    |
+     | Currency or decimal        | `BigDecimal` |
+     | Checkbox / toggle          | `Boolean`    |
+     | Key, foreign key           | `UUID`       |
+   * If a column clearly shows status (badge, colour, icon), represent it with an **enum** (`Status`, `InvoiceState`, etc.) and emit the enum in addition to the DTOs.
+4. **Validation** – add `jakarta.validation` annotations (`@NotNull`, `@Size`, `@Email`, `@Positive`) on *request* DTOs where obvious.
+5. **Javadoc** – a one-line comment atop every record explaining where it is used in the UI (“Used in Finance tab invoice list”).
+6. **Package hint** – add a comment above each code block suggesting its target package (e.g., `// package: com.example.clinic.dto.patient`).
+7. **MVP filter** – before emitting a DTO, check that its underlying entity already exists in the current codebase; if not, **skip** it.
+8. **No dependencies** other than JDK + Jakarta Validation.
 
 ---
 
 ### 3 ️⃣ Quality checklist (self-evaluation)
 
-* Every query method clearly maps to a concrete UI requirement (search bar, filter, table, detail view).
-* No over-fetching: projections include only needed fields.
-* Provide at least one example of `@EntityGraph` or `JOIN FETCH` to solve an N+1 listed in the mock-up.
-* Specifications are composable (`and`, `or`).
-* All list methods honour `Pageable`.
-* Repositories compile with Java 21, Spring-Boot 3.3+.
+* Every **existing** backend entity that the HTML displays has a matching DTO.
+* No DTO refers to an entity the MVP has not implemented.
+* Enums are used wherever the UI clearly limits the possible values.
+* Nested DTOs reflect the containment seen in the UI (cards, tabs, expandable rows).
+* No business logic, no Lombok, no Spring annotations.
 
 ---
 
-### 4 ️⃣ Context files available at runtime
+### 4 ️⃣ Example snippet (do **not** copy verbatim)
 
-* `ui-mockup.html` – full HTML of the current screen(s).
-* All existing Java source under `src/main/java`.
+```java
+// package: com.example.clinic.dto.finance
+
+/**
+ * Row in the invoice table of the Finance tab (MVP scope).
+ */
+public record InvoiceRowDto(
+        UUID id,
+        String invoiceNumber,
+        LocalDate issueDate,
+        BigDecimal totalAmount,
+        InvoiceStatus status) { }
+
+public enum InvoiceStatus { UNPAID, PARTIALLY_PAID, PAID }
+```
 
 ---
 
-**➡️ Generate the complete set of Spring-Data JPA repositories, projections, and specification helpers exactly as described above.**
+### 5 ️⃣ HTML mock-up (inserted at run-time)
+
+```html
+<!-- The full mockup will appear here -->
+```
+
+---
+
+**➡️  Generate the complete set of Java DTO records (and any enums) required for the MVP UI. Skip sections that rely on entities not yet implemented.**

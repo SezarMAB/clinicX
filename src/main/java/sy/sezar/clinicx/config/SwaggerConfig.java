@@ -13,7 +13,7 @@ public class SwaggerConfig {
 
     public static class SwaggerPageable {
         private Integer page = 0;
-        private Integer size = 1;
+        private Integer size = 20;
         private String sort = "id";
 
         public Integer getPage() { return page; }

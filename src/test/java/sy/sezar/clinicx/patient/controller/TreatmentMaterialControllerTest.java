@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import sy.sezar.clinicx.core.exception.NotFoundException;
+import sy.sezar.clinicx.patient.controller.impl.TreatmentMaterialControllerImpl;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialDto;
 import sy.sezar.clinicx.patient.service.TreatmentMaterialService;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(TreatmentMaterialController.class)
+@WebMvcTest(TreatmentMaterialControllerImpl.class)
 class TreatmentMaterialControllerTest {
 
     @Autowired

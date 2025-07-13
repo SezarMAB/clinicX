@@ -10,26 +10,31 @@ import sy.sezar.clinicx.patient.model.Payment;
 import java.util.List;
 
 /**
- * Mapper for financial entities like Invoice and Payment to their DTOs.
+ * Mapper for converting between Invoice/Payment entities and their DTOs.
  */
 @Mapper(componentModel = "spring")
 public interface InvoiceMapper {
 
-    @Mapping(source = "id", target = "recordId")
-    @Mapping(source = "invoiceNumber", target = "invoiceNumber")
-    @Mapping(source = "issueDate", target = "issueDate")
-    @Mapping(source = "dueDate", target = "dueDate")
-    @Mapping(source = "totalAmount", target = "amount")
-    @Mapping(source = "status", target = "status")
+    /**
+     * Maps Invoice entity to FinancialRecordDto.
+     */
+    @Mapping(target = "recordId", source = "id")
     @Mapping(target = "installments", source = "payments")
     FinancialRecordDto toFinancialRecordDto(Invoice invoice);
 
-    List<FinancialRecordDto> toFinancialRecordDtos(List<Invoice> invoices);
+    /**
+     * Maps list of Invoices to list of FinancialRecordDtos.
+     */
+    List<FinancialRecordDto> toFinancialRecordDtoList(List<Invoice> invoices);
 
-    @Mapping(source = "paymentDate", target = "paymentDate")
-    @Mapping(source = "amount", target = "amount")
-    @Mapping(target = "description", constant = "Payment")
+    /**
+     * Maps Payment entity to PaymentInstallmentDto.
+     */
+    @Mapping(target = "description", source = "paymentMethod")
     PaymentInstallmentDto toPaymentInstallmentDto(Payment payment);
 
-    List<PaymentInstallmentDto> toPaymentInstallmentDtos(List<Payment> payments);
+    /**
+     * Maps list of Payments to list of PaymentInstallmentDtos.
+     */
+    List<PaymentInstallmentDto> toPaymentInstallmentDtoList(List<Payment> payments);
 }

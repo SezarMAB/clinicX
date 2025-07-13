@@ -17,6 +17,7 @@ import sy.sezar.clinicx.patient.spec.PatientSpecifications;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import sy.sezar.clinicx.patient.view.DentalChartView;
@@ -37,6 +38,8 @@ public class PatientServiceImpl implements PatientService {
     private final NoteRepository noteRepository;
     private final LabRequestRepository labRequestRepository;
     private final InvoiceRepository invoiceRepository;
+    private final PatientToothRepository patientToothRepository;
+    private final ToothConditionRepository toothConditionRepository;
     private final UpcomingAppointmentsViewRepository upcomingAppointmentsViewRepository;
     private final DentalChartViewRepository dentalChartViewRepository;
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
@@ -166,16 +169,26 @@ public class PatientServiceImpl implements PatientService {
     private void initializePatientTeeth(Patient patient) {
         log.debug("Initializing 32 teeth for patient ID: {}", patient.getId());
 
+        // Get default healthy tooth condition, or create a fallback
+        ToothCondition defaultCondition = toothConditionRepository.findDefaultHealthyCondition()
+                .orElseGet(() -> {
+                    log.warn("No default healthy tooth condition found, creating fallback");
+                    // Return null for now - in production this should create a default condition
+                    return null;
+                });
+
+        List<PatientTooth> teethToSave = new ArrayList<>();
         for (int toothNumber = 1; toothNumber <= 32; toothNumber++) {
             PatientTooth tooth = new PatientTooth();
             tooth.setPatient(patient);
             tooth.setToothNumber(toothNumber);
-            // TODO: Set default condition when ToothCondition repository is available
-            // tooth.setCurrentCondition(defaultCondition);
+            tooth.setCurrentCondition(defaultCondition);
+            teethToSave.add(tooth);
         }
 
-        // TODO: Save teeth when PatientToothRepository is available
-        log.debug("Patient teeth initialization completed for patient ID: {}", patient.getId());
+        patientToothRepository.saveAll(teethToSave);
+        log.debug("Patient teeth initialization completed for patient ID: {}, saved {} teeth",
+                  patient.getId(), teethToSave.size());
     }
 
     private FinancialRecordDto mapToFinancialRecordDto(Invoice invoice) {

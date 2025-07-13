@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.PatientBalanceSummaryDto;
+import sy.sezar.clinicx.patient.mapper.PatientFinancialSummaryMapper;
 import sy.sezar.clinicx.patient.repository.PatientFinancialSummaryViewRepository;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.service.FinancialSummaryService;
@@ -24,13 +26,17 @@ public class FinancialSummaryServiceImpl implements FinancialSummaryService {
 
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
     private final PatientRepository patientRepository;
+    private final PatientFinancialSummaryMapper financialSummaryMapper;
 
     @Override
     public PatientBalanceSummaryDto getPatientFinancialSummary(UUID patientId) {
         log.debug("Getting financial summary for patient: {}", patientId);
 
-        // TODO: Implement mapping from PatientFinancialSummaryView to PatientBalanceSummaryDto
-        throw new UnsupportedOperationException("Financial summary mapping not yet implemented");
+        // IMPLEMENTED: Mapping from PatientFinancialSummaryView to PatientBalanceSummaryDto
+        PatientFinancialSummaryView summaryView = financialSummaryViewRepository.findById(patientId)
+                .orElseThrow(() -> new NotFoundException("Financial summary not found for patient: " + patientId));
+
+        return financialSummaryMapper.toPatientBalanceSummaryDto(summaryView);
     }
 
     @Override
@@ -44,7 +50,7 @@ public class FinancialSummaryServiceImpl implements FinancialSummaryService {
     public List<PatientFinancialSummaryView> getPatientsWithOutstandingBalances() {
         log.debug("Getting patients with outstanding balances");
 
-        // TODO: Implement when repository has method for filtering by balance > 0
-        throw new UnsupportedOperationException("Outstanding balances filter not yet implemented");
+        // IMPLEMENTED: Use repository method for filtering by balance > 0
+        return financialSummaryViewRepository.findPatientsWithOutstandingBalances();
     }
 }

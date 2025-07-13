@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.FinancialRecordDto;
 import sy.sezar.clinicx.patient.dto.PaymentInstallmentDto;
+import sy.sezar.clinicx.patient.mapper.InvoiceMapper;
 import sy.sezar.clinicx.patient.model.Invoice;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Payment;
@@ -35,6 +36,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final PatientRepository patientRepository;
     private final PaymentRepository paymentRepository;
+    private final InvoiceMapper invoiceMapper;
     private final EntityManager entityManager;
 
     @Override
@@ -147,24 +149,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     private FinancialRecordDto mapToFinancialRecordDto(Invoice invoice) {
-        // TODO: Use InvoiceMapper when available
-        return new FinancialRecordDto(
-                invoice.getId(),
-                invoice.getInvoiceNumber(),
-                invoice.getIssueDate(),
-                invoice.getDueDate(),
-                invoice.getTotalAmount(),
-                invoice.getStatus(),
-                null // installments will be mapped when PaymentMapper is available
-        );
+        // IMPLEMENTED: Use InvoiceMapper when available
+        return invoiceMapper.toFinancialRecordDto(invoice);
     }
 
     private PaymentInstallmentDto mapToPaymentInstallmentDto(Payment payment) {
-        return new PaymentInstallmentDto(
-                payment.getPaymentMethod(), // description
-                payment.getPaymentDate(),
-                payment.getAmount()
-        );
+        // IMPLEMENTED: Use InvoiceMapper for payment mapping
+        return invoiceMapper.toPaymentInstallmentDto(payment);
     }
 
     private String determineStatus(Invoice invoice) {

@@ -20,7 +20,16 @@ public interface PatientFinancialSummaryViewRepository extends JpaRepository<Pat
      * @param amount The minimum balance amount.
      * @return A list of {@link PatientFinancialSummaryView} for patients with a balance greater than the specified amount.
      */
+    @Query("SELECT p FROM PatientFinancialSummaryView p WHERE p.balance > :amount ORDER BY p.balance DESC")
     List<PatientFinancialSummaryView> findByBalanceGreaterThan(BigDecimal amount);
+
+    /**
+     * Finds patients with outstanding balances (balance > 0).
+     *
+     * @return A list of patients with outstanding balances.
+     */
+    @Query("SELECT p FROM PatientFinancialSummaryView p WHERE p.balance > 0 ORDER BY p.balance DESC")
+    List<PatientFinancialSummaryView> findPatientsWithOutstandingBalances();
 
     /**
      * Finds patients who have at least one unpaid invoice.
@@ -37,4 +46,3 @@ public interface PatientFinancialSummaryViewRepository extends JpaRepository<Pat
      */
     PatientFinancialSummaryView findByPublicFacingId(String publicFacingId);
 }
-

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -81,12 +82,17 @@ public class TreatmentMaterialController {
     @GetMapping("/treatment/{treatmentId}/paged")
     @Operation(
         summary = "Get materials by treatment ID (paginated)",
-        description = "Retrieves materials used in a specific treatment with pagination."
+        description = "Retrieves materials used in a specific treatment with pagination.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Materials retrieved")
     public ResponseEntity<Page<TreatmentMaterialDto>> getMaterialsByTreatmentPaged(
             @Parameter(description = "Treatment ID") @PathVariable UUID treatmentId,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         log.info("Retrieving paginated materials for treatment ID: {}", treatmentId);
         Page<TreatmentMaterialDto> materials = treatmentMaterialService.findByTreatmentId(treatmentId, pageable);
         return ResponseEntity.ok(materials);
@@ -108,12 +114,17 @@ public class TreatmentMaterialController {
     @GetMapping("/patient/{patientId}/paged")
     @Operation(
         summary = "Get materials by patient ID (paginated)",
-        description = "Retrieves materials used for a specific patient with pagination."
+        description = "Retrieves materials used for a specific patient with pagination.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Materials retrieved")
     public ResponseEntity<Page<TreatmentMaterialDto>> getMaterialsByPatientPaged(
             @Parameter(description = "Patient ID") @PathVariable UUID patientId,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         log.info("Retrieving paginated materials for patient ID: {}", patientId);
         Page<TreatmentMaterialDto> materials = treatmentMaterialService.findByPatientId(patientId, pageable);
         return ResponseEntity.ok(materials);
@@ -179,12 +190,17 @@ public class TreatmentMaterialController {
     @PostMapping("/search")
     @Operation(
         summary = "Advanced material search",
-        description = "Search treatment materials with multiple criteria and filters."
+        description = "Search treatment materials with multiple criteria and filters.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Materials retrieved")
     public ResponseEntity<Page<TreatmentMaterialDto>> searchMaterials(
             @Valid @RequestBody TreatmentMaterialSearchCriteria criteria,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         log.info("Advanced search for treatment materials with criteria: {}", criteria);
         Page<TreatmentMaterialDto> materials = treatmentMaterialService.searchMaterials(criteria, pageable);
         return ResponseEntity.ok(materials);

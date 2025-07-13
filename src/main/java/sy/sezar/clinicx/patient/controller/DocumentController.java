@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,14 +33,19 @@ public class DocumentController {
     @GetMapping("/patient/{patientId}")
     @Operation(
         summary = "Get patient documents",
-        description = "Retrieves paginated list of documents for a specific patient."
+        description = "Retrieves paginated list of documents for a specific patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Documents retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<DocumentSummaryDto>> getPatientDocuments(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @PathVariable UUID patientId,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Retrieving documents for patient ID: {} with pagination: {}", patientId, pageable);
         Page<DocumentSummaryDto> documents = documentService.getPatientDocuments(patientId, pageable);
         return ResponseEntity.ok(documents);

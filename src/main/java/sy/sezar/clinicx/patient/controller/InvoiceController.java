@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -76,14 +78,19 @@ public class InvoiceController {
     @GetMapping("/patient/{patientId}")
     @Operation(
         summary = "Get patient financial records",
-        description = "Retrieves paginated financial records (invoices and payments) for a patient."
+        description = "Retrieves paginated financial records (invoices and payments) for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: invoiceDate", example = "invoiceDate")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Financial records retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<FinancialRecordDto>> getPatientFinancialRecords(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @PathVariable UUID patientId,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "invoiceDate", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("Retrieving financial records for patient ID: {} with pagination: {}", patientId, pageable);
         Page<FinancialRecordDto> records = invoiceService.getPatientFinancialRecords(patientId, pageable);
         return ResponseEntity.ok(records);

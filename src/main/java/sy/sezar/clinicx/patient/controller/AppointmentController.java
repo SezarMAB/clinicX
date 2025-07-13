@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -81,14 +82,19 @@ public class AppointmentController {
     @GetMapping("/patient/{patientId}")
     @Operation(
         summary = "Get all appointments for patient",
-        description = "Retrieves paginated list of all appointments for a specific patient."
+        description = "Retrieves paginated list of all appointments for a specific patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: appointmentDateTime", example = "appointmentDateTime")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Patient appointments retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<AppointmentCardDto>> getPatientAppointments(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @PathVariable UUID patientId,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "appointmentDateTime", direction = org.springframework.data.domain.Sort.Direction.ASC) Pageable pageable) {
         log.info("Retrieving appointments for patient ID: {} with pagination: {}", patientId, pageable);
         Page<AppointmentCardDto> appointments = appointmentService.getPatientAppointments(patientId, pageable);
         return ResponseEntity.ok(appointments);

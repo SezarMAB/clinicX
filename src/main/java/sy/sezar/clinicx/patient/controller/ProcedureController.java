@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,10 +34,15 @@ public class ProcedureController {
     @GetMapping
     @Operation(
         summary = "Get all procedures",
-        description = "Retrieves paginated list of all available dental procedures."
+        description = "Retrieves paginated list of all available dental procedures.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: name", example = "name")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Procedures retrieved")
-    public ResponseEntity<Page<ProcedureSummaryDto>> getAllProcedures(Pageable pageable) {
+    public ResponseEntity<Page<ProcedureSummaryDto>> getAllProcedures(@Parameter(hidden = true) @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         log.info("Retrieving all procedures with pagination: {}", pageable);
         Page<ProcedureSummaryDto> procedures = procedureService.getAllProcedures(pageable);
         return ResponseEntity.ok(procedures);

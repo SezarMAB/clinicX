@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -83,13 +84,18 @@ public class PatientController {
     @GetMapping
     @Operation(
         summary = "Get all patients",
-        description = "Retrieves paginated list of patients with optional search filtering."
+        description = "Retrieves paginated list of patients with optional search filtering.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: fullName", example = "fullName")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Patients retrieved")
     public ResponseEntity<Page<PatientSummaryDto>> getAllPatients(
             @Parameter(name = "searchTerm", description = "Search term for filtering patients")
             @RequestParam(required = false) String searchTerm,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable) {
         log.info("Retrieving patients with search term: {} and pagination: {}", searchTerm, pageable);
         Page<PatientSummaryDto> patients = patientService.findAllPatients(searchTerm, pageable);
         return ResponseEntity.ok(patients);
@@ -98,12 +104,17 @@ public class PatientController {
     @PostMapping("/search")
     @Operation(
         summary = "Advanced patient search",
-        description = "Search patients with multiple criteria and filters."
+        description = "Search patients with multiple criteria and filters.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: fullName", example = "fullName")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Patients retrieved")
     public ResponseEntity<Page<PatientSummaryDto>> searchPatients(
             @Valid @RequestBody PatientSearchCriteria criteria,
-            Pageable pageable) {
+            @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable) {
         log.info("Advanced search for patients with criteria: {}", criteria);
         Page<PatientSummaryDto> patients = patientService.searchPatients(criteria, pageable);
         return ResponseEntity.ok(patients);
@@ -159,14 +170,19 @@ public class PatientController {
     @GetMapping("/{id}/documents")
     @Operation(
         summary = "Get patient documents",
-        description = "Retrieves paginated list of documents for a patient."
+        description = "Retrieves paginated list of documents for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Documents retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<DocumentSummaryDto>> getPatientDocuments(
             @Parameter(name = "id", description = "Patient UUID", required = true)
             @PathVariable UUID id,
-            Pageable pageable) {
+            @Parameter(hidden = true) Pageable pageable) {
         log.info("Retrieving documents for patient ID: {} with pagination: {}", id, pageable);
         Page<DocumentSummaryDto> documents = patientService.getPatientDocuments(id, pageable);
         return ResponseEntity.ok(documents);
@@ -175,14 +191,19 @@ public class PatientController {
     @GetMapping("/{id}/notes")
     @Operation(
         summary = "Get patient notes",
-        description = "Retrieves paginated list of notes for a patient."
+        description = "Retrieves paginated list of notes for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: createdAt", example = "createdAt")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Notes retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<NoteSummaryDto>> getPatientNotes(
             @Parameter(name = "id", description = "Patient UUID", required = true)
             @PathVariable UUID id,
-            Pageable pageable) {
+            @Parameter(hidden = true) Pageable pageable) {
         log.info("Retrieving notes for patient ID: {} with pagination: {}", id, pageable);
         Page<NoteSummaryDto> notes = patientService.getPatientNotes(id, pageable);
         return ResponseEntity.ok(notes);
@@ -191,14 +212,19 @@ public class PatientController {
     @GetMapping("/{id}/treatments")
     @Operation(
         summary = "Get patient treatment history",
-        description = "Retrieves paginated treatment history for a patient."
+        description = "Retrieves paginated treatment history for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Treatment history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(
             @Parameter(name = "id", description = "Patient UUID", required = true)
             @PathVariable UUID id,
-            Pageable pageable) {
+            @Parameter(hidden = true) Pageable pageable) {
         log.info("Retrieving treatment history for patient ID: {} with pagination: {}", id, pageable);
         Page<TreatmentLogDto> treatments = patientService.getPatientTreatmentHistory(id, pageable);
         return ResponseEntity.ok(treatments);
@@ -207,14 +233,19 @@ public class PatientController {
     @GetMapping("/{id}/lab-requests")
     @Operation(
         summary = "Get patient lab requests",
-        description = "Retrieves paginated lab requests for a patient."
+        description = "Retrieves paginated lab requests for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: requestDate", example = "requestDate")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Lab requests retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<LabRequestDto>> getPatientLabRequests(
             @Parameter(name = "id", description = "Patient UUID", required = true)
             @PathVariable UUID id,
-            Pageable pageable) {
+            @Parameter(hidden = true) Pageable pageable) {
         log.info("Retrieving lab requests for patient ID: {} with pagination: {}", id, pageable);
         Page<LabRequestDto> labRequests = patientService.getPatientLabRequests(id, pageable);
         return ResponseEntity.ok(labRequests);
@@ -223,14 +254,19 @@ public class PatientController {
     @GetMapping("/{id}/financial-records")
     @Operation(
         summary = "Get patient financial records",
-        description = "Retrieves paginated financial records for a patient."
+        description = "Retrieves paginated financial records for a patient.",
+        parameters = {
+            @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: invoiceDate", example = "invoiceDate")
+        }
     )
     @ApiResponse(responseCode = "200", description = "Financial records retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     public ResponseEntity<Page<FinancialRecordDto>> getPatientFinancialRecords(
             @Parameter(name = "id", description = "Patient UUID", required = true)
             @PathVariable UUID id,
-            Pageable pageable) {
+            @Parameter(hidden = true) Pageable pageable) {
         log.info("Retrieving financial records for patient ID: {} with pagination: {}", id, pageable);
         Page<FinancialRecordDto> financialRecords = patientService.getPatientFinancialRecords(id, pageable);
         return ResponseEntity.ok(financialRecords);

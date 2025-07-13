@@ -1,116 +1,121 @@
-Below are the two patterns Spring-Boot teams use most often for **read-only PostgreSQL views** such as `v_dental_chart`. Pick the one that best matches your situation.
+### 0️⃣ Mission
+
+> You are the **lead test engineer**.
+> Analyse the whole source tree (entities, mappers, repos, services, controllers) and produce a **comprehensive automated-test suite**.
+> Use the dependencies declared in the Gradle file below (§7).
 
 ---
 
-## 1 ️⃣  Map the view to an **immutable JPA entity**
+### 1️⃣ Test strategy to implement
 
-### a.  Create a composite key for the row
+| Layer                | Test type    | Spring slice                                                     | Tools / Notes                                                                                                                             |
+| -------------------- | ------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Domain / Mapper**  | *Unit*       | none                                                             | MapStructMapperTest, value object invariants                                                                                              |
+| **Service**          | *Unit*       | `@ExtendWith(MockitoExtension.class)` — mock repos & mappers     | Cover happy path + business-rule violations<br>Verify: publicFacingId generation, invoice sequence, balance recompute, patient-teeth init |
+| **Repository**       | *Slice*      | `@DataJpaTest` + **Testcontainers** PostgreSQL                   | Use schema migrated by Flyway; CRUD, custom @Query, Specifications                                                                        |
+| **Controller**       | *Slice*      | `@WebMvcTest` + MockMvc                                          | JSON ↔ DTO, validation 400s, pagination params                                                                                            |
+| **Full integration** | *End-to-end* | `@SpringBootTest(webEnvironment = RANDOM_PORT)` + Testcontainers | Smoke tests for main flows (create patient → schedule appointment → add treatment → issue invoice → pay)                                  |
 
-`v_dental_chart` has no primary key, but JPA still needs one.
-The natural choice is the pair **`patient_id` + `tooth_number`**.
+Add optional **contract tests**: OpenAPI spec validation using `springdoc-openapi-starter`.
 
-```java
-// key
-@AllArgsConstructor @NoArgsConstructor @Getter @Setter @EqualsAndHashCode
-public class DentalChartId implements Serializable {
-    private UUID patientId;
-    private Integer toothNumber;
-}
+---
+
+### 2️⃣ General rules
+
+* **JUnit 5** (`@Test`, `@Nested`, `@DisplayName`).
+* **AssertJ** fluent assertions (`assertThat`).
+* **Mockito** for mocking (`@Mock`, `@InjectMocks`).
+* **Testcontainers** PostgreSQL 15.4; start once per class with static `@Container`.
+* `@TestMethodOrder(OrderAnnotation.class)` for flows where order matters.
+* Keep one test class per production class except trivial getters/setters.
+* Place tests under `src/test/java`, mirroring the main package structure.
+* Use meaningful test data builders (`TestDataFactory`).
+* Aim for **> 80 % line coverage** (Jacoco generated, no need to commit report).
+
+---
+
+### 3️⃣ Deliverables / Output format
+
+For every test class:
+
+1. Markdown heading `#### <ProductionClass>Test`
+2. One `java` fenced code block with the full test source.
+   *No explanatory prose inside the code block.*
+3. Repeat until all relevant classes are covered (skip generated MapStruct impls).
+
+Additionally:
+
+* `#### TestContainersConfig` → a shared `PostgresTestContainer.java` utility.
+* (Optional) `#### TestDataFactory` → helper builders for common entities/DTOs.
+
+---
+
+### 4️⃣ Coverage checklist (self-evaluation)
+
+* **Services**:
+
+    * patient creation generates unique `publicFacingId`.
+    * invoice creation fetches nextval from `invoice_number_seq`.
+    * balance updated after invoice/payment.
+    * patient-teeth rows inserted exactly once.
+* **Repositories**: custom queries return correct projections; Specs filter as expected.
+* **Controllers**: validation errors return 400 with descriptive message JSON.
+* **Integration**: full happy-path creates rows in DB and returns 2xx.
+* Each test is isolated, deterministic, and leaves DB clean (Spring `@Transactional`).
+
+---
+
+### 5️⃣ Recommended file structure
+
+```text
+src/test/java
+└── com/example/clinic
+    ├── common
+    │   ├── PostgresTestContainer.java
+    │   └── TestDataFactory.java
+    ├── mapper
+    │   └── ProcedureMapperTest.java
+    ├── service
+    │   ├── PatientServiceTest.java
+    │   └── FinancialServiceTest.java
+    ├── repository
+    │   ├── PatientRepositoryIT.java
+    │   └── InvoiceRepositoryIT.java
+    ├── controller
+    │   └── PatientControllerTest.java
+    └── integration
+        └── EndToEndFlowIT.java
 ```
 
-### b.  Entity class (read-only)
+---
+
+### 6️⃣ Swagger contract test snippet (optional)
 
 ```java
-@Entity
-@Table(name = "v_dental_chart")          // maps directly to the view
-@Immutable                                // Hibernate-specific but handy
-@IdClass(DentalChartId.class)
-@Getter @Setter @NoArgsConstructor
-public class DentalChartView {
+@WebMvcTest
+@AutoConfigureMockMvc
+class OpenApiContractTest {
+    @Autowired MockMvc mvc;
 
-    @Id @Column(name = "patient_id")
-    private UUID patientId;
-
-    @Id @Column(name = "tooth_number")
-    private Integer toothNumber;
-
-    @Column(name = "condition_code")  private String conditionCode;
-    @Column(name = "condition_name")  private String conditionName;
-    @Column(name = "color_hex")       private String colorHex;
-    private String notes;
-
-    @Column(name = "last_treatment_date")
-    private LocalDate lastTreatmentDate;
-}
-```
-
-* `@Immutable` (Hibernate) or `@ReadOnlyProperty` (Spring) prevents any `INSERT/UPDATE/DELETE`.
-* Make sure **`spring.jpa.hibernate.ddl-auto=none`**, otherwise Hibernate might try to drop/recreate the view.
-
-### c.  Repository
-
-```java
-@Repository
-public interface DentalChartViewRepository
-        extends JpaRepository<DentalChartView, DentalChartId> {
-
-    List<DentalChartView> findByPatientId(UUID patientId);
+    @Test void openApiJsonIsServed() throws Exception {
+        mvc.perform(get("/v3/api-docs"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.openapi").value("3.0.1"));
+    }
 }
 ```
 
 ---
 
-## 2 ️⃣  Skip the entity – use an **interface-based projection**
+### 7️⃣ Gradle dependencies (already present)
 
-If you don’t need paging or dynamic filters, a projection keeps the domain model clean and avoids the fake PK:
-
-```java
-public interface DentalChartProjection {
-    UUID      getPatientId();
-    Integer   getToothNumber();
-    String    getConditionCode();
-    String    getConditionName();
-    String    getColorHex();
-    String    getNotes();
-    LocalDate getLastTreatmentDate();
-}
-
-@Repository
-public interface DentalChartRepository extends JpaRepository<Patient,UUID> {
-
-    @Query(value = """
-        SELECT *
-        FROM v_dental_chart
-        WHERE patient_id = :patientId
-        ORDER BY tooth_number
-        """, nativeQuery = true)
-    List<DentalChartProjection> findChart(@Param("patientId") UUID patientId);
-}
+```gradle
+testImplementation 'org.springframework.boot:spring-boot-starter-test'
+testImplementation 'org.testcontainers:testcontainers:1.21.3'
+testImplementation 'org.testcontainers:postgresql:1.19.0'
+testImplementation 'org.testcontainers:junit-jupiter:1.19.0'
 ```
 
-* Spring Data maps each row to the projection interface by column name.
-* The method returns a **detached, read-only DTO**, so no accidental writes are possible.
-
 ---
 
-## Which approach should I choose? 🤔
-
-| Need / Constraint                                        | Recommendation                           |
-| -------------------------------------------------------- | ---------------------------------------- |
-| Want to reuse JPA paging, sorting, Specifications        | **Entity + @Immutable**                  |
-| Very simple read-only query, don’t want “fake” IDs       | **Projection**                           |
-| You’ll later migrate the view to a materialized table    | **Entity** (future-proof)                |
-| Strict domain-cleanliness (no DB artefacts inside model) | **Projection**, then map to your own DTO |
-
-Both patterns coexist happily in the same codebase, so feel free to mix:
-use entities for complex views and projections for lightweight look-ups.
-
----
-
-### ⚠️  Common pitfalls
-
-1. **DDL-auto** – keep it `none` (or at least `validate`) so Hibernate doesn’t attempt to drop the view.
-2. **Missing `@Id`** – JPA refuses to start without it; always supply an artificial key if you go the entity route.
-3. **Write attempts** – without `@Immutable`, accidental saves will hit “cannot insert into a view” SQL errors.
-
-With either pattern in place, you can now return the dental chart from your service layer as the DTO expected by your UI.
+**➡️  Generate the complete JUnit 5 test-suite, obeying all rules above.**

@@ -1,72 +1,77 @@
-
-### 0️⃣ Mission
-
-> You are a **senior Spring-Boot engineer**.
-> **Analyse** the entire project source tree (entities, DTOs, repositories, projections, specs) **and** the screen requirements expressed in `ui-mockup.html`.
-> Produce every **service interface + implementation** required for the MVP so that the UI can work end-to-end.
+**LLM CODE-GENERATION PROMPT
+(Build Spring-Data JPA repositories from the existing codebase + UI needs)**
 
 ---
 
-### 1️⃣ Scope & Responsibilities
+### 0 ️⃣ Mission
 
-For each aggregate that **already exists** in the project **and** is referenced by the UI:
-
-| Layer                    | What to generate                                                                                                  | Key points                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Service interface**    | `FooService`                                                                                                      | *Pure contract* (`create…`, `update…`, `find…`, etc.)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **Service impl**         | `FooServiceImpl`                                                                                                  | • Annotate `@Service`, implement interface<br>• Wrap write methods in `@Transactional` (class-level or method-level)<br>• Inject repositories & mappers via constructor                                                                                                                                                                                                                                                                                                                                                            |
-| **Business rules**       | Implement once, centrally                                                                                         | 1. **Generate `publicFacingId`** on patient creation (human-readable, unique)<br>2. **Allocate sequential `invoiceNumber`** via DB sequence `invoice_number_seq` (use `@Transactional` + `@Query(value="SELECT nextval('invoice_number_seq')", nativeQuery=true)` inside a helper)<br>3. **Re-calculate patient balance** on every invoice/payment mutation (reuse repository methods; mimic trigger logic)<br>4. **Auto-initialise 32 `PatientTeeth` rows** immediately after patient creation (mimic `initialize_patient_teeth`) |
-| **DTO ↔ Entity mapping** | MapStruct preferred (`@Mapper(componentModel = "spring")`), fallback to manual                                    | Create new mappers only if not already present.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| **Validation**           | Use `jakarta.validation` on *request* DTOs, enforce in service before save.                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| **Error handling**       | Throw custom exceptions (`NotFoundException`, `BusinessRuleException`) located in `com.example.shared.exception`. |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+> You are a senior Spring-Boot engineer.
+> **Analyse** the current project (all Java *entities* and *DTOs*) **plus** the screen requirements expressed in `ui-mockup.html`.
+> For every aggregate that is both **implemented in the project** *and* **displayed / queried in the mock-up**, generate a *production-ready* Spring-Data JPA repository interface that fully supports the UI’s data-access needs.
 
 ---
 
-### 2️⃣ Implementation conventions
+### 1 ️⃣ Repository requirements
 
-* **Packages**
+For each eligible entity:
 
-   * `com.example.<feature>.service` – interfaces
-   * `com.example.<feature>.service.impl` – implementations
-   * `com.example.<feature>.mapper` – MapStruct mappers (if new)
-* **Logging** – `@Slf4j` on implementations.
-* **Constructor injection** – no `@Autowired` on fields.
-* **Read-only methods** – annotate with `@Transactional(readOnly=true)`.
-* **Return types** – DTOs (never entities) or `Page<Dto>` for lists.
+1. **Extend** the correct Spring-Data base:
+   `JpaRepository<Entity, IdType>`
+   Add `JpaSpecificationExecutor<Entity>` when complex filtering is useful.
+2. **Custom query methods**
 
----
+   * Use JPQL or native `@Query` where derived-query names become unreadable.
+   * Optimise with **`LEFT JOIN FETCH`** or `EntityGraph` to prevent N+1 problems shown in the UI.
+3. **Projections & slices**
 
-### 3️⃣ Deliverables / Output format
+   * Provide **interface-based projections** for list/table views (only the columns the UI renders).
+   * Expose methods like `Page<PatientListProjection> findAllProjectedBy(Pageable pageable);`
+4. **Specifications**
 
-For **each** service:
+   * Create a `…Specifications` helper class per aggregate (e.g., `PatientSpecifications.bySearchTerm()`), enabling free-text search & filter chips visible in the mock-up.
+5. **Pagination & Sorting**
 
-1. `#### <Aggregate> Service` (markdown heading)
-2. `java` blocks in this order:
+   * Every list method must accept a `Pageable` argument and return `Page<…>` or `Slice<…>`.
+6. **Naming & packaging**
 
-   1. Service interface
-   2. Implementation class
-   3. (If new) Mapper interface
-   4. (If new) Exception class
-
-*No explanatory prose inside code blocks.*
-
----
-
-### 4️⃣ Quality checklist (self-evaluation)
-
-* All UI use-cases can be fulfilled by calling generated services.
-* Business-rule code is covered by unit-test hints (`TODO write tests`).
-* No duplicate logic; helper methods are `private`.
-* Sequence fetch & balance recalculation run inside the same transaction that persists the invoice/payment.
-* Patient-teeth initialisation runs only once per patient.
+   * Place interfaces in `com.example.<feature>.repository`.
+   * Projections in `com.example.<feature>.projection`.
+   * Specifications in `com.example.<feature>.spec`.
+7. **Skip** entities that are **not part of the current MVP codebase**, even if referenced in the HTML.
 
 ---
 
-### 5️⃣ Input files available at run-time
+### 2 ️⃣ Deliverables / Output format
 
-* `ui-mockup.html` – full HTML of the MVP screen(s).
-* **Project sources** – everything under `src/main/java`.
+Produce for **each** repository:
+
+* `#### <EntityName>` (markdown heading)
+* `java blocks` in this order:
+
+   1. Projection interface(s) (if any)
+   2. Specifications class (if any)
+   3. Repository interface
+
+No explanatory prose inside code blocks.
 
 ---
 
-**➡️ Generate the complete set of Spring-Boot service interfaces, implementations, mappers, and any supporting classes exactly as specified. Skip features tied to entities not present in the current MVP.**
+### 3 ️⃣ Quality checklist (self-evaluation)
+
+* Every query method clearly maps to a concrete UI requirement (search bar, filter, table, detail view).
+* No over-fetching: projections include only needed fields.
+* Provide at least one example of `@EntityGraph` or `JOIN FETCH` to solve an N+1 listed in the mock-up.
+* Specifications are composable (`and`, `or`).
+* All list methods honour `Pageable`.
+* Repositories compile with Java 21, Spring-Boot 3.3+.
+
+---
+
+### 4 ️⃣ Context files available at runtime
+
+* `ui-mockup.html` – full HTML of the current screen(s).
+* All existing Java source under `src/main/java`.
+
+---
+
+**➡️ Generate the complete set of Spring-Data JPA repositories, projections, and specification helpers exactly as described above.**

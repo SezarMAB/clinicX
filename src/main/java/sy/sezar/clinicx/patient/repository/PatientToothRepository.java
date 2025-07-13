@@ -13,7 +13,7 @@ import java.util.UUID;
  * Repository for managing PatientTooth entities.
  */
 @Repository
-public interface PatientToothRepository extends JpaRepository<PatientTooth, PatientToothId> {
+public interface PatientToothRepository extends JpaRepository<PatientTooth, UUID> {
 
     /**
      * Finds all teeth for a specific patient.

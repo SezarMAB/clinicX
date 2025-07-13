@@ -78,78 +78,137 @@ public class PatientServiceImpl implements PatientService {
         patientMapper.updatePatientFromRequest(request, patient);
 
         Patient updatedPatient = patientRepository.save(patient);
+        log.info("Successfully updated patient with ID: {}", patientId);
+        log.debug("Updated patient details: {}", updatedPatient.getFullName());
+
         return patientMapper.toPatientSummaryDto(updatedPatient);
     }
 
     @Override
     public PatientSummaryDto findPatientById(UUID patientId) {
+        log.info("Finding patient by ID: {}", patientId);
+
         Patient patient = findPatientEntityById(patientId);
+        log.debug("Found patient: {}", patient.getFullName());
+
         return patientMapper.toPatientSummaryDto(patient);
     }
 
     @Override
     public Page<PatientSummaryDto> findAllPatients(String searchTerm, Pageable pageable) {
+        log.info("Finding all patients with search term: '{}' and pagination: {}", searchTerm, pageable);
+
         Specification<Patient> spec = null;
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            log.debug("Applying search specification for term: '{}'", searchTerm.trim());
             spec = PatientSpecifications.bySearchTerm(searchTerm.trim());
         }
 
         Page<Patient> patients = patientRepository.findAll(spec, pageable);
+        log.info("Found {} patients (page {} of {})",
+                patients.getNumberOfElements(), patients.getNumber() + 1, patients.getTotalPages());
+
         return patients.map(patientMapper::toPatientSummaryDto);
     }
 
     @Override
     public Page<PatientSummaryDto> searchPatients(PatientSearchCriteria criteria, Pageable pageable) {
+        log.info("Searching patients with advanced criteria: {}", criteria);
+        log.debug("Search pagination: {}", pageable);
+
         Specification<Patient> spec = PatientSpecifications.byAdvancedCriteria(criteria);
         Page<Patient> patients = patientRepository.findAll(spec, pageable);
+
+        log.info("Advanced search found {} patients (page {} of {})",
+                patients.getNumberOfElements(), patients.getNumber() + 1, patients.getTotalPages());
+
         return patients.map(patientMapper::toPatientSummaryDto);
     }
 
     @Override
     public PatientBalanceSummaryDto getPatientBalance(UUID patientId) {
+        log.info("Getting balance summary for patient ID: {}", patientId);
+
         Patient patient = findPatientEntityById(patientId);
-        return patientMapper.toPatientBalanceSummaryDto(patient);
+        PatientBalanceSummaryDto balance = patientMapper.toPatientBalanceSummaryDto(patient);
+
+        log.debug("Retrieved balance for patient {}: {}", patientId, patient.getBalance());
+
+        return balance;
     }
 
     @Override
     public DentalChartDto getPatientDentalChart(UUID patientId) {
+        log.info("Getting dental chart for patient ID: {}", patientId);
+
         List<DentalChartView> teeth = dentalChartViewRepository.findByPatientIdOrderByToothNumber(patientId);
+        log.debug("Retrieved dental chart with {} teeth for patient: {}", teeth.size(), patientId);
+
         return dentalChartMapper.toDentalChartDtoFromView(teeth);
     }
 
     @Override
     public List<UpcomingAppointmentDto> getUpcomingAppointments(UUID patientId) {
+        log.info("Getting upcoming appointments for patient ID: {}", patientId);
+
         List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+        log.debug("Found {} upcoming appointments for patient: {}", appointments.size(), patientId);
+
         return appointmentMapper.toUpcomingAppointmentDtoList(appointments);
     }
 
     @Override
     public Page<DocumentSummaryDto> getPatientDocuments(UUID patientId, Pageable pageable) {
+        log.info("Getting documents for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<Document> documents = documentRepository.findByPatientIdOrderByCreatedAtDesc(patientId, pageable);
+        log.debug("Found {} documents (page {} of {}) for patient: {}",
+                documents.getNumberOfElements(), documents.getNumber() + 1, documents.getTotalPages(), patientId);
+
         return documents.map(documentMapper::toDocumentSummaryDto);
     }
 
     @Override
     public Page<NoteSummaryDto> getPatientNotes(UUID patientId, Pageable pageable) {
+        log.info("Getting notes for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<Note> notes = noteRepository.findByPatientIdOrderByNoteDateDesc(patientId, pageable);
+        log.debug("Found {} notes (page {} of {}) for patient: {}",
+                notes.getNumberOfElements(), notes.getNumber() + 1, notes.getTotalPages(), patientId);
+
         return notes.map(noteSummaryMapper::toNoteSummaryDto);
     }
 
     @Override
     public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
+        log.info("Getting treatment history for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<Treatment> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
+        log.debug("Found {} treatments (page {} of {}) for patient: {}",
+                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
+
         return treatments.map(treatmentMapper::toTreatmentLogDto);
     }
 
     @Override
     public Page<LabRequestDto> getPatientLabRequests(UUID patientId, Pageable pageable) {
+        log.info("Getting lab requests for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<LabRequest> labRequests = labRequestRepository.findByPatientIdOrderByDateSentDesc(patientId, pageable);
+        log.debug("Found {} lab requests (page {} of {}) for patient: {}",
+                labRequests.getNumberOfElements(), labRequests.getNumber() + 1, labRequests.getTotalPages(), patientId);
+
         return labRequests.map(labRequestMapper::toLabRequestDto);
     }
 
     @Override
     public Page<FinancialRecordDto> getPatientFinancialRecords(UUID patientId, Pageable pageable) {
+        log.info("Getting financial records for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<Invoice> invoices = invoiceRepository.findByPatientId(patientId, pageable);
+        log.debug("Found {} financial records (page {} of {}) for patient: {}",
+                invoices.getNumberOfElements(), invoices.getNumber() + 1, invoices.getTotalPages(), patientId);
+
         return invoices.map(this::mapToFinancialRecordDto);
     }
 
@@ -161,11 +220,15 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = findPatientEntityById(patientId);
         patient.setActive(false);
         patientRepository.save(patient);
+        log.info("Successfully deactivated patient with ID: {}", patientId);
     }
 
     private Patient findPatientEntityById(UUID patientId) {
         return patientRepository.findById(patientId)
-                .orElseThrow(() -> new NotFoundException("Patient not found with ID: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Patient not found with ID: {}", patientId);
+                    return new NotFoundException("Patient not found with ID: " + patientId);
+                });
     }
 
     private String generatePublicFacingId() {

@@ -34,43 +34,68 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentCardDto> getAppointmentsByDateRange(Instant startDateTime, Instant endDateTime) {
-        log.debug("Getting appointments between {} and {}", startDateTime, endDateTime);
+        log.info("Getting appointments between {} and {}", startDateTime, endDateTime);
 
         List<Appointment> appointments = appointmentRepository
                 .findByAppointmentDatetimeBetweenOrderByAppointmentDatetimeAsc(startDateTime, endDateTime);
 
+        log.info("Found {} appointments in date range", appointments.size());
+        log.debug("Appointment date range query returned {} results", appointments.size());
+        
         return appointmentMapper.toAppointmentCardDtoList(appointments);
     }
 
     @Override
     public List<AppointmentCardDto> getAppointmentsForDate(LocalDate date) {
+        log.info("Getting appointments for specific date: {}", date);
+        
         Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Instant endOfDay = date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        log.debug("Date range converted to: {} - {}", startOfDay, endOfDay);
 
-        return getAppointmentsByDateRange(startOfDay, endOfDay);
+        List<AppointmentCardDto> appointments = getAppointmentsByDateRange(startOfDay, endOfDay);
+        log.info("Retrieved {} appointments for date: {}", appointments.size(), date);
+        
+        return appointments;
     }
 
     @Override
     public List<UpcomingAppointmentDto> getUpcomingAppointmentsForPatient(UUID patientId) {
-        log.debug("Getting upcoming appointments for patient: {}", patientId);
+        log.info("Getting upcoming appointments for patient: {}", patientId);
 
         List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+        log.info("Found {} upcoming appointments for patient: {}", appointments.size(), patientId);
+        log.debug("Patient {} has appointments: {}", patientId, 
+                appointments.stream().map(Appointment::getId).toList());
+        
         return appointmentMapper.toUpcomingAppointmentDtoList(appointments);
     }
 
     @Override
     public Page<AppointmentCardDto> getPatientAppointments(UUID patientId, Pageable pageable) {
-        log.debug("Getting patient appointments with pagination for patient: {}", patientId);
+        log.info("Getting patient appointments with pagination for patient: {} with pagination: {}", patientId, pageable);
 
         Page<Appointment> appointments = appointmentRepository.findByPatientIdOrderByAppointmentDatetimeDesc(patientId, pageable);
+        log.info("Found {} appointments (page {} of {}) for patient: {}", 
+                appointments.getNumberOfElements(), appointments.getNumber() + 1, 
+                appointments.getTotalPages(), patientId);
+        
         return appointments.map(appointmentMapper::toAppointmentCardDto);
     }
 
     @Override
     public AppointmentCardDto findAppointmentById(UUID appointmentId) {
+        log.info("Finding appointment by ID: {}", appointmentId);
+        
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new NotFoundException("Appointment not found with ID: " + appointmentId));
+                .orElseThrow(() -> {
+                    log.error("Appointment not found with ID: {}", appointmentId);
+                    return new NotFoundException("Appointment not found with ID: " + appointmentId);
+                });
 
+        log.debug("Found appointment for patient: {} at: {}", 
+                appointment.getPatient().getId(), appointment.getAppointmentDatetime());
+        
         return appointmentMapper.toAppointmentCardDto(appointment);
     }
 }

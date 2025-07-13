@@ -26,9 +26,18 @@ public class TreatmentControllerImpl implements TreatmentControllerApi {
 
     @Override
     public ResponseEntity<TreatmentLogDto> createTreatment(UUID patientId, TreatmentCreateRequest request) {
-        log.info("Creating new treatment for patient ID: {}", patientId);
-        TreatmentLogDto treatment = treatmentService.createTreatment(patientId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(treatment);
+        log.info("Creating new treatment for patient ID: {} (procedure: {})", patientId, request.procedureId());
+        log.debug("Treatment creation request validation: {}", request);
+
+        try {
+            TreatmentLogDto treatment = treatmentService.createTreatment(patientId, request);
+            log.info("Successfully created treatment with ID: {} for patient: {} - Status: 201 CREATED",
+                    treatment.treatmentId(), patientId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(treatment);
+        } catch (Exception e) {
+            log.error("Failed to create treatment for patient: {} - Error: {}", patientId, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -48,15 +57,30 @@ public class TreatmentControllerImpl implements TreatmentControllerApi {
     @Override
     public ResponseEntity<TreatmentLogDto> updateTreatment(UUID id, TreatmentCreateRequest request) {
         log.info("Updating treatment with ID: {}", id);
-        TreatmentLogDto treatment = treatmentService.updateTreatment(id, request);
-        return ResponseEntity.ok(treatment);
+        log.debug("Treatment update request validation: {}", request);
+
+        try {
+            TreatmentLogDto treatment = treatmentService.updateTreatment(id, request);
+            log.info("Successfully updated treatment with ID: {} - Status: 200 OK", id);
+            return ResponseEntity.ok(treatment);
+        } catch (Exception e) {
+            log.error("Failed to update treatment with ID: {} - Error: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity<Void> deleteTreatment(UUID id) {
         log.info("Deleting treatment with ID: {}", id);
-        treatmentService.deleteTreatment(id);
-        return ResponseEntity.noContent().build();
+
+        try {
+            treatmentService.deleteTreatment(id);
+            log.info("Successfully deleted treatment with ID: {} - Status: 204 NO CONTENT", id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Failed to delete treatment with ID: {} - Error: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     @Override

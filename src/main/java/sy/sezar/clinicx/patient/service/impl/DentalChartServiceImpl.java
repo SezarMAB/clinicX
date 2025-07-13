@@ -35,46 +35,115 @@ public class DentalChartServiceImpl implements DentalChartService {
 
     @Override
     public DentalChartDto getPatientDentalChart(UUID patientId) {
-        log.debug("Getting dental chart for patient: {}", patientId);
+        log.info("Getting dental chart for patient: {}", patientId);
+        
+        if (patientId == null) {
+            log.error("Patient ID cannot be null for dental chart retrieval");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
 
         List<DentalChartView> teeth = dentalChartViewRepository.findByPatientIdOrderByToothNumber(patientId);
+        log.info("Retrieved dental chart with {} teeth for patient: {}", teeth.size(), patientId);
+        
+        if (teeth.size() != 32) {
+            log.warn("Expected 32 teeth but found {} for patient: {}", teeth.size(), patientId);
+        }
+        
         return dentalChartMapper.toDentalChartDtoFromView(teeth);
     }
 
     @Override
     @Transactional
     public ToothDto updateToothCondition(UUID patientId, Integer toothNumber, UUID conditionId, String notes) {
-        log.info("Updating tooth {} condition for patient: {}", toothNumber, patientId);
+        log.info("Updating tooth {} condition for patient: {} to condition: {}", 
+                toothNumber, patientId, conditionId);
+        log.debug("Tooth condition update - Patient: {}, Tooth: {}, Condition: {}, Notes: '{}'", 
+                patientId, toothNumber, conditionId, notes);
+        
+        // Validate input parameters
+        if (patientId == null) {
+            log.error("Patient ID cannot be null for tooth condition update");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
+        if (toothNumber == null || toothNumber < 1 || toothNumber > 32) {
+            log.error("Invalid tooth number: {} (must be between 1 and 32)", toothNumber);
+            throw new IllegalArgumentException("Tooth number must be between 1 and 32");
+        }
+        if (conditionId == null) {
+            log.error("Condition ID cannot be null for tooth condition update");
+            throw new IllegalArgumentException("Condition ID cannot be null");
+        }
 
         PatientTooth patientTooth = patientToothRepository.findByPatientIdAndToothNumber(patientId, toothNumber)
-                .orElseThrow(() -> new NotFoundException("Tooth " + toothNumber + " not found for patient: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Tooth {} not found for patient: {}", toothNumber, patientId);
+                    return new NotFoundException("Tooth " + toothNumber + " not found for patient: " + patientId);
+                });
+
+        ToothCondition oldCondition = patientTooth.getCurrentCondition();
+        log.debug("Current condition for tooth {}: {}", toothNumber, 
+                oldCondition != null ? oldCondition.getName() : "None");
 
         // Find and set the new tooth condition
         ToothCondition newCondition = toothConditionRepository.findById(conditionId)
-                .orElseThrow(() -> new NotFoundException("Tooth condition not found with ID: " + conditionId));
+                .orElseThrow(() -> {
+                    log.error("Tooth condition not found with ID: {}", conditionId);
+                    return new NotFoundException("Tooth condition not found with ID: " + conditionId);
+                });
+        
+        log.debug("Changing tooth {} condition from '{}' to '{}'", toothNumber,
+                oldCondition != null ? oldCondition.getName() : "None", newCondition.getName());
 
         patientTooth.setCurrentCondition(newCondition);
+        
+        // Handle notes update
         if (notes != null && !notes.trim().isEmpty()) {
-            patientTooth.setNotes(notes);
+            String trimmedNotes = notes.trim();
+            log.debug("Adding notes to tooth {}: '{}'", toothNumber, trimmedNotes);
+            patientTooth.setNotes(trimmedNotes);
+        } else if (notes != null) {
+            log.debug("Clearing notes for tooth {}", toothNumber);
+            patientTooth.setNotes(null);
         }
 
         PatientTooth savedTooth = patientToothRepository.save(patientTooth);
-        log.info("Updated tooth {} condition for patient {} to condition: {}",
-                 toothNumber, patientId, newCondition.getName());
+        log.info("Successfully updated tooth {} condition for patient {} from '{}' to '{}'",
+                 toothNumber, patientId, 
+                 oldCondition != null ? oldCondition.getName() : "None", 
+                 newCondition.getName());
 
         return dentalChartMapper.toToothDto(savedTooth);
     }
 
     @Override
     public ToothDto getToothDetails(UUID patientId, Integer toothNumber) {
-        log.debug("Getting tooth {} details for patient: {}", toothNumber, patientId);
+        log.info("Getting tooth {} details for patient: {}", toothNumber, patientId);
+        
+        // Validate input parameters
+        if (patientId == null) {
+            log.error("Patient ID cannot be null for tooth details retrieval");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
+        if (toothNumber == null || toothNumber < 1 || toothNumber > 32) {
+            log.error("Invalid tooth number: {} (must be between 1 and 32)", toothNumber);
+            throw new IllegalArgumentException("Tooth number must be between 1 and 32");
+        }
 
         List<DentalChartView> teeth = dentalChartViewRepository.findByPatientIdOrderByToothNumber(patientId);
+        log.debug("Retrieved {} teeth records for patient: {}", teeth.size(), patientId);
+        
         DentalChartView tooth = teeth.stream()
                 .filter(t -> t.getToothNumber().equals(toothNumber))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Tooth " + toothNumber + " not found for patient: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Tooth {} not found for patient: {} (total teeth found: {})", 
+                            toothNumber, patientId, teeth.size());
+                    return new NotFoundException("Tooth " + toothNumber + " not found for patient: " + patientId);
+                });
 
+        log.debug("Found tooth {} for patient: {} - Condition: {}", 
+                toothNumber, patientId, tooth.getConditionName());
+        
         return dentalChartMapper.toToothDto(tooth);
     }
 }

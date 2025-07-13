@@ -43,41 +43,66 @@ public class TreatmentServiceImpl implements TreatmentService {
     @Override
     @Transactional
     public TreatmentLogDto createTreatment(UUID patientId, TreatmentCreateRequest request) {
-        log.info("Creating new treatment for patient: {}", patientId);
+        log.info("Creating new treatment for patient: {} with procedure: {}", patientId, request.procedureId());
+        log.debug("Treatment creation request: {}", request);
 
         Treatment treatment = treatmentMapper.toTreatment(request);
 
         // Set patient, procedure, doctor from request IDs
         Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new NotFoundException("Patient not found with ID: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Patient not found with ID: {} during treatment creation", patientId);
+                    return new NotFoundException("Patient not found with ID: " + patientId);
+                });
         treatment.setPatient(patient);
+        log.debug("Set patient: {} for treatment", patient.getFullName());
 
         Procedure procedure = procedureRepository.findById(request.procedureId())
-                .orElseThrow(() -> new NotFoundException("Procedure not found with ID: " + request.procedureId()));
+                .orElseThrow(() -> {
+                    log.error("Procedure not found with ID: {} during treatment creation", request.procedureId());
+                    return new NotFoundException("Procedure not found with ID: " + request.procedureId());
+                });
         treatment.setProcedure(procedure);
+        log.debug("Set procedure: {} for treatment", procedure.getName());
 
         Staff doctor = staffRepository.findById(request.doctorId())
-                .orElseThrow(() -> new NotFoundException("Doctor not found with ID: " + request.doctorId()));
+                .orElseThrow(() -> {
+                    log.error("Doctor not found with ID: {} during treatment creation", request.doctorId());
+                    return new NotFoundException("Doctor not found with ID: " + request.doctorId());
+                });
         treatment.setDoctor(doctor);
+        log.debug("Set doctor: {} for treatment", doctor.getFullName());
 
         Treatment savedTreatment = treatmentRepository.save(treatment);
-        log.info("Created treatment with ID: {}", savedTreatment.getId());
+        log.info("Successfully created treatment with ID: {} for patient: {} (procedure: {}, cost: {})",
+                savedTreatment.getId(), patientId, procedure.getName(), savedTreatment.getCost());
 
         return treatmentMapper.toTreatmentLogDto(savedTreatment);
     }
 
     @Override
     public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
-        log.debug("Getting treatment history for patient: {}", patientId);
+        log.info("Getting treatment history for patient: {} with pagination: {}", patientId, pageable);
 
         Page<Treatment> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
+        log.info("Found {} treatments (page {} of {}) for patient: {}",
+                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
+
         return treatments.map(treatmentMapper::toTreatmentLogDto);
     }
 
     @Override
     public TreatmentLogDto findTreatmentById(UUID treatmentId) {
+        log.info("Finding treatment by ID: {}", treatmentId);
+
         Treatment treatment = treatmentRepository.findById(treatmentId)
-                .orElseThrow(() -> new NotFoundException("Treatment not found with ID: " + treatmentId));
+                .orElseThrow(() -> {
+                    log.error("Treatment not found with ID: {}", treatmentId);
+                    return new NotFoundException("Treatment not found with ID: " + treatmentId);
+                });
+
+        log.debug("Found treatment: {} for patient: {} performed on: {}",
+                treatment.getProcedure().getName(), treatment.getPatient().getId(), treatment.getTreatmentDate());
 
         return treatmentMapper.toTreatmentLogDto(treatment);
     }
@@ -85,10 +110,17 @@ public class TreatmentServiceImpl implements TreatmentService {
     @Override
     @Transactional
     public TreatmentLogDto updateTreatment(UUID treatmentId, TreatmentCreateRequest request) {
-        log.info("Updating treatment with ID: {}", treatmentId);
+        log.info("Updating treatment with ID: {} - new cost: {}, status: {}", treatmentId, request.cost(), request.status());
+        log.debug("Treatment update request: {}", request);
 
         Treatment treatment = treatmentRepository.findById(treatmentId)
-                .orElseThrow(() -> new NotFoundException("Treatment not found with ID: " + treatmentId));
+                .orElseThrow(() -> {
+                    log.error("Treatment not found with ID: {} during update", treatmentId);
+                    return new NotFoundException("Treatment not found with ID: " + treatmentId);
+                });
+
+        log.debug("Original treatment - Cost: {}, Status: {}, Procedure: {}",
+                treatment.getCost(), treatment.getStatus(), treatment.getProcedure().getName());
 
         // Update treatment fields from request
         treatment.setTreatmentDate(request.treatmentDate());
@@ -99,18 +131,31 @@ public class TreatmentServiceImpl implements TreatmentService {
 
         // Update relationships if IDs changed
         if (request.procedureId() != null && !request.procedureId().equals(treatment.getProcedure().getId())) {
+            log.debug("Updating procedure from {} to {}", treatment.getProcedure().getId(), request.procedureId());
             Procedure procedure = procedureRepository.findById(request.procedureId())
-                    .orElseThrow(() -> new NotFoundException("Procedure not found with ID: " + request.procedureId()));
+                    .orElseThrow(() -> {
+                        log.error("Procedure not found with ID: {} during treatment update", request.procedureId());
+                        return new NotFoundException("Procedure not found with ID: " + request.procedureId());
+                    });
             treatment.setProcedure(procedure);
+            log.debug("Updated to procedure: {}", procedure.getName());
         }
 
         if (request.doctorId() != null && !request.doctorId().equals(treatment.getDoctor().getId())) {
+            log.debug("Updating doctor from {} to {}", treatment.getDoctor().getId(), request.doctorId());
             Staff doctor = staffRepository.findById(request.doctorId())
-                    .orElseThrow(() -> new NotFoundException("Doctor not found with ID: " + request.doctorId()));
+                    .orElseThrow(() -> {
+                        log.error("Doctor not found with ID: {} during treatment update", request.doctorId());
+                        return new NotFoundException("Doctor not found with ID: " + request.doctorId());
+                    });
             treatment.setDoctor(doctor);
+            log.debug("Updated to doctor: {}", doctor.getFullName());
         }
 
         Treatment updatedTreatment = treatmentRepository.save(treatment);
+        log.info("Successfully updated treatment with ID: {} - Final cost: {}, status: {}",
+                treatmentId, updatedTreatment.getCost(), updatedTreatment.getStatus());
+
         return treatmentMapper.toTreatmentLogDto(updatedTreatment);
     }
 
@@ -120,17 +165,25 @@ public class TreatmentServiceImpl implements TreatmentService {
         log.info("Deleting treatment with ID: {}", treatmentId);
 
         if (!treatmentRepository.existsById(treatmentId)) {
+            log.error("Cannot delete - treatment not found with ID: {}", treatmentId);
             throw new NotFoundException("Treatment not found with ID: " + treatmentId);
         }
 
         treatmentRepository.deleteById(treatmentId);
+        log.info("Successfully deleted treatment with ID: {}", treatmentId);
     }
 
     @Override
     public Page<TreatmentLogDto> searchTreatments(TreatmentSearchCriteria criteria, Pageable pageable) {
         log.info("Searching treatments with criteria: {}", criteria);
+        log.debug("Search pagination: {}", pageable);
+
         Specification<Treatment> spec = TreatmentSpecifications.byAdvancedCriteria(criteria);
         Page<Treatment> treatments = treatmentRepository.findAll(spec, pageable);
+
+        log.info("Treatment search found {} results (page {} of {})",
+                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages());
+
         return treatments.map(treatmentMapper::toTreatmentLogDto);
     }
 }

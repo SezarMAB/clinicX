@@ -27,22 +27,43 @@ public class InvoiceControllerImpl implements InvoiceControllerApi {
 
     @Override
     public ResponseEntity<FinancialRecordDto> createInvoice(InvoiceCreateRequest request) {
-        log.info("Creating new invoice for patient ID: {}", request.patientId());
-        // Calculate total amount from items and extract description
-        BigDecimal totalAmount = request.items().stream()
-            .map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        String description = request.notes() != null ? request.notes() : "Invoice for dental services";
+        log.info("Creating new invoice for patient ID: {} with {} items", request.patientId(), request.items().size());
+        log.debug("Invoice creation request validation: {}", request);
+        
+        try {
+            // Calculate total amount from items and extract description
+            BigDecimal totalAmount = request.items().stream()
+                .map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            String description = request.notes() != null ? request.notes() : "Invoice for dental services";
+            
+            log.debug("Calculated invoice total: {} for patient: {}", totalAmount, request.patientId());
 
-        FinancialRecordDto invoice = invoiceService.createInvoice(request.patientId(), totalAmount, description);
-        return ResponseEntity.status(HttpStatus.CREATED).body(invoice);
+            FinancialRecordDto invoice = invoiceService.createInvoice(request.patientId(), totalAmount, description);
+            log.info("Successfully created invoice: {} for patient: {} - Status: 201 CREATED", 
+                    invoice.invoiceNumber(), request.patientId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(invoice);
+        } catch (Exception e) {
+            log.error("Failed to create invoice for patient: {} - Error: {}", request.patientId(), e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity<FinancialRecordDto> addPayment(UUID invoiceId, PaymentCreateRequest request) {
-        log.info("Adding payment to invoice ID: {} with amount: {}", invoiceId, request.amount());
-        FinancialRecordDto payment = invoiceService.addPayment(invoiceId, request.amount(), request.paymentMethod());
-        return ResponseEntity.status(HttpStatus.CREATED).body(payment);
+        log.info("Adding payment to invoice ID: {} with amount: {} (method: {})", 
+                invoiceId, request.amount(), request.paymentMethod());
+        log.debug("Payment request validation: {}", request);
+        
+        try {
+            FinancialRecordDto payment = invoiceService.addPayment(invoiceId, request.amount(), request.paymentMethod());
+            log.info("Successfully added payment of {} to invoice: {} - Status: 201 CREATED", 
+                    request.amount(), invoiceId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(payment);
+        } catch (Exception e) {
+            log.error("Failed to add payment to invoice: {} - Error: {}", invoiceId, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -62,7 +83,15 @@ public class InvoiceControllerImpl implements InvoiceControllerApi {
     @Override
     public ResponseEntity<BigDecimal> recalculatePatientBalance(UUID patientId) {
         log.info("Recalculating balance for patient ID: {}", patientId);
-        BigDecimal newBalance = invoiceService.recalculatePatientBalance(patientId);
-        return ResponseEntity.ok(newBalance);
+        
+        try {
+            BigDecimal newBalance = invoiceService.recalculatePatientBalance(patientId);
+            log.info("Successfully recalculated balance for patient: {} - New balance: {} - Status: 200 OK", 
+                    patientId, newBalance);
+            return ResponseEntity.ok(newBalance);
+        } catch (Exception e) {
+            log.error("Failed to recalculate balance for patient: {} - Error: {}", patientId, e.getMessage());
+            throw e;
+        }
     }
 }

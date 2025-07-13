@@ -30,27 +30,69 @@ public class FinancialSummaryServiceImpl implements FinancialSummaryService {
 
     @Override
     public PatientBalanceSummaryDto getPatientFinancialSummary(UUID patientId) {
-        log.debug("Getting financial summary for patient: {}", patientId);
+        log.info("Getting financial summary for patient: {}", patientId);
+
+        if (patientId == null) {
+            log.error("Patient ID cannot be null for financial summary retrieval");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
 
         // IMPLEMENTED: Mapping from PatientFinancialSummaryView to PatientBalanceSummaryDto
         PatientFinancialSummaryView summaryView = financialSummaryViewRepository.findById(patientId)
-                .orElseThrow(() -> new NotFoundException("Financial summary not found for patient: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Financial summary not found for patient: {}", patientId);
+                    return new NotFoundException("Financial summary not found for patient: " + patientId);
+                });
 
-        return financialSummaryMapper.toPatientBalanceSummaryDto(summaryView);
+        log.debug("Retrieved financial summary for patient: {} - Balance: {}, Total Invoiced: {}",
+                patientId, summaryView.getBalance(), summaryView.getTotalInvoices());
+
+        PatientBalanceSummaryDto result = financialSummaryMapper.toPatientBalanceSummaryDto(summaryView);
+        log.info("Successfully retrieved financial summary for patient: {}", patientId);
+
+        return result;
     }
 
     @Override
     public List<PatientFinancialSummaryView> getAllPatientFinancialSummaries() {
-        log.debug("Getting all patient financial summaries");
+        log.info("Getting all patient financial summaries");
 
-        return financialSummaryViewRepository.findAll();
+        List<PatientFinancialSummaryView> summaries = financialSummaryViewRepository.findAll();
+        log.info("Retrieved {} patient financial summaries", summaries.size());
+
+        if (log.isDebugEnabled()) {
+            long patientsWithBalance = summaries.stream()
+                    .filter(s -> s.getBalance() != null && s.getBalance().compareTo(java.math.BigDecimal.ZERO) > 0)
+                    .count();
+            log.debug("Financial summaries breakdown - Total: {}, With outstanding balance: {}",
+                    summaries.size(), patientsWithBalance);
+        }
+
+        return summaries;
     }
 
     @Override
     public List<PatientFinancialSummaryView> getPatientsWithOutstandingBalances() {
-        log.debug("Getting patients with outstanding balances");
+        log.info("Getting patients with outstanding balances");
 
-        // IMPLEMENTED: Use repository method for filtering by balance > 0
-        return financialSummaryViewRepository.findPatientsWithOutstandingBalances();
+        try {
+            // IMPLEMENTED: Use repository method for filtering by balance > 0
+            List<PatientFinancialSummaryView> patientsWithBalance = financialSummaryViewRepository.findPatientsWithOutstandingBalances();
+
+            log.info("Found {} patients with outstanding balances", patientsWithBalance.size());
+
+            if (log.isDebugEnabled() && !patientsWithBalance.isEmpty()) {
+                java.math.BigDecimal totalOutstanding = patientsWithBalance.stream()
+                        .map(PatientFinancialSummaryView::getBalance)
+                        .filter(balance -> balance != null)
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                log.debug("Total outstanding balance across all patients: {}", totalOutstanding);
+            }
+
+            return patientsWithBalance;
+        } catch (Exception e) {
+            log.error("Error retrieving patients with outstanding balances", e);
+            throw e;
+        }
     }
 }

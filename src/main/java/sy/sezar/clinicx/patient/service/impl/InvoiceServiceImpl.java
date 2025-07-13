@@ -42,33 +42,49 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional
     public FinancialRecordDto createInvoice(UUID patientId, BigDecimal amount, String description) {
-        log.info("Creating invoice for patient ID: {} with amount: {}", patientId, amount);
+        log.info("Creating invoice for patient ID: {} with amount: {} (description: {})", patientId, amount, description);
+        log.debug("Invoice creation parameters - Patient: {}, Amount: {}", patientId, amount);
 
         Patient patient = findPatientById(patientId);
+        log.debug("Found patient: {} for invoice creation", patient.getFullName());
+
+        String invoiceNumber = getNextInvoiceNumber();
+        log.debug("Generated invoice number: {}", invoiceNumber);
 
         Invoice invoice = new Invoice();
         invoice.setPatient(patient);
-        invoice.setInvoiceNumber(getNextInvoiceNumber());
+        invoice.setInvoiceNumber(invoiceNumber);
         invoice.setTotalAmount(amount);
         invoice.setIssueDate(LocalDate.now());
         // Note: Invoice entity doesn't have description field - using parameter for logging only
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
+        log.debug("Saved invoice with ID: {} and number: {}", savedInvoice.getId(), savedInvoice.getInvoiceNumber());
 
         // Recalculate patient balance
-        recalculatePatientBalance(patientId);
+        BigDecimal newBalance = recalculatePatientBalance(patientId);
+        log.info("Patient balance updated to: {} after invoice creation", newBalance);
 
-        log.info("Created invoice with number: {} for patient: {} (description: {})",
-                savedInvoice.getInvoiceNumber(), patientId, description);
+        log.info("Successfully created invoice with number: {} for patient: {} (amount: {}, description: {})",
+                savedInvoice.getInvoiceNumber(), patientId, amount, description);
         return mapToFinancialRecordDto(savedInvoice);
     }
 
     @Override
     @Transactional
     public FinancialRecordDto addPayment(UUID invoiceId, BigDecimal amount, String paymentMethod) {
-        log.info("Adding payment of {} to invoice ID: {}", amount, invoiceId);
+        log.info("Adding payment of {} to invoice ID: {} using method: {}", amount, invoiceId, paymentMethod);
+        log.debug("Payment details - Invoice: {}, Amount: {}, Method: {}", invoiceId, amount, paymentMethod);
 
         Invoice invoice = findInvoiceById(invoiceId);
+        log.debug("Found invoice {} with current total: {} for patient: {}",
+                invoice.getInvoiceNumber(), invoice.getTotalAmount(), invoice.getPatient().getId());
+
+        // Calculate current paid amount before adding new payment
+        BigDecimal currentPaid = invoice.getPayments().stream()
+                .map(Payment::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        log.debug("Current total paid on invoice {}: {}", invoice.getInvoiceNumber(), currentPaid);
 
         Payment payment = new Payment();
         payment.setInvoice(invoice);
@@ -79,16 +95,33 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.getPayments().add(payment);
         Invoice savedInvoice = invoiceRepository.save(invoice);
 
-        // Recalculate patient balance
-        recalculatePatientBalance(invoice.getPatient().getId());
+        BigDecimal newTotalPaid = currentPaid.add(amount);
+        log.debug("New total paid on invoice {}: {}", invoice.getInvoiceNumber(), newTotalPaid);
 
-        log.info("Added payment to invoice: {}", invoiceId);
+        // Determine payment status for logging
+        String paymentStatus = "PARTIAL";
+        if (newTotalPaid.compareTo(invoice.getTotalAmount()) >= 0) {
+            paymentStatus = "FULL";
+        }
+        log.info("Payment status for invoice {}: {}", invoice.getInvoiceNumber(), paymentStatus);
+
+        // Recalculate patient balance
+        BigDecimal newBalance = recalculatePatientBalance(invoice.getPatient().getId());
+        log.info("Patient balance updated to: {} after payment", newBalance);
+
+        log.info("Successfully added payment of {} to invoice: {} (total paid: {}/{})",
+                amount, invoiceId, newTotalPaid, invoice.getTotalAmount());
         return mapToFinancialRecordDto(savedInvoice);
     }
 
     @Override
     public Page<FinancialRecordDto> getPatientFinancialRecords(UUID patientId, Pageable pageable) {
+        log.info("Getting financial records for patient ID: {} with pagination: {}", patientId, pageable);
+
         Page<Invoice> invoices = invoiceRepository.findByPatientId(patientId, pageable);
+        log.info("Found {} financial records (page {} of {}) for patient: {}",
+                invoices.getNumberOfElements(), invoices.getNumber() + 1, invoices.getTotalPages(), patientId);
+
         return invoices.map(this::mapToFinancialRecordDto);
     }
 
@@ -133,19 +166,30 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional
     public String getNextInvoiceNumber() {
+        log.debug("Generating next invoice number from sequence");
+
         Query query = entityManager.createNativeQuery("SELECT nextval('invoice_number_seq')");
         Long nextValue = ((Number) query.getSingleResult()).longValue();
-        return String.format("INV-%06d", nextValue);
+        String invoiceNumber = String.format("INV-%06d", nextValue);
+
+        log.debug("Generated invoice number: {} (sequence value: {})", invoiceNumber, nextValue);
+        return invoiceNumber;
     }
 
     private Patient findPatientById(UUID patientId) {
         return patientRepository.findById(patientId)
-                .orElseThrow(() -> new NotFoundException("Patient not found with ID: " + patientId));
+                .orElseThrow(() -> {
+                    log.error("Patient not found with ID: {} during invoice operation", patientId);
+                    return new NotFoundException("Patient not found with ID: " + patientId);
+                });
     }
 
     private Invoice findInvoiceById(UUID invoiceId) {
         return invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new NotFoundException("Invoice not found with ID: " + invoiceId));
+                .orElseThrow(() -> {
+                    log.error("Invoice not found with ID: {} during financial operation", invoiceId);
+                    return new NotFoundException("Invoice not found with ID: " + invoiceId);
+                });
     }
 
     private FinancialRecordDto mapToFinancialRecordDto(Invoice invoice) {
@@ -163,12 +207,18 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .map(Payment::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        String status;
         if (totalPaid.compareTo(BigDecimal.ZERO) == 0) {
-            return "UNPAID";
+            status = "UNPAID";
         } else if (totalPaid.compareTo(invoice.getTotalAmount()) >= 0) {
-            return "PAID";
+            status = "PAID";
         } else {
-            return "PARTIALLY_PAID";
+            status = "PARTIALLY_PAID";
         }
+
+        log.debug("Determined status for invoice {}: {} (paid: {}, total: {})",
+                invoice.getInvoiceNumber(), status, totalPaid, invoice.getTotalAmount());
+
+        return status;
     }
 }

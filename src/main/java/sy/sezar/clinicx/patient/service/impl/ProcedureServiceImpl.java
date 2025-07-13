@@ -30,35 +30,68 @@ public class ProcedureServiceImpl implements ProcedureService {
 
     @Override
     public Page<ProcedureSummaryDto> getAllProcedures(Pageable pageable) {
-        log.debug("Getting all procedures with pagination");
+        log.info("Getting all procedures with pagination: {}", pageable);
 
         Page<Procedure> procedures = procedureRepository.findAllByOrderByName(pageable);
+        log.info("Found {} procedures (page {} of {})",
+                procedures.getNumberOfElements(), procedures.getNumber() + 1, procedures.getTotalPages());
+
         return procedures.map(procedureMapper::toProcedureSummaryDto);
     }
 
     @Override
     public List<ProcedureSummaryDto> getAllActiveProcedures() {
-        log.debug("Getting all active procedures");
+        log.info("Getting all active procedures");
 
         List<Procedure> procedures = procedureRepository.findAllActive();
+        log.info("Found {} active procedures", procedures.size());
+        log.debug("Active procedures retrieved: {}",
+                procedures.stream().map(Procedure::getName).toList());
+
         return procedureMapper.toProcedureSummaryDtoList(procedures);
     }
 
     @Override
     public ProcedureSummaryDto findProcedureById(UUID procedureId) {
-        log.debug("Finding procedure by ID: {}", procedureId);
+        log.info("Finding procedure by ID: {}", procedureId);
+
+        if (procedureId == null) {
+            log.error("Procedure ID cannot be null");
+            throw new IllegalArgumentException("Procedure ID cannot be null");
+        }
 
         Procedure procedure = procedureRepository.findById(procedureId)
-                .orElseThrow(() -> new NotFoundException("Procedure not found with ID: " + procedureId));
+                .orElseThrow(() -> {
+                    log.error("Procedure not found with ID: {}", procedureId);
+                    return new NotFoundException("Procedure not found with ID: " + procedureId);
+                });
+
+        log.debug("Found procedure: {} (code: {}, cost: {})",
+                procedure.getName(), procedure.getProcedureCode(), procedure.getDefaultCost());
 
         return procedureMapper.toProcedureSummaryDto(procedure);
     }
 
     @Override
     public List<ProcedureSummaryDto> searchProcedures(String searchTerm) {
-        log.debug("Searching procedures with term: {}", searchTerm);
+        log.info("Searching procedures with term: '{}'", searchTerm);
 
-        List<Procedure> procedures = procedureRepository.searchByNameOrCode(searchTerm);
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            log.warn("Empty or null search term provided for procedure search");
+            return List.of();
+        }
+
+        String trimmedSearchTerm = searchTerm.trim();
+        log.debug("Executing procedure search with trimmed term: '{}'", trimmedSearchTerm);
+
+        List<Procedure> procedures = procedureRepository.searchByNameOrCode(trimmedSearchTerm);
+        log.info("Procedure search for '{}' returned {} results", trimmedSearchTerm, procedures.size());
+
+        if (log.isDebugEnabled() && !procedures.isEmpty()) {
+            log.debug("Search results: {}",
+                    procedures.stream().map(p -> p.getName() + " (" + p.getProcedureCode() + ")").toList());
+        }
+
         return procedureMapper.toProcedureSummaryDtoList(procedures);
     }
 }

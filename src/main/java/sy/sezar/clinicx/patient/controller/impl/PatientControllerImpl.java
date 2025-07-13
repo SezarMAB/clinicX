@@ -23,15 +23,29 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<PatientSummaryDto> getPatientById(UUID id) {
         log.info("Retrieving patient with ID: {}", id);
-        PatientSummaryDto patient = patientService.findPatientById(id);
-        return ResponseEntity.ok(patient);
+        
+        try {
+            PatientSummaryDto patient = patientService.findPatientById(id);
+            log.info("Successfully retrieved patient with ID: {} - Status: 200 OK", id);
+            return ResponseEntity.ok(patient);
+        } catch (Exception e) {
+            log.error("Failed to retrieve patient with ID: {} - Error: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity<Page<PatientSummaryDto>> getAllPatients(String searchTerm, Pageable pageable) {
-        log.info("Retrieving patients with search term: {} and pagination: {}", searchTerm, pageable);
-        Page<PatientSummaryDto> patients = patientService.findAllPatients(searchTerm, pageable);
-        return ResponseEntity.ok(patients);
+        log.info("Retrieving patients with search term: '{}' and pagination: {}", searchTerm, pageable);
+        
+        try {
+            Page<PatientSummaryDto> patients = patientService.findAllPatients(searchTerm, pageable);
+            log.info("Successfully retrieved {} patients - Status: 200 OK", patients.getNumberOfElements());
+            return ResponseEntity.ok(patients);
+        } catch (Exception e) {
+            log.error("Failed to retrieve patients with search term: '{}' - Error: {}", searchTerm, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -44,22 +58,45 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<PatientSummaryDto> createPatient(PatientCreateRequest request) {
         log.info("Creating new patient with name: {}", request.fullName());
-        PatientSummaryDto patient = patientService.createPatient(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(patient);
+        log.debug("Patient creation request validation: {}", request);
+        
+        try {
+            PatientSummaryDto patient = patientService.createPatient(request);
+            log.info("Successfully created patient: {} - Status: 201 CREATED", patient.publicFacingId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(patient);
+        } catch (Exception e) {
+            log.error("Failed to create patient with name: {} - Error: {}", request.fullName(), e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity<PatientSummaryDto> updatePatient(UUID id, PatientUpdateRequest request) {
         log.info("Updating patient with ID: {}", id);
-        PatientSummaryDto patient = patientService.updatePatient(id, request);
-        return ResponseEntity.ok(patient);
+        log.debug("Patient update request validation: {}", request);
+        
+        try {
+            PatientSummaryDto patient = patientService.updatePatient(id, request);
+            log.info("Successfully updated patient with ID: {} - Status: 200 OK", id);
+            return ResponseEntity.ok(patient);
+        } catch (Exception e) {
+            log.error("Failed to update patient with ID: {} - Error: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public ResponseEntity<Void> deletePatient(UUID id) {
-        log.info("Deleting patient with ID: {}", id);
-        patientService.deactivatePatient(id);
-        return ResponseEntity.noContent().build();
+        log.info("Deactivating patient with ID: {}", id);
+        
+        try {
+            patientService.deactivatePatient(id);
+            log.info("Successfully deactivated patient with ID: {} - Status: 204 NO CONTENT", id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Failed to deactivate patient with ID: {} - Error: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     @Override

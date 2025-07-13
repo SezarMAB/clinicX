@@ -1,92 +1,116 @@
-**LLM CODE-GENERATION PROMPT
-(Create Spring-Boot JPA mappings for every SQL VIEW in a supplied script)**
+Below are the two patterns Spring-Boot teams use most often for **read-only PostgreSQL views** such as `v_dental_chart`. Pick the one that best matches your situation.
 
 ---
 
-### 0 ️⃣  Mission
+## 1 ️⃣  Map the view to an **immutable JPA entity**
 
-> You are a senior Java / Spring Boot engineer.
-> Given an SQL file that contains one or more **`CREATE VIEW …`** statements, generate Java source code that lets a Spring-Boot application read from those views via Spring Data JPA.
+### a.  Create a composite key for the row
 
----
+`v_dental_chart` has no primary key, but JPA still needs one.
+The natural choice is the pair **`patient_id` + `tooth_number`**.
 
-### 1 ️⃣  Input
+```java
+// key
+@AllArgsConstructor @NoArgsConstructor @Getter @Setter @EqualsAndHashCode
+public class DentalChartId implements Serializable {
+    private UUID patientId;
+    private Integer toothNumber;
+}
+```
 
-* **File:** `views.sql` (full text pasted in §6 of this prompt at runtime).
-* Target stack: **Java 21, Spring Boot 3.3+, Spring Data JPA, Lombok, Hibernate 6**.
+### b.  Entity class (read-only)
 
----
+```java
+@Entity
+@Table(name = "v_dental_chart")          // maps directly to the view
+@Immutable                                // Hibernate-specific but handy
+@IdClass(DentalChartId.class)
+@Getter @Setter @NoArgsConstructor
+public class DentalChartView {
 
-### 2 ️⃣  Output requirements
+    @Id @Column(name = "patient_id")
+    private UUID patientId;
 
-For **each view** in `views.sql` produce:
+    @Id @Column(name = "tooth_number")
+    private Integer toothNumber;
 
-1. **Immutable Entity class**
+    @Column(name = "condition_code")  private String conditionCode;
+    @Column(name = "condition_name")  private String conditionName;
+    @Column(name = "color_hex")       private String colorHex;
+    private String notes;
 
-   * Annotated with `@Entity` and `@Table(name = "<view_name>")`.
-   * Marked **read-only** using `@Immutable` (Hibernate) *or* `@Subselect` if you prefer the alternate pattern.
-   * Supply at least one `@Id` column. If the view lacks a natural PK, create a **composite key** via `@IdClass` or `@EmbeddedId`. Use the smallest column set that uniquely identifies a row (derive from `PRIMARY KEY` of the underlying table if obvious, else choose sensible columns).
-   * Map every column with the correct Java type.
-   * No setters except for testing (mark with Lombok’s `@Getter` only or `@AllArgsConstructor`).
-   * Place in package `com.example.<feature>.view`.
+    @Column(name = "last_treatment_date")
+    private LocalDate lastTreatmentDate;
+}
+```
 
-2. **Repository interface**
+* `@Immutable` (Hibernate) or `@ReadOnlyProperty` (Spring) prevents any `INSERT/UPDATE/DELETE`.
+* Make sure **`spring.jpa.hibernate.ddl-auto=none`**, otherwise Hibernate might try to drop/recreate the view.
 
-   * `public interface <ViewName>Repository extends JpaRepository<<Entity>, <IdType>>`
-   * Provide at least one query method that is useful, e.g. `findBy<FirstNonIdColumn>()`.
-   * Package: `com.example.<feature>.repository`.
+### c.  Repository
 
-3. **DTO record** *(optional but encouraged)*
+```java
+@Repository
+public interface DentalChartViewRepository
+        extends JpaRepository<DentalChartView, DentalChartId> {
 
-   * If the entity contains many columns, create a slim projection DTO for typical UI needs.
-   * Map via MapStruct if convenient.
-
-4. **Unit test stub** for one generated view to illustrate usage (JUnit 5, `@DataJpaTest`).
-
-5. **No schema-altering code** – entities must not try to create or drop the view.
-   Ensure users keep `spring.jpa.hibernate.ddl-auto` set to `none` or `validate`.
-
----
-
-### 3 ️⃣  General conventions
-
-| Topic              | Rule                                                                                   |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| **Packages**       | `com.example.<feature>.view` · `…repository` · `…dto`                                  |
-| **Lombok**         | `@Getter`, `@NoArgsConstructor(access = PROTECTED)` for entities                       |
-| **Java types**     | Use `java.time` (`Instant`, `LocalDate`, `LocalDateTime`)                              |
-| **Composite keys** | Implement `Serializable`, override `equals`/`hashCode` (Lombok’s `@EqualsAndHashCode`) |
-| **Column names**   | Use `@Column(name = "…")` when camel case deviates                                     |
-| **Read-only**      | Add `updatable = false, insertable = false` on all columns for extra safety            |
-| **Docs**           | Javadoc block on each entity describing the purpose of the view                        |
-
----
-
-### 4 ️⃣  File & code-block format
-
-* Output each Java file inside its own triple-backtick <code>`java … `</code> block, **no explanatory prose inside code blocks**.
-* Order: entity → repository → (optional) mapper → (optional) DTO → (optional) test.
-* Prefix every group of files for one view with a simple markdown heading `#### <view_name>` so the reader can navigate easily.
-
----
-
-### 5 ️⃣  Quality bar
-
-* Must compile with Maven coordinates:
-  `spring-boot-starter-data-jpa`, `lombok`, `postgresql` driver, `hibernate-core`.
-* No setter methods on view entities.
-* No accidental write operations (verify `@Immutable`).
-* Id choice clearly reflects uniqueness; avoid UUID generation hacks.
-* Static imports, unused code, and wildcard imports are forbidden.
-
----
-
-### 6 ️⃣  SQL source (inserted at run-time)
-
-```sql
--- the user will paste or attach the full `views.sql` here
+    List<DentalChartView> findByPatientId(UUID patientId);
+}
 ```
 
 ---
 
-**➡️  Now generate the Java source files that fulfil all requirements for every view present in the supplied SQL.**
+## 2 ️⃣  Skip the entity – use an **interface-based projection**
+
+If you don’t need paging or dynamic filters, a projection keeps the domain model clean and avoids the fake PK:
+
+```java
+public interface DentalChartProjection {
+    UUID      getPatientId();
+    Integer   getToothNumber();
+    String    getConditionCode();
+    String    getConditionName();
+    String    getColorHex();
+    String    getNotes();
+    LocalDate getLastTreatmentDate();
+}
+
+@Repository
+public interface DentalChartRepository extends JpaRepository<Patient,UUID> {
+
+    @Query(value = """
+        SELECT *
+        FROM v_dental_chart
+        WHERE patient_id = :patientId
+        ORDER BY tooth_number
+        """, nativeQuery = true)
+    List<DentalChartProjection> findChart(@Param("patientId") UUID patientId);
+}
+```
+
+* Spring Data maps each row to the projection interface by column name.
+* The method returns a **detached, read-only DTO**, so no accidental writes are possible.
+
+---
+
+## Which approach should I choose? 🤔
+
+| Need / Constraint                                        | Recommendation                           |
+| -------------------------------------------------------- | ---------------------------------------- |
+| Want to reuse JPA paging, sorting, Specifications        | **Entity + @Immutable**                  |
+| Very simple read-only query, don’t want “fake” IDs       | **Projection**                           |
+| You’ll later migrate the view to a materialized table    | **Entity** (future-proof)                |
+| Strict domain-cleanliness (no DB artefacts inside model) | **Projection**, then map to your own DTO |
+
+Both patterns coexist happily in the same codebase, so feel free to mix:
+use entities for complex views and projections for lightweight look-ups.
+
+---
+
+### ⚠️  Common pitfalls
+
+1. **DDL-auto** – keep it `none` (or at least `validate`) so Hibernate doesn’t attempt to drop the view.
+2. **Missing `@Id`** – JPA refuses to start without it; always supply an artificial key if you go the entity route.
+3. **Write attempts** – without `@Immutable`, accidental saves will hit “cannot insert into a view” SQL errors.
+
+With either pattern in place, you can now return the dental chart from your service layer as the DTO expected by your UI.

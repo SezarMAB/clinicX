@@ -21,7 +21,7 @@ import sy.sezar.clinicx.patient.repository.TreatmentRepository;
 import sy.sezar.clinicx.patient.service.TreatmentService;
 import sy.sezar.clinicx.patient.spec.TreatmentSpecifications;
 import sy.sezar.clinicx.staff.model.Staff;
-import sy.sezar.clinicx.patient.repository.StaffRepository;
+import sy.sezar.clinicx.staff.repository.StaffRepository;
 
 import java.util.UUID;
 

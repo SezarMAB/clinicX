@@ -36,6 +36,7 @@ public final class PatientSpecifications {
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("fullName")), likePattern));
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("publicFacingId")), likePattern));
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("insuranceNumber")), likePattern));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.function("TO_CHAR", String.class, root.get("dateOfBirth"), criteriaBuilder.literal("YYYY-MM-DD")), likePattern));
 
             return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
         };

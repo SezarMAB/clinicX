@@ -4,6 +4,7 @@ public enum TreatmentStatus {
     PLANNED,
     IN_PROGRESS,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
+    SCHEDULED
 }
 

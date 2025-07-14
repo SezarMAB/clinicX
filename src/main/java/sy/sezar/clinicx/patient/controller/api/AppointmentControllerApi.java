@@ -12,7 +12,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
+import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
 
 import java.time.Instant;
@@ -24,6 +26,17 @@ import java.util.UUID;
 @RequestMapping("/api/v1/appointments")
 @Tag(name = "Appointments", description = "Operations related to appointment management")
 public interface AppointmentControllerApi {
+
+    @PostMapping
+    @Operation(
+        summary = "Create new appointment",
+        description = "Creates a new appointment in the system."
+    )
+    @ApiResponse(responseCode = "201", description = "Appointment created",
+                content = @Content(schema = @Schema(implementation = AppointmentCardDto.class)))
+    @ApiResponse(responseCode = "400", description = "Validation error")
+    ResponseEntity<AppointmentCardDto> createAppointment(
+            @Valid @RequestBody AppointmentCreateRequest request);
 
     @GetMapping("/date-range")
     @Operation(

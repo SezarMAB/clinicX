@@ -8,11 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
+import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
 import sy.sezar.clinicx.patient.mapper.AppointmentMapper;
 import sy.sezar.clinicx.patient.model.Appointment;
 import sy.sezar.clinicx.patient.repository.AppointmentRepository;
+import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.service.AppointmentService;
+import sy.sezar.clinicx.clinic.repository.SpecialtyRepository;
+import sy.sezar.clinicx.staff.repository.StaffRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,6 +35,42 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
+    private final PatientRepository patientRepository;
+    private final SpecialtyRepository specialtyRepository;
+    private final StaffRepository staffRepository;
+
+    @Override
+    @Transactional
+    public AppointmentCardDto createAppointment(AppointmentCreateRequest request) {
+        log.info("Creating new appointment for patient: {}", request.patientId());
+        
+        Appointment appointment = appointmentMapper.toEntity(request);
+        
+        appointment.setPatient(patientRepository.findById(request.patientId())
+                .orElseThrow(() -> new NotFoundException("Patient not found with id: " + request.patientId())));
+        
+        appointment.setSpecialty(specialtyRepository.findById(request.specialtyId())
+                .orElseThrow(() -> new NotFoundException("Specialty not found with id: " + request.specialtyId())));
+        
+        if (request.doctorId() != null) {
+            appointment.setDoctor(staffRepository.findById(request.doctorId())
+                    .orElseThrow(() -> new NotFoundException("Doctor not found with id: " + request.doctorId())));
+        }
+        
+        if (request.createdById() != null) {
+            appointment.setCreatedBy(staffRepository.findById(request.createdById())
+                    .orElseThrow(() -> new NotFoundException("Staff not found with id: " + request.createdById())));
+        }
+        
+        if (request.status() == null) {
+            appointment.setStatus(sy.sezar.clinicx.patient.model.enums.AppointmentStatus.SCHEDULED);
+        }
+        
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        log.info("Created appointment with id: {}", savedAppointment.getId());
+        
+        return appointmentMapper.toAppointmentCardDto(savedAppointment);
+    }
 
     @Override
     public List<AppointmentCardDto> getAppointmentsByDateRange(Instant startDateTime, Instant endDateTime) {

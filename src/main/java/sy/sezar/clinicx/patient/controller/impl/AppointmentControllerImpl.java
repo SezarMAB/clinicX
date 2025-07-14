@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import sy.sezar.clinicx.patient.controller.api.AppointmentControllerApi;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
+import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
 import sy.sezar.clinicx.patient.service.AppointmentService;
 
@@ -24,6 +26,13 @@ import java.util.UUID;
 public class AppointmentControllerImpl implements AppointmentControllerApi {
 
     private final AppointmentService appointmentService;
+
+    @Override
+    public ResponseEntity<AppointmentCardDto> createAppointment(AppointmentCreateRequest request) {
+        log.info("Creating new appointment for patient: {}", request.patientId());
+        AppointmentCardDto createdAppointment = appointmentService.createAppointment(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+    }
 
     @Override
     public ResponseEntity<List<AppointmentCardDto>> getAppointmentsByDateRange(Instant startDateTime, Instant endDateTime) {

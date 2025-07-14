@@ -3,6 +3,7 @@ package sy.sezar.clinicx.patient.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
+import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
 
 import java.time.Instant;
@@ -14,6 +15,11 @@ import java.util.UUID;
  * Service interface for managing appointments.
  */
 public interface AppointmentService {
+
+    /**
+     * Creates a new appointment.
+     */
+    AppointmentCardDto createAppointment(AppointmentCreateRequest request);
 
     /**
      * Gets appointments for a specific date range (for daily view in sidebar).

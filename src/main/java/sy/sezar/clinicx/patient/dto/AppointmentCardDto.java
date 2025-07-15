@@ -17,6 +17,7 @@ public record AppointmentCardDto(
     String appointmentType,
     String practitionerTag,
     String patientPhoneNumber,
+    String gender,
     boolean isActive,
     boolean hasFinancialAlert,
     AppointmentStatus status

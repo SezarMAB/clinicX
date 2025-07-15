@@ -89,7 +89,7 @@ VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('bd2e7d3e-1e92-4bf6-9ac2-f212dee320a2', 'P2024001', 'يوسف الخالد', '1973-10-07', 'ذكر',
+VALUES ('bd2e7d3e-1e92-4bf6-9ac2-f212dee320a2', 'P2024001', 'يوسف الخالد', '1973-10-07', 'male',
         '+966 550694526', 'patient1@email.com', 'شارع فلسطين، حي البوادي', 'بوبا العربية',
         'INS800023',
         NULL,
@@ -98,7 +98,7 @@ VALUES ('bd2e7d3e-1e92-4bf6-9ac2-f212dee320a2', 'P2024001', 'يوسف الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('8b7a519e-6993-49a7-b712-6cfbcb387fae', 'P2024002', 'سعيد الخالد', '1989-12-07', 'ذكر',
+VALUES ('8b7a519e-6993-49a7-b712-6cfbcb387fae', 'P2024002', 'سعيد الخالد', '1989-12-07', 'male',
         '+966 551472081', 'patient2@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', NULL,
         NULL,
         NULL,
@@ -107,7 +107,7 @@ VALUES ('8b7a519e-6993-49a7-b712-6cfbcb387fae', 'P2024002', 'سعيد الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('2d467671-ea75-4f4d-af6a-76945d8445d0', 'P2024003', 'سعيد الإبراهيم', '1997-05-27', 'ذكر',
+VALUES ('2d467671-ea75-4f4d-af6a-76945d8445d0', 'P2024003', 'سعيد الإبراهيم', '1997-05-27', 'male',
         '+966 585012411', 'patient3@email.com', 'شارع الملك فهد، حي الروضة', 'بوبا العربية',
         'INS294392',
         NULL,
@@ -116,7 +116,7 @@ VALUES ('2d467671-ea75-4f4d-af6a-76945d8445d0', 'P2024003', 'سعيد الإبر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('8a74df49-6cec-4cb8-b096-583f82568f50', 'P2024004', 'سعيد الشامي', '1967-12-16', 'ذكر',
+VALUES ('8a74df49-6cec-4cb8-b096-583f82568f50', 'P2024004', 'سعيد الشامي', '1967-12-16', 'male',
         '+966 516047971', 'patient4@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', NULL,
         NULL,
         NULL,
@@ -125,7 +125,7 @@ VALUES ('8a74df49-6cec-4cb8-b096-583f82568f50', 'P2024004', 'سعيد الشام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('50f029c1-5c9b-4d7c-af2a-ee3e9b47505f', 'P2024005', 'علي المحمد', '1967-06-24', 'ذكر',
+VALUES ('50f029c1-5c9b-4d7c-af2a-ee3e9b47505f', 'P2024005', 'علي المحمد', '1967-06-24', 'male',
         '+966 586924646', 'patient5@email.com', 'شارع التحلية، حي الزهراء', NULL,
         NULL,
         NULL,
@@ -134,7 +134,7 @@ VALUES ('50f029c1-5c9b-4d7c-af2a-ee3e9b47505f', 'P2024005', 'علي المحمد
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('a92d8a07-88d8-47a5-a47c-f3828b552b81', 'P2024006', 'علي الشامي', '1994-08-14', 'ذكر',
+VALUES ('a92d8a07-88d8-47a5-a47c-f3828b552b81', 'P2024006', 'علي الشامي', '1994-08-14', 'male',
         '+966 582284947', 'patient6@email.com', 'شارع الأمير سلطان، حي السلامة', 'التعاونية للتأمين',
         'INS809607',
         'ضغط الدم',
@@ -143,7 +143,7 @@ VALUES ('a92d8a07-88d8-47a5-a47c-f3828b552b81', 'P2024006', 'علي الشامي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('0808331a-cc14-45bd-900d-735efc50ce82', 'P2024007', 'أمل العلي', '1970-02-26', 'أنثى',
+VALUES ('0808331a-cc14-45bd-900d-735efc50ce82', 'P2024007', 'أمل العلي', '1970-02-26', 'female',
         '+966 527592675', 'patient7@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         'أمراض القلب',
@@ -152,7 +152,7 @@ VALUES ('0808331a-cc14-45bd-900d-735efc50ce82', 'P2024007', 'أمل العلي',
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('abffbe05-3216-44e9-a843-ea3a342f2c29', 'P2024008', 'خالد العلي', '1989-06-28', 'ذكر',
+VALUES ('abffbe05-3216-44e9-a843-ea3a342f2c29', 'P2024008', 'خالد العلي', '1989-06-28', 'male',
         '+966 551646593', 'patient8@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'بوبا العربية',
         'INS520911',
         NULL,
@@ -161,7 +161,7 @@ VALUES ('abffbe05-3216-44e9-a843-ea3a342f2c29', 'P2024008', 'خالد العلي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3027c252-9e51-454a-b713-055b52fc9c5e', 'P2024009', 'حسن السعيد', '1999-10-14', 'ذكر',
+VALUES ('3027c252-9e51-454a-b713-055b52fc9c5e', 'P2024009', 'حسن السعيد', '1999-10-14', 'male',
         '+966 598316093', 'patient9@email.com', 'شارع فلسطين، حي البوادي', 'الدرع العربي',
         'INS907831',
         NULL,
@@ -170,7 +170,7 @@ VALUES ('3027c252-9e51-454a-b713-055b52fc9c5e', 'P2024009', 'حسن السعيد
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('881eab7c-30db-4e17-aa99-03e93dde1ff7', 'P2024010', 'أمل الخالد', '1960-03-20', 'أنثى',
+VALUES ('881eab7c-30db-4e17-aa99-03e93dde1ff7', 'P2024010', 'أمل الخالد', '1960-03-20', 'female',
         '+966 547684894', 'patient10@email.com', 'شارع الملك فهد، حي الروضة', NULL,
         NULL,
         NULL,
@@ -179,7 +179,7 @@ VALUES ('881eab7c-30db-4e17-aa99-03e93dde1ff7', 'P2024010', 'أمل الخالد
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('55e06b34-32dc-4e01-8f7c-2d87e3db166a', 'P2024011', 'سارة الحسن', '1988-03-02', 'أنثى',
+VALUES ('55e06b34-32dc-4e01-8f7c-2d87e3db166a', 'P2024011', 'سارة الحسن', '1988-03-02', 'female',
         '+966 519152364', 'patient11@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'بوبا العربية',
         'INS608458',
         NULL,
@@ -188,7 +188,7 @@ VALUES ('55e06b34-32dc-4e01-8f7c-2d87e3db166a', 'P2024011', 'سارة الحسن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('419f3922-59c9-488f-b175-3753c2e6797d', 'P2024012', 'هدى العمر', '1973-09-19', 'أنثى',
+VALUES ('419f3922-59c9-488f-b175-3753c2e6797d', 'P2024012', 'هدى العمر', '1973-09-19', 'female',
         '+966 533895576', 'patient12@email.com', 'شارع التحلية، حي الزهراء', NULL,
         NULL,
         NULL,
@@ -197,7 +197,7 @@ VALUES ('419f3922-59c9-488f-b175-3753c2e6797d', 'P2024012', 'هدى العمر',
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('ea3193a8-394b-4d2a-8168-079caebf3db3', 'P2024013', 'زينب السعيد', '2005-12-06', 'أنثى',
+VALUES ('ea3193a8-394b-4d2a-8168-079caebf3db3', 'P2024013', 'زينب السعيد', '2005-12-06', 'female',
         '+966 531035739', 'patient13@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         'حساسية البنسلين',
@@ -206,7 +206,7 @@ VALUES ('ea3193a8-394b-4d2a-8168-079caebf3db3', 'P2024013', 'زينب السعي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('29ed1c3a-1b46-4f01-af0a-16f97bdcb0d7', 'P2024014', 'فاطمة الإبراهيم', '1984-09-13', 'أنثى',
+VALUES ('29ed1c3a-1b46-4f01-af0a-16f97bdcb0d7', 'P2024014', 'فاطمة الإبراهيم', '1984-09-13', 'female',
         '+966 561888891', 'patient14@email.com', 'شارع فلسطين، حي البوادي', 'أليانز السعودي',
         'INS874765',
         NULL,
@@ -215,7 +215,7 @@ VALUES ('29ed1c3a-1b46-4f01-af0a-16f97bdcb0d7', 'P2024014', 'فاطمة الإب
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('73ffc159-4e56-4891-a951-a7d8e6b4120b', 'P2024015', 'عمر العمر', '2010-11-24', 'ذكر',
+VALUES ('73ffc159-4e56-4891-a951-a7d8e6b4120b', 'P2024015', 'عمر العمر', '2010-11-24', 'male',
         '+966 537958824', 'patient15@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'ميدغلف',
         'INS284522',
         NULL,
@@ -224,7 +224,7 @@ VALUES ('73ffc159-4e56-4891-a951-a7d8e6b4120b', 'P2024015', 'عمر العمر',
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('39f3e20c-c5c9-475b-8bd3-f9d6eb63f4e2', 'P2024016', 'ليلى العمر', '1963-03-17', 'أنثى',
+VALUES ('39f3e20c-c5c9-475b-8bd3-f9d6eb63f4e2', 'P2024016', 'ليلى العمر', '1963-03-17', 'female',
         '+966 563773911', 'patient16@email.com', 'شارع التحلية، حي الزهراء', NULL,
         NULL,
         NULL,
@@ -233,7 +233,7 @@ VALUES ('39f3e20c-c5c9-475b-8bd3-f9d6eb63f4e2', 'P2024016', 'ليلى العمر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('29e9ce56-21f1-4c10-93c9-c4f7b4493c1b', 'P2024017', 'إبراهيم المصري', '1963-03-10', 'ذكر',
+VALUES ('29e9ce56-21f1-4c10-93c9-c4f7b4493c1b', 'P2024017', 'إبراهيم المصري', '1963-03-10', 'male',
         '+966 545747869', 'patient17@email.com', 'شارع فلسطين، حي البوادي', 'أليانز السعودي',
         'INS133725',
         NULL,
@@ -242,7 +242,7 @@ VALUES ('29e9ce56-21f1-4c10-93c9-c4f7b4493c1b', 'P2024017', 'إبراهيم ال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('ea5cb8ec-aec6-414c-9abe-1ac3b7f8e3ff', 'P2024018', 'أحمد السعيد', '1958-06-05', 'ذكر',
+VALUES ('ea5cb8ec-aec6-414c-9abe-1ac3b7f8e3ff', 'P2024018', 'أحمد السعيد', '1958-06-05', 'male',
         '+966 590470392', 'patient18@email.com', 'شارع الأمير سلطان، حي السلامة', 'بوبا العربية',
         'INS740500',
         NULL,
@@ -251,7 +251,7 @@ VALUES ('ea5cb8ec-aec6-414c-9abe-1ac3b7f8e3ff', 'P2024018', 'أحمد السعي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('f3350684-9bed-4605-82b7-9b905e723444', 'P2024019', 'رانيا السعيد', '1995-10-05', 'أنثى',
+VALUES ('f3350684-9bed-4605-82b7-9b905e723444', 'P2024019', 'رانيا السعيد', '1995-10-05', 'female',
         '+966 588281894', 'patient19@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         'أمراض القلب',
@@ -260,7 +260,7 @@ VALUES ('f3350684-9bed-4605-82b7-9b905e723444', 'P2024019', 'رانيا السع
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('ed000d0a-4263-4295-9a1e-50df1f5bdc75', 'P2024020', 'مريم الأحمد', '1985-12-12', 'أنثى',
+VALUES ('ed000d0a-4263-4295-9a1e-50df1f5bdc75', 'P2024020', 'مريم الأحمد', '1985-12-12', 'female',
         '+966 594712704', 'patient20@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         NULL,
@@ -1625,7 +1625,7 @@ VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('aadf80ef-bd99-4ecb-a1ff-653253e68df0', 'P2024021', 'رانيا الزهراني', '1944-12-20', 'أنثى',
+VALUES ('aadf80ef-bd99-4ecb-a1ff-653253e68df0', 'P2024021', 'رانيا الزهراني', '1944-12-20', 'female',
         '+966 544250775', 'patient21@email.com', 'شارع مكة، حي المروة', 'بوبا العربية',
         'INS268305',
         'أمراض الكبد',
@@ -1633,7 +1633,7 @@ VALUES ('aadf80ef-bd99-4ecb-a1ff-653253e68df0', 'P2024021', 'رانيا الزه
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('48bb9995-9330-4894-b74a-f24116c225ed', 'P2024022', 'رانيا الحربي', '1954-06-28', 'أنثى',
+VALUES ('48bb9995-9330-4894-b74a-f24116c225ed', 'P2024022', 'رانيا الحربي', '1954-06-28', 'female',
         '+966 581562376', 'patient22@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', NULL,
         NULL,
         'أمراض القلب',
@@ -1641,7 +1641,7 @@ VALUES ('48bb9995-9330-4894-b74a-f24116c225ed', 'P2024022', 'رانيا الحر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('4096b1dc-2e28-4fe4-a22c-b62c1ba7cb56', 'P2024023', 'وليد القحطاني', '1969-07-02', 'ذكر',
+VALUES ('4096b1dc-2e28-4fe4-a22c-b62c1ba7cb56', 'P2024023', 'وليد القحطاني', '1969-07-02', 'male',
         '+966 570273461', 'patient23@email.com', 'شارع الأمير ماجد، حي الفيصلية', 'التعاونية للتأمين',
         'INS945878',
         NULL,
@@ -1649,7 +1649,7 @@ VALUES ('4096b1dc-2e28-4fe4-a22c-b62c1ba7cb56', 'P2024023', 'وليد القحط
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('517d1071-dde1-4d36-b1ef-5745264bf869', 'P2024024', 'سلمى الزهراني', '1979-04-19', 'أنثى',
+VALUES ('517d1071-dde1-4d36-b1ef-5745264bf869', 'P2024024', 'سلمى الزهراني', '1979-04-19', 'female',
         '+966 571588559', 'patient24@email.com', 'شارع الأمير ماجد، حي الفيصلية', NULL,
         NULL,
         'فقر الدم',
@@ -1657,7 +1657,7 @@ VALUES ('517d1071-dde1-4d36-b1ef-5745264bf869', 'P2024024', 'سلمى الزهر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('009f45fe-3809-464d-96ce-3956e150e456', 'P2024025', 'سلطان الغامدي', '1943-11-22', 'ذكر',
+VALUES ('009f45fe-3809-464d-96ce-3956e150e456', 'P2024025', 'سلطان الغامدي', '1943-11-22', 'male',
         '+966 587294190', 'patient25@email.com', 'شارع الملك فهد، حي الروضة', NULL,
         NULL,
         NULL,
@@ -1665,7 +1665,7 @@ VALUES ('009f45fe-3809-464d-96ce-3956e150e456', 'P2024025', 'سلطان الغا
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('8a77a5ce-84d2-4696-bbba-52f2304bdb8d', 'P2024026', 'رانيا الحربي', '1972-09-06', 'أنثى',
+VALUES ('8a77a5ce-84d2-4696-bbba-52f2304bdb8d', 'P2024026', 'رانيا الحربي', '1972-09-06', 'female',
         '+966 573044782', 'patient26@email.com', 'شارع الملك فهد، حي الروضة', 'سلامة',
         'INS165644',
         NULL,
@@ -1673,7 +1673,7 @@ VALUES ('8a77a5ce-84d2-4696-bbba-52f2304bdb8d', 'P2024026', 'رانيا الحر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('0f85ab34-195f-4d5b-8a27-47b733b7678f', 'P2024027', 'وليد الخالد', '2004-03-23', 'ذكر',
+VALUES ('0f85ab34-195f-4d5b-8a27-47b733b7678f', 'P2024027', 'وليد الخالد', '2004-03-23', 'male',
         '+966 534417281', 'patient27@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'أليانز السعودي',
         'INS676661',
         NULL,
@@ -1681,7 +1681,7 @@ VALUES ('0f85ab34-195f-4d5b-8a27-47b733b7678f', 'P2024027', 'وليد الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('81c2b2f8-63bb-488c-a276-d6766d4eae8a', 'P2024028', 'علي القحطاني', '1996-07-20', 'ذكر',
+VALUES ('81c2b2f8-63bb-488c-a276-d6766d4eae8a', 'P2024028', 'علي القحطاني', '1996-07-20', 'male',
         '+966 555963049', 'patient28@email.com', 'شارع الملك فهد، حي الروضة', 'سلامة',
         'INS165591',
         'الصرع',
@@ -1689,7 +1689,7 @@ VALUES ('81c2b2f8-63bb-488c-a276-d6766d4eae8a', 'P2024028', 'علي القحطا
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('7aa917b9-c53b-4e77-935a-6297112588e6', 'P2024029', 'ريم العنزي', '1990-05-05', 'أنثى',
+VALUES ('7aa917b9-c53b-4e77-935a-6297112588e6', 'P2024029', 'ريم العنزي', '1990-05-05', 'female',
         '+966 576540579', 'patient29@email.com', 'شارع الملك عبدالله، حي النزهة', 'بوبا العربية',
         'INS500031',
         NULL,
@@ -1697,7 +1697,7 @@ VALUES ('7aa917b9-c53b-4e77-935a-6297112588e6', 'P2024029', 'ريم العنزي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('33208c0c-cf5f-4fd4-9091-a6247d44f026', 'P2024030', 'وليد العتيبي', '1980-07-03', 'ذكر',
+VALUES ('33208c0c-cf5f-4fd4-9091-a6247d44f026', 'P2024030', 'وليد العتيبي', '1980-07-03', 'male',
         '+966 551568330', 'patient30@email.com', 'شارع التحلية، حي الزهراء', 'وقاية للتأمين',
         'INS507069',
         'ضغط الدم',
@@ -1705,7 +1705,7 @@ VALUES ('33208c0c-cf5f-4fd4-9091-a6247d44f026', 'P2024030', 'وليد العتي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3bba0776-a012-4b92-90f4-765a0ee510d6', 'P2024031', 'سارة القحطاني', '1956-05-02', 'أنثى',
+VALUES ('3bba0776-a012-4b92-90f4-765a0ee510d6', 'P2024031', 'سارة القحطاني', '1956-05-02', 'female',
         '+966 520939301', 'patient31@email.com', 'شارع الأمير ماجد، حي الفيصلية', 'التعاونية للتأمين',
         'INS479695',
         NULL,
@@ -1713,7 +1713,7 @@ VALUES ('3bba0776-a012-4b92-90f4-765a0ee510d6', 'P2024031', 'سارة القحط
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('51739c46-139f-499c-bec0-720560313310', 'P2024032', 'طارق الجهني', '2006-04-03', 'ذكر',
+VALUES ('51739c46-139f-499c-bec0-720560313310', 'P2024032', 'طارق الجهني', '2006-04-03', 'male',
         '+966 576408137', 'patient32@email.com', 'شارع المدينة، حي الصفا', 'بوبا العربية',
         'INS158069',
         NULL,
@@ -1721,7 +1721,7 @@ VALUES ('51739c46-139f-499c-bec0-720560313310', 'P2024032', 'طارق الجهن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('cb4208fe-0afc-4844-80c5-e437eda54c4d', 'P2024033', 'رانيا المحمد', '1968-08-20', 'أنثى',
+VALUES ('cb4208fe-0afc-4844-80c5-e437eda54c4d', 'P2024033', 'رانيا المحمد', '1968-08-20', 'female',
         '+966 511525043', 'patient33@email.com', 'شارع مكة، حي المروة', 'بوبا العربية',
         'INS222408',
         'أمراض الكبد',
@@ -1729,7 +1729,7 @@ VALUES ('cb4208fe-0afc-4844-80c5-e437eda54c4d', 'P2024033', 'رانيا المح
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3d209091-82a5-484c-91f7-6dbaf91154b1', 'P2024034', 'عبير الغامدي', '1954-05-28', 'أنثى',
+VALUES ('3d209091-82a5-484c-91f7-6dbaf91154b1', 'P2024034', 'عبير الغامدي', '1954-05-28', 'female',
         '+966 584572348', 'patient34@email.com', 'شارع الأمير ماجد، حي الفيصلية', NULL,
         NULL,
         'السكري',
@@ -1737,7 +1737,7 @@ VALUES ('3d209091-82a5-484c-91f7-6dbaf91154b1', 'P2024034', 'عبير الغام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('74037d63-ac9e-4428-860f-3c0a0504a40c', 'P2024035', 'عائشة الحربي', '1999-01-15', 'أنثى',
+VALUES ('74037d63-ac9e-4428-860f-3c0a0504a40c', 'P2024035', 'عائشة الحربي', '1999-01-15', 'female',
         '+966 589569548', 'patient35@email.com', 'شارع الأمير سلطان، حي السلامة', 'ميدغلف',
         'INS738799',
         NULL,
@@ -1745,7 +1745,7 @@ VALUES ('74037d63-ac9e-4428-860f-3c0a0504a40c', 'P2024035', 'عائشة الحر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('998dbd19-94b9-4c62-9df1-202d06aa254a', 'P2024036', 'منى الإبراهيم', '2009-02-25', 'أنثى',
+VALUES ('998dbd19-94b9-4c62-9df1-202d06aa254a', 'P2024036', 'منى الإبراهيم', '2009-02-25', 'female',
         '+966 518631516', 'patient36@email.com', 'شارع المدينة، حي الصفا', 'التعاونية للتأمين',
         'INS727146',
         'أمراض القلب',
@@ -1753,7 +1753,7 @@ VALUES ('998dbd19-94b9-4c62-9df1-202d06aa254a', 'P2024036', 'منى الإبرا
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('c85699c1-ffc2-483b-8999-cacc91b76fa1', 'P2024037', 'نجلاء المصري', '1990-09-07', 'أنثى',
+VALUES ('c85699c1-ffc2-483b-8999-cacc91b76fa1', 'P2024037', 'نجلاء المصري', '1990-09-07', 'female',
         '+966 528702110', 'patient37@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', NULL,
         NULL,
         'حساسية البنسلين',
@@ -1761,7 +1761,7 @@ VALUES ('c85699c1-ffc2-483b-8999-cacc91b76fa1', 'P2024037', 'نجلاء المص
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('75d43ba8-1c27-4d1b-99e6-5ce77cf08750', 'P2024038', 'منى المطيري', '1966-10-16', 'أنثى',
+VALUES ('75d43ba8-1c27-4d1b-99e6-5ce77cf08750', 'P2024038', 'منى المطيري', '1966-10-16', 'female',
         '+966 539030974', 'patient38@email.com', 'شارع المدينة، حي الصفا', NULL,
         NULL,
         'الصرع',
@@ -1769,7 +1769,7 @@ VALUES ('75d43ba8-1c27-4d1b-99e6-5ce77cf08750', 'P2024038', 'منى المطير
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('536663f3-678d-4bc4-8f75-c188152194d9', 'P2024039', 'يوسف العتيبي', '2000-11-26', 'ذكر',
+VALUES ('536663f3-678d-4bc4-8f75-c188152194d9', 'P2024039', 'يوسف العتيبي', '2000-11-26', 'male',
         '+966 513883118', 'patient39@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', NULL,
         NULL,
         'فقر الدم',
@@ -1777,7 +1777,7 @@ VALUES ('536663f3-678d-4bc4-8f75-c188152194d9', 'P2024039', 'يوسف العتي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('f9e60397-26d4-4c86-98a7-d906d9359501', 'P2024040', 'سلطان المطيري', '1957-07-19', 'ذكر',
+VALUES ('f9e60397-26d4-4c86-98a7-d906d9359501', 'P2024040', 'سلطان المطيري', '1957-07-19', 'male',
         '+966 525859178', 'patient40@email.com', 'شارع فلسطين، حي البوادي', 'ملاذ للتأمين',
         'INS811130',
         'حساسية الأسبرين',
@@ -1785,7 +1785,7 @@ VALUES ('f9e60397-26d4-4c86-98a7-d906d9359501', 'P2024040', 'سلطان المط
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('14d28cf4-88b5-41f5-98b2-926cb0f94ae9', 'P2024041', 'ماجد الحربي', '1986-10-03', 'ذكر',
+VALUES ('14d28cf4-88b5-41f5-98b2-926cb0f94ae9', 'P2024041', 'ماجد الحربي', '1986-10-03', 'male',
         '+966 511544737', 'patient41@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'أكسا التعاونية',
         'INS635539',
         'أمراض الكلى',
@@ -1793,7 +1793,7 @@ VALUES ('14d28cf4-88b5-41f5-98b2-926cb0f94ae9', 'P2024041', 'ماجد الحرب
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('688b05f6-aa01-4e29-8e46-92af09f92a12', 'P2024042', 'ليلى العنزي', '1965-05-28', 'أنثى',
+VALUES ('688b05f6-aa01-4e29-8e46-92af09f92a12', 'P2024042', 'ليلى العنزي', '1965-05-28', 'female',
         '+966 599919450', 'patient42@email.com', 'شارع الملك فهد، حي الروضة', NULL,
         NULL,
         NULL,
@@ -1801,7 +1801,7 @@ VALUES ('688b05f6-aa01-4e29-8e46-92af09f92a12', 'P2024042', 'ليلى العنز
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('fc2bd317-69b1-405e-9094-f85f96a7d53b', 'P2024043', 'منى السعيد', '2012-07-16', 'أنثى',
+VALUES ('fc2bd317-69b1-405e-9094-f85f96a7d53b', 'P2024043', 'منى السعيد', '2012-07-16', 'female',
         '+966 543081316', 'patient43@email.com', 'شارع فلسطين، حي البوادي', 'أليانز السعودي',
         'INS163301',
         'حساسية البنسلين',
@@ -1809,7 +1809,7 @@ VALUES ('fc2bd317-69b1-405e-9094-f85f96a7d53b', 'P2024043', 'منى السعيد
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('452847a3-bd3c-4666-8aef-9cdb7c508f60', 'P2024044', 'حسن الإبراهيم', '2012-10-13', 'ذكر',
+VALUES ('452847a3-bd3c-4666-8aef-9cdb7c508f60', 'P2024044', 'حسن الإبراهيم', '2012-10-13', 'male',
         '+966 585826375', 'patient44@email.com', 'شارع فلسطين، حي البوادي', NULL,
         NULL,
         'أمراض الكلى',
@@ -1817,7 +1817,7 @@ VALUES ('452847a3-bd3c-4666-8aef-9cdb7c508f60', 'P2024044', 'حسن الإبرا
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('a60a0f58-bc0e-4896-b8a8-25359d4827a4', 'P2024045', 'لينا الإبراهيم', '1989-10-13', 'أنثى',
+VALUES ('a60a0f58-bc0e-4896-b8a8-25359d4827a4', 'P2024045', 'لينا الإبراهيم', '1989-10-13', 'female',
         '+966 575507961', 'patient45@email.com', 'شارع الملك عبدالله، حي النزهة', 'ميدغلف',
         'INS376969',
         NULL,
@@ -1825,7 +1825,7 @@ VALUES ('a60a0f58-bc0e-4896-b8a8-25359d4827a4', 'P2024045', 'لينا الإبر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3e8dcbc5-36b1-435b-bfef-356d7d615c73', 'P2024046', 'راشد الحربي', '1991-03-12', 'ذكر',
+VALUES ('3e8dcbc5-36b1-435b-bfef-356d7d615c73', 'P2024046', 'راشد الحربي', '1991-03-12', 'male',
         '+966 533912689', 'patient46@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'سلامة',
         'INS527794',
         NULL,
@@ -1833,7 +1833,7 @@ VALUES ('3e8dcbc5-36b1-435b-bfef-356d7d615c73', 'P2024046', 'راشد الحرب
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('bb002dda-1f45-4af2-b66d-13d745614679', 'P2024047', 'لينا السعيد', '2004-02-26', 'أنثى',
+VALUES ('bb002dda-1f45-4af2-b66d-13d745614679', 'P2024047', 'لينا السعيد', '2004-02-26', 'female',
         '+966 526289440', 'patient47@email.com', 'شارع الأمير سلطان، حي السلامة', 'المتحدة للتأمين',
         'INS471555',
         'الصرع',
@@ -1841,7 +1841,7 @@ VALUES ('bb002dda-1f45-4af2-b66d-13d745614679', 'P2024047', 'لينا السعي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('4c4eeae5-1844-4545-a6ce-2b8bbece8e88', 'P2024048', 'نجلاء الأحمد', '1998-03-22', 'أنثى',
+VALUES ('4c4eeae5-1844-4545-a6ce-2b8bbece8e88', 'P2024048', 'نجلاء الأحمد', '1998-03-22', 'female',
         '+966 536359429', 'patient48@email.com', 'شارع فلسطين، حي البوادي', 'سلامة',
         'INS842539',
         NULL,
@@ -1849,7 +1849,7 @@ VALUES ('4c4eeae5-1844-4545-a6ce-2b8bbece8e88', 'P2024048', 'نجلاء الأح
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('0d8194ad-2d57-446b-b73d-1b8ec4993b84', 'P2024049', 'ليلى المطيري', '1963-04-09', 'أنثى',
+VALUES ('0d8194ad-2d57-446b-b73d-1b8ec4993b84', 'P2024049', 'ليلى المطيري', '1963-04-09', 'female',
         '+966 540198838', 'patient49@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', 'ميدغلف',
         'INS897944',
         NULL,
@@ -1857,7 +1857,7 @@ VALUES ('0d8194ad-2d57-446b-b73d-1b8ec4993b84', 'P2024049', 'ليلى المطي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('e6b862ca-2f88-41e6-a7e2-6b2e39bb9797', 'P2024050', 'أمل الدوسري', '1971-09-12', 'أنثى',
+VALUES ('e6b862ca-2f88-41e6-a7e2-6b2e39bb9797', 'P2024050', 'أمل الدوسري', '1971-09-12', 'female',
         '+966 550132735', 'patient50@email.com', 'شارع الملك فهد، حي الروضة', 'الدرع العربي',
         'INS390278',
         NULL,
@@ -1865,7 +1865,7 @@ VALUES ('e6b862ca-2f88-41e6-a7e2-6b2e39bb9797', 'P2024050', 'أمل الدوسر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('b5ad516c-6b71-4416-b660-056ad1d34f79', 'P2024051', 'ليلى الإبراهيم', '1998-04-06', 'أنثى',
+VALUES ('b5ad516c-6b71-4416-b660-056ad1d34f79', 'P2024051', 'ليلى الإبراهيم', '1998-04-06', 'female',
         '+966 541879101', 'patient51@email.com', 'شارع المدينة، حي الصفا', 'سلامة',
         'INS167991',
         'الربو',
@@ -1873,7 +1873,7 @@ VALUES ('b5ad516c-6b71-4416-b660-056ad1d34f79', 'P2024051', 'ليلى الإبر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('578912a3-7404-4cc6-8ff7-d4c7332acc45', 'P2024052', 'لينا المحمد', '1964-04-12', 'أنثى',
+VALUES ('578912a3-7404-4cc6-8ff7-d4c7332acc45', 'P2024052', 'لينا المحمد', '1964-04-12', 'female',
         '+966 539579657', 'patient52@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'وقاية للتأمين',
         'INS375725',
         'أمراض الكبد',
@@ -1881,7 +1881,7 @@ VALUES ('578912a3-7404-4cc6-8ff7-d4c7332acc45', 'P2024052', 'لينا المحم
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('81a36250-0264-4339-b35e-dd3786feca0e', 'P2024053', 'هدى العلي', '2003-02-27', 'أنثى',
+VALUES ('81a36250-0264-4339-b35e-dd3786feca0e', 'P2024053', 'هدى العلي', '2003-02-27', 'female',
         '+966 540819595', 'patient53@email.com', 'شارع فلسطين، حي البوادي', NULL,
         NULL,
         NULL,
@@ -1889,7 +1889,7 @@ VALUES ('81a36250-0264-4339-b35e-dd3786feca0e', 'P2024053', 'هدى العلي',
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('c99fc741-2b1d-405b-ac34-dd92212fbc99', 'P2024054', 'راشد الحسن', '1980-11-14', 'ذكر',
+VALUES ('c99fc741-2b1d-405b-ac34-dd92212fbc99', 'P2024054', 'راشد الحسن', '1980-11-14', 'male',
         '+966 535541767', 'patient54@email.com', 'شارع التحلية، حي الزهراء', NULL,
         NULL,
         'أمراض الكبد',
@@ -1897,7 +1897,7 @@ VALUES ('c99fc741-2b1d-405b-ac34-dd92212fbc99', 'P2024054', 'راشد الحسن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('951394c6-4e21-4d51-ba77-80c783a574e2', 'P2024055', 'عائشة العتيبي', '1971-07-18', 'أنثى',
+VALUES ('951394c6-4e21-4d51-ba77-80c783a574e2', 'P2024055', 'عائشة العتيبي', '1971-07-18', 'female',
         '+966 512141801', 'patient55@email.com', 'شارع الأمير سلطان، حي السلامة', 'ميدغلف',
         'INS313563',
         'أمراض الكبد',
@@ -1905,7 +1905,7 @@ VALUES ('951394c6-4e21-4d51-ba77-80c783a574e2', 'P2024055', 'عائشة العت
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('94ebb4cc-4a6c-4063-8cea-3130a45e71e4', 'P2024056', 'منى الخالد', '2011-12-04', 'أنثى',
+VALUES ('94ebb4cc-4a6c-4063-8cea-3130a45e71e4', 'P2024056', 'منى الخالد', '2011-12-04', 'female',
         '+966 517538235', 'patient56@email.com', 'شارع التحلية، حي الزهراء', 'سلامة',
         'INS645754',
         NULL,
@@ -1913,7 +1913,7 @@ VALUES ('94ebb4cc-4a6c-4063-8cea-3130a45e71e4', 'P2024056', 'منى الخالد
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('638b6b84-50f9-4861-b001-c86ad2188ef1', 'P2024057', 'مريم الخالد', '1991-10-14', 'أنثى',
+VALUES ('638b6b84-50f9-4861-b001-c86ad2188ef1', 'P2024057', 'مريم الخالد', '1991-10-14', 'female',
         '+966 558171109', 'patient57@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', NULL,
         NULL,
         'أمراض الكلى',
@@ -1921,7 +1921,7 @@ VALUES ('638b6b84-50f9-4861-b001-c86ad2188ef1', 'P2024057', 'مريم الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('4cf6838e-3cfd-4469-b010-38442aca0857', 'P2024058', 'سارة المطيري', '1940-09-01', 'أنثى',
+VALUES ('4cf6838e-3cfd-4469-b010-38442aca0857', 'P2024058', 'سارة المطيري', '1940-09-01', 'female',
         '+966 542676953', 'patient58@email.com', 'شارع الملك فهد، حي الروضة', NULL,
         NULL,
         NULL,
@@ -1929,7 +1929,7 @@ VALUES ('4cf6838e-3cfd-4469-b010-38442aca0857', 'P2024058', 'سارة المطي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('68cedbfc-9ea7-4941-90d8-8927bcac14a8', 'P2024059', 'طارق الأحمد', '1983-10-20', 'ذكر',
+VALUES ('68cedbfc-9ea7-4941-90d8-8927bcac14a8', 'P2024059', 'طارق الأحمد', '1983-10-20', 'male',
         '+966 575005024', 'patient59@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', 'وقاية للتأمين',
         'INS949941',
         'الصرع',
@@ -1937,7 +1937,7 @@ VALUES ('68cedbfc-9ea7-4941-90d8-8927bcac14a8', 'P2024059', 'طارق الأحم
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('e3e078df-a3c6-4446-900b-e3abe2ff19ff', 'P2024060', 'نورا الغامدي', '1959-03-14', 'أنثى',
+VALUES ('e3e078df-a3c6-4446-900b-e3abe2ff19ff', 'P2024060', 'نورا الغامدي', '1959-03-14', 'female',
         '+966 562408265', 'patient60@email.com', 'شارع الأمير ماجد، حي الفيصلية', 'أليانز السعودي',
         'INS938932',
         NULL,
@@ -1945,7 +1945,7 @@ VALUES ('e3e078df-a3c6-4446-900b-e3abe2ff19ff', 'P2024060', 'نورا الغام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('e51d0c71-9df6-4c78-88c4-56f6b3ecc3fa', 'P2024061', 'محمد الخالد', '2013-06-18', 'ذكر',
+VALUES ('e51d0c71-9df6-4c78-88c4-56f6b3ecc3fa', 'P2024061', 'محمد الخالد', '2013-06-18', 'male',
         '+966 582227319', 'patient61@email.com', 'شارع مكة، حي المروة', 'أكسا التعاونية',
         'INS731805',
         NULL,
@@ -1953,7 +1953,7 @@ VALUES ('e51d0c71-9df6-4c78-88c4-56f6b3ecc3fa', 'P2024061', 'محمد الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('bd71e492-b94d-44b1-8c0b-1012177e68d4', 'P2024062', 'خالد الدوسري', '1983-04-07', 'ذكر',
+VALUES ('bd71e492-b94d-44b1-8c0b-1012177e68d4', 'P2024062', 'خالد الدوسري', '1983-04-07', 'male',
         '+966 545487931', 'patient62@email.com', 'شارع مكة، حي المروة', 'أليانز السعودي',
         'INS998801',
         NULL,
@@ -1961,7 +1961,7 @@ VALUES ('bd71e492-b94d-44b1-8c0b-1012177e68d4', 'P2024062', 'خالد الدوس
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('ae32aab1-387f-4742-a104-9593c8820a09', 'P2024063', 'زياد القحطاني', '1946-03-18', 'ذكر',
+VALUES ('ae32aab1-387f-4742-a104-9593c8820a09', 'P2024063', 'زياد القحطاني', '1946-03-18', 'male',
         '+966 576474683', 'patient63@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         NULL,
@@ -1969,7 +1969,7 @@ VALUES ('ae32aab1-387f-4742-a104-9593c8820a09', 'P2024063', 'زياد القحط
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('b9b53000-347b-499c-9259-a16709d58358', 'P2024064', 'نورا المطيري', '1980-04-01', 'أنثى',
+VALUES ('b9b53000-347b-499c-9259-a16709d58358', 'P2024064', 'نورا المطيري', '1980-04-01', 'female',
         '+966 595990598', 'patient64@email.com', 'شارع الملك فهد، حي الروضة', NULL,
         NULL,
         'أمراض الكبد',
@@ -1977,7 +1977,7 @@ VALUES ('b9b53000-347b-499c-9259-a16709d58358', 'P2024064', 'نورا المطي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('5a0072a5-bc9f-40e0-a289-b750dfb2dc87', 'P2024065', 'فيصل الجهني', '1948-11-28', 'ذكر',
+VALUES ('5a0072a5-bc9f-40e0-a289-b750dfb2dc87', 'P2024065', 'فيصل الجهني', '1948-11-28', 'male',
         '+966 510959594', 'patient65@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', 'المتحدة للتأمين',
         'INS884848',
         'الربو',
@@ -1985,7 +1985,7 @@ VALUES ('5a0072a5-bc9f-40e0-a289-b750dfb2dc87', 'P2024065', 'فيصل الجهن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3bac8559-06ab-4672-8336-9ad2a0cadce0', 'P2024066', 'فيصل الشامي', '1961-05-16', 'ذكر',
+VALUES ('3bac8559-06ab-4672-8336-9ad2a0cadce0', 'P2024066', 'فيصل الشامي', '1961-05-16', 'male',
         '+966 575430949', 'patient66@email.com', 'شارع التحلية، حي الزهراء', 'وقاية للتأمين',
         'INS479825',
         NULL,
@@ -1993,7 +1993,7 @@ VALUES ('3bac8559-06ab-4672-8336-9ad2a0cadce0', 'P2024066', 'فيصل الشام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('12e8d048-1f45-4dfe-920b-b3b28507702a', 'P2024067', 'فاطمة الزهراني', '1988-12-04', 'أنثى',
+VALUES ('12e8d048-1f45-4dfe-920b-b3b28507702a', 'P2024067', 'فاطمة الزهراني', '1988-12-04', 'female',
         '+966 559326715', 'patient67@email.com', 'شارع المدينة، حي الصفا', NULL,
         NULL,
         NULL,
@@ -2001,7 +2001,7 @@ VALUES ('12e8d048-1f45-4dfe-920b-b3b28507702a', 'P2024067', 'فاطمة الزه
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('9018a956-250f-40ca-be2c-bc6a37ec8b19', 'P2024068', 'ريم الدوسري', '1961-07-11', 'أنثى',
+VALUES ('9018a956-250f-40ca-be2c-bc6a37ec8b19', 'P2024068', 'ريم الدوسري', '1961-07-11', 'female',
         '+966 579285500', 'patient68@email.com', 'شارع مكة، حي المروة', 'ملاذ للتأمين',
         'INS590532',
         NULL,
@@ -2009,7 +2009,7 @@ VALUES ('9018a956-250f-40ca-be2c-bc6a37ec8b19', 'P2024068', 'ريم الدوسر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('1d6f6927-2e1b-4928-ad7d-4416b021719e', 'P2024069', 'مريم الإبراهيم', '1971-09-20', 'أنثى',
+VALUES ('1d6f6927-2e1b-4928-ad7d-4416b021719e', 'P2024069', 'مريم الإبراهيم', '1971-09-20', 'female',
         '+966 549113994', 'patient69@email.com', 'شارع الملك فهد، حي الروضة', 'الدرع العربي',
         'INS826064',
         'أمراض القلب',
@@ -2017,7 +2017,7 @@ VALUES ('1d6f6927-2e1b-4928-ad7d-4416b021719e', 'P2024069', 'مريم الإبر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('e614e5fe-eafc-4da8-9666-9e4b2bef565d', 'P2024070', 'سعيد السعيد', '1967-08-09', 'ذكر',
+VALUES ('e614e5fe-eafc-4da8-9666-9e4b2bef565d', 'P2024070', 'سعيد السعيد', '1967-08-09', 'male',
         '+966 547734926', 'patient70@email.com', 'شارع المدينة، حي الصفا', 'أكسا التعاونية',
         'INS478983',
         NULL,
@@ -2025,7 +2025,7 @@ VALUES ('e614e5fe-eafc-4da8-9666-9e4b2bef565d', 'P2024070', 'سعيد السعي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('c788722c-3a96-4bd5-9139-33a8d8e65565', 'P2024071', 'وليد المصري', '1984-02-17', 'ذكر',
+VALUES ('c788722c-3a96-4bd5-9139-33a8d8e65565', 'P2024071', 'وليد المصري', '1984-02-17', 'male',
         '+966 566287814', 'patient71@email.com', 'شارع التحلية، حي الزهراء', 'سلامة',
         'INS395806',
         NULL,
@@ -2033,7 +2033,7 @@ VALUES ('c788722c-3a96-4bd5-9139-33a8d8e65565', 'P2024071', 'وليد المصر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('7ecc8943-b925-4944-8e60-8c0570ad9404', 'P2024072', 'عبدالعزيز الغامدي', '2003-12-09', 'ذكر',
+VALUES ('7ecc8943-b925-4944-8e60-8c0570ad9404', 'P2024072', 'عبدالعزيز الغامدي', '2003-12-09', 'male',
         '+966 597600474', 'patient72@email.com', 'شارع الملك عبدالله، حي النزهة', 'أكسا التعاونية',
         'INS411374',
         NULL,
@@ -2041,7 +2041,7 @@ VALUES ('7ecc8943-b925-4944-8e60-8c0570ad9404', 'P2024072', 'عبدالعزيز 
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('958efdc2-87c6-4770-8f11-b93c68c0fa8b', 'P2024073', 'عبير الجهني', '1988-04-20', 'أنثى',
+VALUES ('958efdc2-87c6-4770-8f11-b93c68c0fa8b', 'P2024073', 'عبير الجهني', '1988-04-20', 'female',
         '+966 515128294', 'patient73@email.com', 'شارع مكة، حي المروة', 'التعاونية للتأمين',
         'INS594710',
         NULL,
@@ -2049,7 +2049,7 @@ VALUES ('958efdc2-87c6-4770-8f11-b93c68c0fa8b', 'P2024073', 'عبير الجهن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('3057ea2c-1fdc-4d82-8e19-282a3566172b', 'P2024074', 'ناصر الدوسري', '1992-09-19', 'ذكر',
+VALUES ('3057ea2c-1fdc-4d82-8e19-282a3566172b', 'P2024074', 'ناصر الدوسري', '1992-09-19', 'male',
         '+966 588516087', 'patient74@email.com', 'شارع الأمير ماجد، حي الفيصلية', 'أكسا التعاونية',
         'INS708462',
         'الصرع',
@@ -2057,7 +2057,7 @@ VALUES ('3057ea2c-1fdc-4d82-8e19-282a3566172b', 'P2024074', 'ناصر الدوس
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('875b2d85-4697-4477-9297-f19ffda87d21', 'P2024075', 'سعيد الشامي', '1973-10-02', 'ذكر',
+VALUES ('875b2d85-4697-4477-9297-f19ffda87d21', 'P2024075', 'سعيد الشامي', '1973-10-02', 'male',
         '+966 538602897', 'patient75@email.com', 'شارع الأمير محمد بن عبدالعزيز، حي الأندلس', 'أليانز السعودي',
         'INS904459',
         NULL,
@@ -2065,7 +2065,7 @@ VALUES ('875b2d85-4697-4477-9297-f19ffda87d21', 'P2024075', 'سعيد الشام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('060e5ecd-073f-4930-9a27-e7bfcf8245b0', 'P2024076', 'سلمى الخالد', '1947-06-04', 'أنثى',
+VALUES ('060e5ecd-073f-4930-9a27-e7bfcf8245b0', 'P2024076', 'سلمى الخالد', '1947-06-04', 'female',
         '+966 571989054', 'patient76@email.com', 'شارع فلسطين، حي البوادي', NULL,
         NULL,
         NULL,
@@ -2073,7 +2073,7 @@ VALUES ('060e5ecd-073f-4930-9a27-e7bfcf8245b0', 'P2024076', 'سلمى الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('42324f9a-fcea-4f6d-939b-64ec33f3defa', 'P2024077', 'زياد العمر', '2000-03-05', 'ذكر',
+VALUES ('42324f9a-fcea-4f6d-939b-64ec33f3defa', 'P2024077', 'زياد العمر', '2000-03-05', 'male',
         '+966 589279572', 'patient77@email.com', 'شارع فلسطين، حي البوادي', 'وقاية للتأمين',
         'INS323508',
         NULL,
@@ -2081,7 +2081,7 @@ VALUES ('42324f9a-fcea-4f6d-939b-64ec33f3defa', 'P2024077', 'زياد العمر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('810a56b5-6e4f-42d9-9aa8-e1d8a1477db7', 'P2024078', 'طارق المحمد', '1941-01-08', 'ذكر',
+VALUES ('810a56b5-6e4f-42d9-9aa8-e1d8a1477db7', 'P2024078', 'طارق المحمد', '1941-01-08', 'male',
         '+966 591925501', 'patient78@email.com', 'شارع المدينة، حي الصفا', 'الدرع العربي',
         'INS836649',
         NULL,
@@ -2089,7 +2089,7 @@ VALUES ('810a56b5-6e4f-42d9-9aa8-e1d8a1477db7', 'P2024078', 'طارق المحم
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('5747f021-7809-4e2d-856d-45ebdced300c', 'P2024079', 'رانيا العتيبي', '1964-02-08', 'أنثى',
+VALUES ('5747f021-7809-4e2d-856d-45ebdced300c', 'P2024079', 'رانيا العتيبي', '1964-02-08', 'female',
         '+966 567921025', 'patient79@email.com', 'شارع الملك فهد، حي الروضة', 'أكسا التعاونية',
         'INS852557',
         'حساسية الأسبرين',
@@ -2097,7 +2097,7 @@ VALUES ('5747f021-7809-4e2d-856d-45ebdced300c', 'P2024079', 'رانيا العت
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('b25049f9-d533-495b-ba24-753998010265', 'P2024080', 'فيصل القحطاني', '1982-04-12', 'ذكر',
+VALUES ('b25049f9-d533-495b-ba24-753998010265', 'P2024080', 'فيصل القحطاني', '1982-04-12', 'male',
         '+966 531146513', 'patient80@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'التعاونية للتأمين',
         'INS488186',
         NULL,
@@ -2105,7 +2105,7 @@ VALUES ('b25049f9-d533-495b-ba24-753998010265', 'P2024080', 'فيصل القحط
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('b7fa9854-934d-4afa-862c-075bd03b04d0', 'P2024081', 'أحمد الإبراهيم', '1946-07-02', 'ذكر',
+VALUES ('b7fa9854-934d-4afa-862c-075bd03b04d0', 'P2024081', 'أحمد الإبراهيم', '1946-07-02', 'male',
         '+966 541914854', 'patient81@email.com', 'شارع الملك فهد، حي الروضة', 'وقاية للتأمين',
         'INS918686',
         'أمراض القلب',
@@ -2113,7 +2113,7 @@ VALUES ('b7fa9854-934d-4afa-862c-075bd03b04d0', 'P2024081', 'أحمد الإبر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('1d7de144-435b-4d30-aab6-6fb43d4ac723', 'P2024082', 'طارق الشهري', '2007-05-02', 'ذكر',
+VALUES ('1d7de144-435b-4d30-aab6-6fb43d4ac723', 'P2024082', 'طارق الشهري', '2007-05-02', 'male',
         '+966 522977193', 'patient82@email.com', 'شارع فلسطين، حي البوادي', 'الدرع العربي',
         'INS739653',
         NULL,
@@ -2121,7 +2121,7 @@ VALUES ('1d7de144-435b-4d30-aab6-6fb43d4ac723', 'P2024082', 'طارق الشهر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('89ef4a50-600e-4ad1-8396-9eb6fa992e60', 'P2024083', 'سلطان الإبراهيم', '1943-05-05', 'ذكر',
+VALUES ('89ef4a50-600e-4ad1-8396-9eb6fa992e60', 'P2024083', 'سلطان الإبراهيم', '1943-05-05', 'male',
         '+966 558520398', 'patient83@email.com', 'شارع المدينة، حي الصفا', 'سلامة',
         'INS155281',
         'حساسية الأسبرين',
@@ -2129,7 +2129,7 @@ VALUES ('89ef4a50-600e-4ad1-8396-9eb6fa992e60', 'P2024083', 'سلطان الإب
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('fb732ed6-a4cf-4db4-bf66-4f2b6c327b3e', 'P2024084', 'دلال الخالد', '1943-02-05', 'أنثى',
+VALUES ('fb732ed6-a4cf-4db4-bf66-4f2b6c327b3e', 'P2024084', 'دلال الخالد', '1943-02-05', 'female',
         '+966 538377470', 'patient84@email.com', 'شارع الملك عبدالله، حي النزهة', 'سلامة',
         'INS334619',
         NULL,
@@ -2137,7 +2137,7 @@ VALUES ('fb732ed6-a4cf-4db4-bf66-4f2b6c327b3e', 'P2024084', 'دلال الخال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('66d56a9b-17c4-4183-aa15-2db3082c3874', 'P2024085', 'سلطان الزهراني', '1959-01-24', 'ذكر',
+VALUES ('66d56a9b-17c4-4183-aa15-2db3082c3874', 'P2024085', 'سلطان الزهراني', '1959-01-24', 'male',
         '+966 512562397', 'patient85@email.com', 'شارع المدينة، حي الصفا', 'ميدغلف',
         'INS554023',
         NULL,
@@ -2145,7 +2145,7 @@ VALUES ('66d56a9b-17c4-4183-aa15-2db3082c3874', 'P2024085', 'سلطان الزه
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('a84f91b9-21de-47fe-941e-023727b5a321', 'P2024086', 'عبدالله الأحمد', '1977-12-27', 'ذكر',
+VALUES ('a84f91b9-21de-47fe-941e-023727b5a321', 'P2024086', 'عبدالله الأحمد', '1977-12-27', 'male',
         '+966 591429505', 'patient86@email.com', 'شارع المدينة، حي الصفا', 'أليانز السعودي',
         'INS872387',
         'فقر الدم',
@@ -2153,7 +2153,7 @@ VALUES ('a84f91b9-21de-47fe-941e-023727b5a321', 'P2024086', 'عبدالله ال
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('959023bc-fabf-46ba-8e10-5a218859f611', 'P2024087', 'مريم الجهني', '1943-09-23', 'أنثى',
+VALUES ('959023bc-fabf-46ba-8e10-5a218859f611', 'P2024087', 'مريم الجهني', '1943-09-23', 'female',
         '+966 530805617', 'patient87@email.com', 'شارع مكة، حي المروة', 'التعاونية للتأمين',
         'INS526859',
         NULL,
@@ -2161,7 +2161,7 @@ VALUES ('959023bc-fabf-46ba-8e10-5a218859f611', 'P2024087', 'مريم الجهن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('4beb4577-a28a-4ae6-bf53-400e18edccac', 'P2024088', 'دلال المطيري', '2013-07-25', 'أنثى',
+VALUES ('4beb4577-a28a-4ae6-bf53-400e18edccac', 'P2024088', 'دلال المطيري', '2013-07-25', 'female',
         '+966 536287495', 'patient88@email.com', 'شارع مكة، حي المروة', NULL,
         NULL,
         NULL,
@@ -2169,7 +2169,7 @@ VALUES ('4beb4577-a28a-4ae6-bf53-400e18edccac', 'P2024088', 'دلال المطي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('78d7276b-275d-4e1b-a0b4-dfcc334bd2c3', 'P2024089', 'سعيد الزهراني', '1991-11-11', 'ذكر',
+VALUES ('78d7276b-275d-4e1b-a0b4-dfcc334bd2c3', 'P2024089', 'سعيد الزهراني', '1991-11-11', 'male',
         '+966 539215766', 'patient89@email.com', 'شارع الأمير ماجد، حي الفيصلية', 'أليانز السعودي',
         'INS155012',
         NULL,
@@ -2177,7 +2177,7 @@ VALUES ('78d7276b-275d-4e1b-a0b4-dfcc334bd2c3', 'P2024089', 'سعيد الزهر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('cffe62fb-dd1c-444d-b911-422ba6f25a81', 'P2024090', 'راشد الشامي', '1995-01-13', 'ذكر',
+VALUES ('cffe62fb-dd1c-444d-b911-422ba6f25a81', 'P2024090', 'راشد الشامي', '1995-01-13', 'male',
         '+966 573832910', 'patient90@email.com', 'شارع الملك عبدالله، حي النزهة', NULL,
         NULL,
         'السكري',
@@ -2185,7 +2185,7 @@ VALUES ('cffe62fb-dd1c-444d-b911-422ba6f25a81', 'P2024090', 'راشد الشام
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('61f80afa-ecc4-436d-918e-04afb7ef1a16', 'P2024091', 'أمل العتيبي', '1962-06-21', 'أنثى',
+VALUES ('61f80afa-ecc4-436d-918e-04afb7ef1a16', 'P2024091', 'أمل العتيبي', '1962-06-21', 'female',
         '+966 519833359', 'patient91@email.com', 'شارع الملك فهد، حي الروضة', 'التعاونية للتأمين',
         'INS587696',
         NULL,
@@ -2193,7 +2193,7 @@ VALUES ('61f80afa-ecc4-436d-918e-04afb7ef1a16', 'P2024091', 'أمل العتيب
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('7c9db862-5ccd-4652-b053-cedc74f5dac5', 'P2024092', 'وليد المطيري', '2002-08-13', 'ذكر',
+VALUES ('7c9db862-5ccd-4652-b053-cedc74f5dac5', 'P2024092', 'وليد المطيري', '2002-08-13', 'male',
         '+966 514641039', 'patient92@email.com', 'شارع الأمير سلطان، حي السلامة', NULL,
         NULL,
         'أمراض الكلى',
@@ -2201,7 +2201,7 @@ VALUES ('7c9db862-5ccd-4652-b053-cedc74f5dac5', 'P2024092', 'وليد المطي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('7c87b878-6378-4a47-b464-5dc61e1020ee', 'P2024093', 'هدى العلي', '1950-08-17', 'أنثى',
+VALUES ('7c87b878-6378-4a47-b464-5dc61e1020ee', 'P2024093', 'هدى العلي', '1950-08-17', 'female',
         '+966 559074217', 'patient93@email.com', 'شارع الأمير سلطان، حي السلامة', 'ميدغلف',
         'INS173813',
         NULL,
@@ -2209,7 +2209,7 @@ VALUES ('7c87b878-6378-4a47-b464-5dc61e1020ee', 'P2024093', 'هدى العلي',
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('f3c23c7a-cc29-4424-9995-c1e197b8489a', 'P2024094', 'فيصل العلي', '2001-11-15', 'ذكر',
+VALUES ('f3c23c7a-cc29-4424-9995-c1e197b8489a', 'P2024094', 'فيصل العلي', '2001-11-15', 'male',
         '+966 587168462', 'patient94@email.com', 'شارع المدينة، حي الصفا', 'سلامة',
         'INS190121',
         NULL,
@@ -2217,7 +2217,7 @@ VALUES ('f3c23c7a-cc29-4424-9995-c1e197b8489a', 'P2024094', 'فيصل العلي
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('97a843e7-13f3-4a2e-9009-2f26025ffc08', 'P2024095', 'عمر المطيري', '2014-04-21', 'ذكر',
+VALUES ('97a843e7-13f3-4a2e-9009-2f26025ffc08', 'P2024095', 'عمر المطيري', '2014-04-21', 'male',
         '+966 515012925', 'patient95@email.com', 'شارع فلسطين، حي البوادي', 'أكسا التعاونية',
         'INS141336',
         'حساسية البنسلين',
@@ -2225,7 +2225,7 @@ VALUES ('97a843e7-13f3-4a2e-9009-2f26025ffc08', 'P2024095', 'عمر المطير
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('93dc2d56-7b5e-4607-b3c8-6aa2773fcc52', 'P2024096', 'سمر القحطاني', '1941-12-22', 'أنثى',
+VALUES ('93dc2d56-7b5e-4607-b3c8-6aa2773fcc52', 'P2024096', 'سمر القحطاني', '1941-12-22', 'female',
         '+966 532520315', 'patient96@email.com', 'شارع فلسطين، حي البوادي', 'أليانز السعودي',
         'INS870133',
         NULL,
@@ -2233,7 +2233,7 @@ VALUES ('93dc2d56-7b5e-4607-b3c8-6aa2773fcc52', 'P2024096', 'سمر القحطا
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('e9591707-0295-4c79-ae31-86fce4108d2f', 'P2024097', 'حسن الجهني', '1987-06-06', 'ذكر',
+VALUES ('e9591707-0295-4c79-ae31-86fce4108d2f', 'P2024097', 'حسن الجهني', '1987-06-06', 'male',
         '+966 576350654', 'patient97@email.com', 'شارع مكة، حي المروة', 'سلامة',
         'INS226178',
         NULL,
@@ -2241,7 +2241,7 @@ VALUES ('e9591707-0295-4c79-ae31-86fce4108d2f', 'P2024097', 'حسن الجهني
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('28bb748d-3170-4652-87e7-871566ae3e74', 'P2024098', 'مريم الجهني', '1984-09-20', 'أنثى',
+VALUES ('28bb748d-3170-4652-87e7-871566ae3e74', 'P2024098', 'مريم الجهني', '1984-09-20', 'female',
         '+966 547810233', 'patient98@email.com', 'شارع الأمير سلطان، حي السلامة', 'أكسا التعاونية',
         'INS750335',
         NULL,
@@ -2249,7 +2249,7 @@ VALUES ('28bb748d-3170-4652-87e7-871566ae3e74', 'P2024098', 'مريم الجهن
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('4756d93c-b914-4fcd-ad22-9374cc1cbba8', 'P2024099', 'ليلى الزهراني', '1991-06-18', 'أنثى',
+VALUES ('4756d93c-b914-4fcd-ad22-9374cc1cbba8', 'P2024099', 'ليلى الزهراني', '1991-06-18', 'female',
         '+966 546388545', 'patient99@email.com', 'شارع الملك عبدالعزيز، حي الشاطئ', 'المتحدة للتأمين',
         'INS738355',
         NULL,
@@ -2257,7 +2257,7 @@ VALUES ('4756d93c-b914-4fcd-ad22-9374cc1cbba8', 'P2024099', 'ليلى الزهر
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender,
                       phone_number, email, address, insurance_provider, insurance_number,
                       important_medical_notes, created_by)
-VALUES ('adcd0fd2-cfe1-4f19-ada9-f7dcb5e18aa6', 'P2024100', 'منصور الجهني', '1989-06-17', 'ذكر',
+VALUES ('adcd0fd2-cfe1-4f19-ada9-f7dcb5e18aa6', 'P2024100', 'منصور الجهني', '1989-06-17', 'male',
         '+966 516256375', 'patient100@email.com', 'شارع مكة، حي المروة', 'التعاونية للتأمين',
         'INS682169',
         NULL,

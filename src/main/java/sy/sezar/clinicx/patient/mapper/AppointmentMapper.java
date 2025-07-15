@@ -26,7 +26,7 @@ public interface AppointmentMapper {
     @Mapping(source = "patient.publicFacingId", target = "patientPublicId")
     @Mapping(source = "patient.id", target = "patientId")
     @Mapping(source = "patient.phoneNumber", target = "patientPhoneNumber")
-    @Mapping(source = "patient.gender", target = "gender")
+    @Mapping(source = "patient.gender", target = "patientGender")
     AppointmentCardDto toAppointmentCardDto(Appointment appointment);
     List<AppointmentCardDto> toAppointmentCardDtoList(List<Appointment> appointments);
 

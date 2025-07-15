@@ -87,7 +87,6 @@ CREATE TABLE patients (
                           created_at              TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
                           updated_at              TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
                           created_by              UUID REFERENCES staff(id),
-                          CONSTRAINT chk_balance_non_negative CHECK (balance >= 0),
                           CONSTRAINT chk_email_format CHECK (email IS NULL OR email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 

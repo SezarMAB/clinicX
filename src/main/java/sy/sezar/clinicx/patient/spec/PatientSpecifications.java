@@ -229,6 +229,15 @@ public final class PatientSpecifications {
                 ));
             }
 
+            // Is balance negative filter
+            if (criteria.isBalanceNegative() != null) {
+                if (criteria.isBalanceNegative()) {
+                    predicates.add(criteriaBuilder.lessThan(root.get("balance"), 0));
+                } else {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("balance"), 0));
+                }
+            }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -78,6 +78,9 @@ public record PatientSearchCriteria(
         Boolean hasTreatments,
         
         @Schema(description = "Filter by city or address", example = "New York")
-        String address
+        String address,
+        
+        @Schema(description = "Filter patients with negative balance", example = "true")
+        Boolean isBalanceNegative
 ) {
 }

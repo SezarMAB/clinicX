@@ -6,6 +6,8 @@ import org.mapstruct.MappingTarget;
 import sy.sezar.clinicx.patient.dto.*;
 import sy.sezar.clinicx.patient.model.*;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * Centralized mapper for all Patient-related DTOs and entities.
@@ -13,7 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface PatientCentralMapper {
     // Patient <-> PatientSummaryDto
-    @Mapping(target = "age", ignore = true)
+    @Mapping(target = "age", expression = "java(calculateAge(patient.getDateOfBirth()))")
     @Mapping(target = "hasAlert", ignore = true)
     PatientSummaryDto toPatientSummaryDto(Patient patient);
     List<PatientSummaryDto> toPatientSummaryDtoList(List<Patient> patients);
@@ -59,7 +61,22 @@ public interface PatientCentralMapper {
     @Mapping(target = "patientTeeth", ignore = true)
     void updatePatientFromRequest(PatientUpdateRequest request, @MappingTarget Patient patient);
 
-
-
-
+    default Integer calculateAge(LocalDate dateOfBirth) {
+        if (dateOfBirth == null) {
+            return null;
+        }
+        
+        LocalDate today = LocalDate.now();
+        
+        // Check if birthday hasn't occurred this year yet
+        if (today.getMonthValue() < dateOfBirth.getMonthValue() ||
+            (today.getMonthValue() == dateOfBirth.getMonthValue() && 
+             today.getDayOfMonth() < dateOfBirth.getDayOfMonth())) {
+            // Birthday hasn't occurred yet this year
+            return today.getYear() - dateOfBirth.getYear() - 1;
+        } else {
+            // Birthday has occurred this year
+            return today.getYear() - dateOfBirth.getYear();
+        }
+    }
 }

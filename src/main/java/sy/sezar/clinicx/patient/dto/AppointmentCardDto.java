@@ -9,12 +9,14 @@ import java.util.UUID;
  */
 public record AppointmentCardDto(
     UUID appointmentId,
+    UUID patientId,
     String patientFullName,
     String patientPublicId,
     LocalTime startTime,
     LocalTime endTime,
     String appointmentType,
     String practitionerTag,
+    String patientPhoneNumber,
     boolean isActive,
     boolean hasFinancialAlert,
     AppointmentStatus status

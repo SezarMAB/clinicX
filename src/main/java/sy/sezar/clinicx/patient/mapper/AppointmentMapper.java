@@ -24,6 +24,8 @@ public interface AppointmentMapper {
     @Mapping(target = "hasFinancialAlert", ignore = true)
     @Mapping(source = "patient.fullName", target = "patientFullName")
     @Mapping(source = "patient.publicFacingId", target = "patientPublicId")
+    @Mapping(source = "patient.id", target = "patientId")
+    @Mapping(source = "patient.phoneNumber", target = "patientPhoneNumber")
     AppointmentCardDto toAppointmentCardDto(Appointment appointment);
     List<AppointmentCardDto> toAppointmentCardDtoList(List<Appointment> appointments);
 

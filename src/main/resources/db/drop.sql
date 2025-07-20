@@ -150,6 +150,46 @@ DROP SEQUENCE IF EXISTS invoice_number_seq;
 DROP EXTENSION IF EXISTS btree_gist;
 DROP EXTENSION IF EXISTS pgcrypto;
 
+
+-- ================================
+-- DROP TRIGGERS AND FUNCTIONS
+-- ================================
+
+DROP TRIGGER IF EXISTS trg_calculate_material_total_cost ON treatment_materials;
+
+DROP FUNCTION IF EXISTS calculate_material_total_cost CASCADE;
+DROP FUNCTION IF EXISTS get_treatment_material_cost(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_patient_material_cost(UUID) CASCADE;
+
+-- ================================
+-- DROP VIEWS
+-- ================================
+
+DROP VIEW IF EXISTS v_patient_financial_summary;
+DROP VIEW IF EXISTS v_material_usage_stats;
+DROP VIEW IF EXISTS v_treatment_material_summary;
+
+-- ================================
+-- DROP INDEXES
+-- ================================
+
+DROP INDEX IF EXISTS idx_treatment_materials_created_at;
+DROP INDEX IF EXISTS idx_treatment_materials_supplier;
+DROP INDEX IF EXISTS idx_treatment_materials_name;
+DROP INDEX IF EXISTS idx_treatment_materials_treatment;
+
+DROP INDEX IF EXISTS idx_patients_full_name_lower;
+DROP INDEX IF EXISTS idx_patients_email_lower;
+DROP INDEX IF EXISTS idx_treatments_date;
+DROP INDEX IF EXISTS idx_treatments_status;
+DROP INDEX IF EXISTS idx_treatments_tooth_number;
+
+-- ================================
+-- DROP TABLES
+-- ================================
+
+DROP TABLE IF EXISTS treatment_materials CASCADE;
+
 COMMIT;
 
 -- ====================================================================

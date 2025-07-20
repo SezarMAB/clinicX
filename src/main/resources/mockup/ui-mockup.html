@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دينتال - إدارة عيادة الأسنان</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div class="app-container">
+  <!-- ===== الشريط الجانبي الأيسر (الأدوات) ===== -->
+  <!-- <aside class="sidebar-tools">
+      <a href="#"><i class="fas fa-th-list"></i></a>
+      <a href="#"><i class="fas fa-chart-line"></i></a>
+      <a href="#" class="active-tool"><span class="tool-char">H</span></a>
+      <a href="#"><i class="fas fa-layer-group"></i></a>
+  </aside> -->
+
+  <!-- ===== المحتوى الرئيسي ===== -->
+  <main class="main-content">
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+      <div class="logo">دينتال</div>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="ابحث عن مريض، رقم المريض، تاريخ الميلاد، رقم التأمين">
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary"><i class="fas fa-plus"></i> إضافة جديد</button>
+        <a href="#" class="icon-btn"><i class="far fa-calendar-check"></i></a>
+        <a href="#" class="icon-btn"><i class="far fa-calendar"></i></a>
+        <a href="#" class="icon-btn"><i class="fas fa-th"></i></a>
+        <!-- افتار المستخدم في الهيدر (ذكر) -->
+        <div class="user-avatar avatar avatar-male">
+          <i class="fas fa-user-tie"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- جسم المحتوى -->
+    <div class="content-body">
+      <!-- لوحة تفاصيل المريض -->
+      <section class="patient-details-panel">
+        <div class="patient-header">
+          <!-- افتار المريض (أنثى) -->
+          <div class="patient-photo avatar avatar-female">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="patient-summary">
+            <h2>ريما الحمصي <span class="patient-id orange">2478</span> <i class="fas fa-file-invoice has-alert"></i></h2>
+            <p>31.01.1989 (33)</p>
+            <p>(ج) موبايل: 90806700 123 49+</p>
+            <p>تأمين الشام الصحي</p>
+            <div class="patient-tags">
+              <span class="tag">JSC</span>
+              <span class="tag">AMS</span>
+              <span class="tag">BND</span>
+            </div>
+          </div>
+          <div class="info-card-container">
+            <div class="info-card">
+              <h3>المواعيد <i class="fas fa-plus"></i></h3>
+              <p><i class="far fa-calendar-check"></i> المواعيد القادمة <br> 08.10.25 | تنظيف احترافي</p>
+              <p><i class="far fa-calendar"></i> المواعيد المفتوحة <br> --- | 01 - جديد - تبييض</p>
+            </div>
+            <div class="info-card">
+              <h3>المهام المفتوحة <i class="fas fa-plus"></i></h3>
+              <p>إنشاء خطة علاج 16084 <br> 30.09.23 <span class="tag">JSC</span> <span class="status-tag">مفتوحة <i class="fas fa-caret-down"></i></span></p>
+              <p>تأكيد الموعد التالي <br> 07.10.23 <span class="tag">HMU</span> <span class="status-tag">مفتوحة <i class="fas fa-caret-down"></i></span></p>
+            </div>
+            <div class="info-card">
+              <h3>المالية <i class="fas fa-plus"></i></h3>
+              <p>فواتير مفتوحة</p>
+              <p>خطط معتمدة <i class="fas fa-circle red-dot"></i> <br> EWE 10.09.22/AVA</p>
+              <p>مبالغ مستحقة: 2,450€</p>
+            </div>
+            <div class="info-card">
+              <h3>ملاحظات</h3>
+              <p>السجل الطبي <span class="notification-badge">5</span></p>
+              <p>كلمات مفتاحية <span class="notification-badge">1</span></p>
+              <p>مذكرات</p>
+              <p>الخدمات</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- مخطط الأسنان (ظاهر بشكل دائم) -->
+        <div class="chart-container">
+          <div class="main-chart-area">
+            <div class="chart-header">مخطط الأسنان</div>
+            <div class="dental-chart">
+              <div class="tooth missing">18</div><div class="tooth">17</div><div class="tooth red-outline">16</div><div class="tooth">15</div><div class="tooth red-outline">14</div><div class="tooth">13</div><div class="tooth">12</div><div class="tooth">11</div>
+              <div class="tooth">21</div><div class="tooth">22</div><div class="tooth purple-fill">23</div><div class="tooth yellow-fill">24</div><div class="tooth">25</div><div class="tooth">26</div><div class="tooth missing">27</div><div class="tooth missing">28</div>
+              <div class="tooth">48</div><div class="tooth green-fill">47</div><div class="tooth">46</div><div class="tooth">45</div><div class="tooth">44</div><div class="tooth">43</div><div class="tooth pink-fill">42</div><div class="tooth">41</div>
+              <div class="tooth">31</div><div class="tooth">32</div><div class="tooth">33</div><div class="tooth">34</div><div class="tooth">35</div><div class="tooth missing">36</div><div class="tooth">37</div><div class="tooth">38</div>
+            </div>
+          </div>
+          <div class="chart-notes">
+            <div class="chart-notes-header">
+              <div class="tabs">
+                <button class="active">السن</button>
+                <button>ملاحظات</button>
+              </div>
+            </div>
+            <div class="notes-list">
+              <div class="note-item"><span class="note-icon">33 <i class="fas fa-times-circle"></i></span> مراقبة السن</div>
+              <div class="note-item"><span class="note-icon">32 <i class="fas fa-times-circle"></i></span> مراقبة السن</div>
+              <div class="note-item"><span class="note-icon">27 <i class="fas fa-times-circle"></i></span> مراقبة السن</div>
+              <div class="note-item"><span class="note-icon">28 <i class="fas fa-times-circle"></i></span> مراقبة السن</div>
+              <div class="note-item"><span class="note-icon">21 <i class="fas fa-times-circle"></i></span> مراقبة السن</div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="patient-tabs">
+          <a href="#" class="tab-link active" data-tab="basic-info">البيانات الأساسية</a>
+          <a href="#" class="tab-link" data-tab="treatment-log">سجل الزيارات</a>
+          <a href="#" class="tab-link" data-tab="documents">مستندات العلاج <i class="fas"></i></a>
+          <a href="#" class="tab-link" data-tab="treatment-form">ورقة العلاج</a>
+          <!-- <a href="#" class="tab-link" data-tab="cost-plan">خطة التكاليف <i class="fas fa-caret-down"></i></a> -->
+          <a href="#" class="tab-link" data-tab="lab">المختبر <i class="fas "></i></a>
+          <a href="#" class="tab-link" data-tab="finance">المالية <i class="fas"></i></a>
+          <div class="tab-actions">
+            <a href="#" class="icon-btn"><i class="fas fa-print"></i> <i class="fas fa-caret-down"></i></a>
+            <a href="#" class="icon-btn"><i class="fas fa-plus"></i> <i class="fas fa-caret-down"></i></a>
+            <a href="#" class="icon-btn"><i class="fas fa-ellipsis-h"></i></a>
+          </div>
+        </nav>
+
+        <!-- حاويات المحتوى لكل قسم -->
+        <div id="basic-info-content" class="tab-content active">
+          <div class="info-section-card">
+            <div class="basic-info-grid">
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-user"></i><strong>الاسم الكامل</strong></div>
+                <div class="info-value">ريما أحمد الحمصي</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-calendar-alt"></i><strong>تاريخ الميلاد</strong></div>
+                <div class="info-value">31.01.1989</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-venus-mars"></i><strong>الجنس</strong></div>
+                <div class="info-value">أنثى</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-phone"></i><strong>رقم الهاتف</strong></div>
+                <div class="info-value">+49 123 90806700</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-envelope"></i><strong>البريد الإلكتروني</strong></div>
+                <div class="info-value">rima.homsi@email.com</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-map-marker-alt"></i><strong>العنوان</strong></div>
+                <div class="info-value">شارع الزهور، مبنى 5، برلين</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-shield-alt"></i><strong>شركة التأمين</strong></div>
+                <div class="info-value">تأمين الشام الصحي</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-id-card"></i><strong>رقم التأمين</strong></div>
+                <div class="info-value">SN-8573920</div>
+              </div>
+              <div class="info-item full-width">
+                <div class="info-label"><i class="fas fa-notes-medical"></i><strong>حالات طبية هامة</strong></div>
+                <div class="info-value">حساسية من البنسلين.</div>
+              </div>
+            </div>
+            <div class="section-footer">
+              <button class="btn btn-primary"><i class="fas fa-edit"></i> تعديل البيانات</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="treatment-log-content" class="tab-content">
+          <div class="data-table">
+            <div class="table-header">
+              <div class="table-title">سجل زيارات المريض</div>
+              <div class="table-actions">
+                <button class="btn-small"><i class="fas fa-filter"></i> تصفية</button>
+                <button class="btn-small"><i class="fas fa-download"></i> تصدير</button>
+                <button class="btn-small"><i class="fas fa-print"></i> طباعة</button>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>الوقت</th>
+                  <th>نوع الزيارة</th>
+                  <th>السن</th>
+                  <th>العلاج</th>
+                  <th>الطبيب</th>
+                  <th>المدة</th>
+                  <th>التكلفة</th>
+                  <th>الحالة</th>
+                  <th>الملاحظات</th>
+                  <th>الموعد القادم</th>
+                  <th>الإجراءات</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td>17.06.2025</td>
+                  <td>09:30</td>
+                  <td>فحص دوري</td>
+                  <td>14</td>
+                  <td>حشوة كومبوزيت</td>
+                  <td>د. أحمد الشامي</td>
+                  <td>30 دقيقة</td>
+                  <td>67,500 ل.س</td>
+                  <td><span class="status-badge status-completed">مكتمل</span></td>
+                  <td>تسوس عميق - تم العلاج بنجاح</td>
+                  <td>18.09.2023</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-print"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>28.08.2023</td>
+                  <td>14:15</td>
+                  <td>استشارة</td>
+                  <td>16</td>
+                  <td>فحص شامل</td>
+                  <td>د. سارة الحلبي</td>
+                  <td>45 دقيقة</td>
+                  <td>25,000 ل.س</td>
+                  <td><span class="status-badge status-completed">مكتمل</span></td>
+                  <td>فحص شامل - حالة جيدة</td>
+                  <td>-</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-print"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>15.08.2023</td>
+                  <td>11:00</td>
+                  <td>علاج</td>
+                  <td>26</td>
+                  <td>تنظيف الأسنان</td>
+                  <td>د. محمد الدمشقي</td>
+                  <td>25 دقيقة</td>
+                  <td>35,000 ل.س</td>
+                  <td><span class="status-badge status-completed">مكتمل</span></td>
+                  <td>تنظيف عميق - إزالة الجير</td>
+                  <td>15.11.2023</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-print"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>02.08.2023</td>
+                  <td>16:30</td>
+                  <td>طوارئ</td>
+                  <td>11</td>
+                  <td>علاج ألم</td>
+                  <td>د. أحمد الشامي</td>
+                  <td>20 دقيقة</td>
+                  <td>15,000 ل.س</td>
+                  <td><span class="status-badge status-completed">مكتمل</span></td>
+                  <td>ألم حاد - تم تسكين الألم</td>
+                  <td>17.06.2025</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-print"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>20.07.2023</td>
+                  <td>10:15</td>
+                  <td>متابعة</td>
+                  <td>22</td>
+                  <td>فحص متابعة</td>
+                  <td>د. سارة الحلبي</td>
+                  <td>15 دقيقة</td>
+                  <td>10,000 ل.س</td>
+                  <td><span class="status-badge status-completed">مكتمل</span></td>
+                  <td>متابعة حشوة سابقة - حالة ممتازة</td>
+                  <td>-</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-print"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>18.09.2023</td>
+                  <td>09:30</td>
+                  <td>متابعة</td>
+                  <td>14</td>
+                  <td>فحص متابعة</td>
+                  <td>د. أحمد الشامي</td>
+                  <td>15 دقيقة</td>
+                  <td>10,000 ل.س</td>
+                  <td><span class="status-badge status-pending">مجدول</span></td>
+                  <td>متابعة الحشوة الجديدة</td>
+                  <td>-</td>
+                  <td class="action-icons">
+                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-calendar"></i>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="documents-content" class="tab-content">
+          <div class="data-table-container">
+            <table>
+              <thead>
+              <tr>
+                <th style="width: 5%;">النوع</th>
+                <th>اسم الملف</th>
+                <th>تاريخ الرفع</th>
+                <th>إجراءات</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td class="icon-cell"><i class="fas fa-file-pdf"></i></td>
+                <td>موافقة على خلع السن 16.pdf</td>
+                <td>23.08.2024</td>
+                <td class="action-cell"><a href="#">عرض</a> | <a href="#">تحميل</a></td>
+              </tr>
+              <tr>
+                <td class="icon-cell"><i class="fas fa-file-image"></i></td>
+                <td>صورة أشعة بانورامية.jpg</td>
+                <td>15.05.2024</td>
+                <td class="action-cell"><a href="#">عرض</a> | <a href="#">تحميل</a></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 20px;"><i class="fas fa-upload"></i> رفع مستند جديد</button>
+        </div>
+
+        <div id="treatment-form-content" class="tab-content">
+          <div class="treatment-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>التاريخ</label>
+                <input type="date" value="2023-09-04">
+              </div>
+              <div class="form-group">
+                <label>الوقت</label>
+                <input type="time" value="09:30">
+              </div>
+              <div class="form-group">
+                <label>رقم السن</label>
+                <select>
+                  <option value="">اختر السن</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="13">13</option>
+                  <option value="14" selected>14</option>
+                  <option value="15">15</option>
+                  <option value="16">16</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>نوع العلاج</label>
+                <select>
+                  <option value="">اختر نوع العلاج</option>
+                  <option value="filling" selected>حشوة</option>
+                  <option value="cleaning">تنظيف</option>
+                  <option value="extraction">قلع</option>
+                  <option value="crown">تاج</option>
+                  <option value="root_canal">علاج عصب</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>المادة المستخدمة</label>
+                <input type="text" value="حشوة كومبوزيت">
+              </div>
+              <div class="form-group">
+                <label>الكمية</label>
+                <input type="number" value="1" min="1">
+              </div>
+              <div class="form-group">
+                <label>التكلفة (ليرة سورية)</label>
+                <input type="number" value="67500">
+              </div>
+              <div class="form-group">
+                <label>حالة العلاج</label>
+                <select>
+                  <option value="completed" selected>مكتمل</option>
+                  <option value="pending">قيد التنفيذ</option>
+                  <option value="planned">مخطط</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>الطبيب المعالج</label>
+                <input type="text" value="د. أحمد الشامي">
+              </div>
+              <div class="form-group">
+                <label>المساعد</label>
+                <input type="text" value="سارة محمد">
+              </div>
+              <div class="form-group">
+                <label>رقم الجلسة</label>
+                <input type="text" value="1">
+              </div>
+              <div class="form-group">
+                <label>المدة (دقيقة)</label>
+                <input type="number" value="30">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>ملاحظات العلاج</label>
+                <textarea placeholder="أدخل ملاحظات العلاج هنا...">المريضة تحضر مع شكاوى من ألم في السن رقم 14. تم إجراء فحص شامل وتبين وجود تسوس عميق. تم تنظيف التسوس ووضع حشوة كومبوزيت. نصحت المريضة بتجنب الأطعمة الصلبة لمدة 24 ساعة.</textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>تعليمات ما بعد العلاج</label>
+                <textarea placeholder="أدخل التعليمات هنا...">- تجنب الأطعمة الصلبة لمدة 24 ساعة
+- استخدام غسول الفم المضاد للبكتيريا
+- مراجعة الطبيب في حالة استمرار الألم
+- موعد المتابعة بعد أسبوعين</textarea>
+              </div>
+            </div>
+
+            <div class="treatment-buttons">
+              <button class="btn-save">حفظ العلاج</button>
+              <button class="btn-cancel">إلغاء</button>
+              <button class="btn btn-primary">طباعة الوصفة</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="cost-plan-content" class="tab-content">
+          <div class="data-table-container">
+            <table>
+              <thead>
+              <tr>
+                <th>الإجراء</th>
+                <th>التكلفة الإجمالية</th>
+                <th>تغطية التأمين</th>
+                <th>المبلغ المطلوب من المريض</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>خلع جراحي للسن 16</td>
+                <td>250.00€</td>
+                <td>100.00€</td>
+                <td>150.00€</td>
+              </tr>
+              <tr>
+                <td>زراعة سن (Implant)</td>
+                <td>1500.00€</td>
+                <td>500.00€</td>
+                <td>1000.00€</td>
+              </tr>
+              <tr>
+                <td>تاج زركون نهائي</td>
+                <td>700.00€</td>
+                <td>250.00€</td>
+                <td>450.00€</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>الإجمالي</strong></td>
+                <td><strong>2450.00€</strong></td>
+                <td><strong>850.00€</strong></td>
+                <td><strong>1600.00€</strong></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="lab-content" class="tab-content">
+          <div class="data-table-container">
+            <table>
+              <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>العنصر المطلوب</th>
+                <th>تاريخ الإرسال</th>
+                <th>تاريخ الاستلام المتوقع</th>
+                <th>الحالة</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>LAB-0543</td>
+                <td>تاج زركون للسن 24</td>
+                <td>12.01.2024</td>
+                <td>20.01.2024</td>
+                <td><span class="tag" style="background-color: #d1fae5; color: #065f46;">تم التسليم</span></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="finance-content" class="tab-content">
+          <!-- ===== NEW: Patient Balance Summary Card ===== -->
+          <div class="balance-card-container">
+            <h3>ملخص الرصيد المالي للمريض</h3>
+            <div class="balance-card negative"> <!-- Add class 'positive' for credit, 'negative' for debt -->
+              <div class="balance-info">
+                <span class="balance-label">الرصيد الإجمالي</span>
+                <!-- Example of a NEGATIVE balance (patient owes money) -->
+                <span class="balance-amount">-77,69€</span>
+              </div>
+              <p class="balance-status">يوجد مبلغ مستحق على المريض. إجمالي الفواتير المفتوحة.</p>
+            </div>
+
+            <!--
+            // EXAMPLE: POSITIVE BALANCE (Patient has credit)
+            <div class="balance-card positive">
+                <div class="balance-info">
+                    <span class="balance-label">الرصيد الإجمالي</span>
+                    <span class="balance-amount">+422,31€</span>
+                </div>
+                <p class="balance-status">لدى المريض رصيد دائن يمكن استخدامه للعلاجات المستقبلية.</p>
+            </div>
+
+            // EXAMPLE: ZERO BALANCE
+            <div class="balance-card">
+                <div class="balance-info">
+                    <span class="balance-label">الرصيد الإجمالي</span>
+                    <span class="balance-amount">0,00€</span>
+                </div>
+                <p class="balance-status">لا توجد أي مبالغ مستحقة أو أرصدة دائنة.</p>
+            </div>
+            -->
+          </div>
+
+          <!-- ===== UPDATED: Data Table with expandable rows ===== -->
+          <div class="data-table-container">
+            <table>
+              <thead>
+              <tr>
+                <th style="width: 8%;">التفاصيل</th>
+                <th>رقم الفاتورة / البيان</th>
+                <th>تاريخ الإصدار</th>
+                <th>المبلغ</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+              </thead>
+              <!-- Invoice 1: Partially paid -->
+              <tbody class="invoice-group">
+              <tr class="invoice-main">
+                <td class="toggle-cell"><i class="fas fa-plus-circle toggle-details"></i></td>
+                <td>INV-2024-08-23</td>
+                <td>23.08.2024</td>
+                <td>157,69€</td>
+                <td><span class="tag tag-due">مستحقة</span></td>
+                <td class="action-cell"><a href="#">عرض</a> | <a href="#">إرسال تذكير</a></td>
+              </tr>
+              <tr class="installment-detail hidden">
+                <td></td>
+                <td colspan="4">
+                  <div class="payment-info">
+                    <span class="payment-desc">دفعة أولى</span>
+                    <span class="payment-date">تاريخ الدفعة: 01.09.2024</span>
+                    <span class="payment-amount">80,00€</span>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+              </tbody>
+
+              <!-- Invoice 2: Fully paid with multiple installments -->
+              <tbody class="invoice-group">
+              <tr class="invoice-main">
+                <td class="toggle-cell"><i class="fas fa-plus-circle toggle-details"></i></td>
+                <td>INV-2024-05-15</td>
+                <td>15.05.2024</td>
+                <td>85,00€</td>
+                <td><span class="tag tag-paid">مدفوعة</span></td>
+                <td class="action-cell"><a href="#">عرض</a> | <a href="#">طباعة</a></td>
+              </tr>
+              <tr class="installment-detail hidden">
+                <td></td>
+                <td colspan="4">
+                  <div class="payment-info">
+                    <span class="payment-desc">الدفعة الثانية (الأخيرة)</span>
+                    <span class="payment-date">تاريخ الدفعة: 01.06.2024</span>
+                    <span class="payment-amount">45,00€</span>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+              <tr class="installment-detail hidden">
+                <td></td>
+                <td colspan="4">
+                  <div class="payment-info">
+                    <span class="payment-desc">دفعة أولى</span>
+                    <span class="payment-date">تاريخ الدفعة: 16.05.2024</span>
+                    <span class="payment-amount">40,00€</span>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+              </tbody>
+
+              <!-- Record 3: Advance payment (credit) -->
+              <tbody class="invoice-group">
+              <tr class="invoice-main">
+                <td class="toggle-cell"></td> <!-- No details to show -->
+                <td>إيداع رصيد مقدم</td>
+                <td>10.04.2024</td>
+                <td>+500,00€</td>
+                <td><span class="tag tag-credit">رصيد مضاف</span></td>
+                <td class="action-cell"><a href="#">طباعة إيصال</a></td>
+              </tr>
+              <!-- No installment rows needed for an advance payment -->
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- لوحة المواعيد -->
+      <aside class="appointments-panel">
+        <div class="appointments-header">
+          <button class="date-nav"><i class="fas fa-chevron-right"></i></button>
+          <div class="date-display">17.06.2025 <i class="fas fa-caret-down"></i></div>
+          <button class="date-nav"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="appointments-filter">
+          <button class="btn-filter active">اليوم</button>
+          <button class="btn-filter"><i class="fas fa-user-friends"></i> <i class="fas fa-caret-down"></i></button>
+        </div>
+        <div class="appointment-list">
+          <!-- الموعد المحدد -->
+          <div class="appointment-card active">
+            <div class="card-content">
+              <div class="patient-info">
+                <span class="status-dot red"></span>
+                <span><strong>الحمصي، ريما</strong></span>
+                <span class="patient-id">12345</span>
+              </div>
+              <div class="appointment-time">9:30 - 10:00</div>
+              <div class="appointment-details">مؤقت جديد</div>
+              <div class="card-footer">
+                <div class="card-icons">
+                  <i class="fas fa-file-alt"></i>
+                  <i class="far fa-folder"></i>
+                  <i class="far fa-credit-card has-alert"></i>
+                </div>
+                <div class="practitioner-info">
+                  <i class="fas fa-phone-alt"></i>
+                  <span class="practitioner-tag">HSO</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- باقي المواعيد -->
+          <div class="appointment-card">
+            <div class="card-content">
+              <div class="patient-info">
+                <span><strong>الشامي، محمد</strong></span>
+                <span class="patient-id orange">15432</span>
+              </div>
+              <div class="appointment-time">9:30 - 10:00</div>
+              <div class="appointment-details">مؤقت جديد</div>
+              <div class="card-footer">
+                <div class="card-icons">
+                  <i class="fas fa-file-alt"></i>
+                  <i class="far fa-folder"></i>
+                  <i class="far fa-credit-card"></i>
+                </div>
+                <div class="practitioner-info">
+                  <i class="fas fa-phone-alt"></i>
+                  <span class="practitioner-tag">TMD</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="appointment-card">
+            <div class="card-content">
+              <div class="patient-info">
+                <span class="status-dot green"></span>
+                <span><strong>خوري، أوسكار</strong></span>
+                <span class="patient-id orange">47895</span>
+              </div>
+              <div class="appointment-time">9:30 - 10:30</div>
+              <div class="appointment-details">وقاية</div>
+              <div class="card-footer">
+                <div class="card-icons">
+                  <i class="fas fa-file-alt"></i>
+                  <i class="far fa-folder"></i>
+                  <i class="far fa-credit-card"></i>
+                </div>
+                <div class="practitioner-info">
+                  <i class="fas fa-phone-alt"></i>
+                  <span class="practitioner-tag">HSO</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ===== الشريط الجانبي الأيمن (القائمة) ===== -->
+  <nav class="sidebar-main-nav">
+    <div class="sidebar-header">
+      <i class="fas fa-bars"></i>
+    </div>
+    <ul class="sidebar-menu">
+      <!-- <li><a href="#"><i class="fas fa-user"></i></a></li> -->
+      <!-- <li><a href="#"><i class="fas fa-users"></i></a></li>
+      <li><a href="#"><i class="fas fa-folder"></i></a></li> -->
+      <li class="has-notification"><a href="#"><i class="fas fa-comment-medical"></i><span class="notification-badge">3</span></a></li>
+      <!-- <li class="has-notification"><a href="#"><i class="fas fa-phone"></i><span class="notification-badge">3</span></a></li>
+      <li class="has-notification"><a href="#"><i class="fas fa-clipboard-list"></i><span class="notification-badge">1</span></a></li> -->
+      <li><a href="#"><i class="fas fa-calendar-alt"></i></a></li>
+      <li><a href="#"><i class="fas fa-cog"></i></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <!-- افتار المستخدم في الشريط الجانبي (أنثى) -->
+      <a href="#" class="active-user">
+        <div class="sidebar-avatar avatar avatar-female">
+          <i class="fas fa-user"></i>
+        </div>
+      </a>
+      <a href="#"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </nav>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

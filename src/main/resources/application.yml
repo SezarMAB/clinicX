@@ -2,22 +2,30 @@ spring:
   application:
     name: clinicX
 
+  datasource:
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driverClassName: ${spring.datasource.driverClassName}
+
+  profiles:
+    active: h2  # Default to H2 for development. Use 'postgres' for PostgreSQL
+
   jpa:
+    show-sql: false
     properties:
       hibernate:
+        dialect: ${spring.jpa.properties.hibernate.dialect}
         hbm2ddl:
           auto: validate
-  datasource:
-    url: jdbc:postgresql://localhost:5432/clinicx?currentSchema=public
-    username: postgres
-    password: postgres
-    driverClassName: org.postgresql.Driver
+        format_sql: true
+
   flyway:
     enabled: true
     baselineOnMigrate: true
     baseline-version: 0
-    out-of-order: true # NOTE only for local development
-    locations: classpath:db/migration,classpath:db/local_demo_data
+    out-of-order: true
+    locations: ${flyway.locations}
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}

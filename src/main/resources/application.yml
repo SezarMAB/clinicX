@@ -8,8 +8,8 @@ spring:
     password: ${spring.datasource.password}
     driverClassName: ${spring.datasource.driverClassName}
 
-  profiles:
-    active: h2  # Default to H2 for development. Use 'postgres' for PostgreSQL
+#  profiles:
+#    active: postgres  # Default to H2 for development. Use 'postgres' for PostgreSQL
 
   jpa:
     show-sql: false
@@ -29,3 +29,51 @@ spring:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
+
+  # Security configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:18081/realms/clinicx-dev
+          jwk-set-uri: http://localhost:18081/realms/clinicx-dev/protocol/openid-connect/certs
+
+# ClinicX specific configuration
+clinicx:
+  tenant:
+    mode: single  # Options: single, multi
+    default-id: default-tenant
+
+  security:
+    keycloak:
+      realm: clinicx-dev
+      client-id: clinicx-backend
+      client-secret: tHFYKZ1bgyLz6dOWHsAa8ir3yXdzbcjk
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    sy.sezar.clinicx: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Springdoc OpenAPI configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  security-schemes:
+    bearer-jwt:
+      type: http
+      scheme: bearer
+      bearer-format: JWT
+      description: "Enter JWT Bearer token"

@@ -190,17 +190,85 @@ dependencies {
 ```
 
 ### Security with Keycloak
+
+**⚠️ CRITICAL: Tenant Isolation Security**
+
+The tenant identification MUST come from the JWT token issued by Keycloak, NOT from request headers that clients can manipulate.
+
+#### Secure Tenant Resolution
+```java
+// ❌ INSECURE - Never do this!
+String tenantId = request.getHeader("X-Tenant-ID"); // Client can fake this!
+
+// ✅ SECURE - Extract from JWT
+@Component
+public class SecureTenantInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, 
+                           HttpServletResponse response, 
+                           Object handler) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            
+            // Tenant ID embedded in JWT by Keycloak (cannot be forged)
+            String tenantId = jwt.getClaimAsString("tenant_id");
+            
+            // Validate user belongs to this tenant
+            validateTenantAccess(jwt.getSubject(), tenantId);
+            
+            TenantContext.setCurrentTenant(tenantId);
+        }
+        return true;
+    }
+}
+```
+
+#### Keycloak Configuration
 ```yaml
-# Realm per tenant approach
+# Option 1: Realm per tenant (Recommended)
 keycloak:
   realms:
-    - name: smile-dental
-      client-id: clinicx-dental
+    - name: clinicx-smile-dental
+      tenant-id: tenant_001
+      client-id: clinicx-app
       features: [dental-api, full-access]
     
-    - name: family-medical  
-      client-id: clinicx-basic
+    - name: clinicx-family-medical  
+      tenant-id: tenant_002
+      client-id: clinicx-app
       features: [basic-api, appointments-only]
+
+# Option 2: Single realm with tenant claims
+keycloak:
+  realm: clinicx
+  client-mappers:
+    - name: tenant-mapper
+      protocol: openid-connect
+      protocol-mapper: oidc-usermodel-attribute-mapper
+      user-attribute: tenant_id
+      claim-name: tenant_id
+      add-to-access-token: true
+```
+
+#### Additional Security Layers
+```java
+// 1. Entity-level tenant validation
+@Entity
+@Where(clause = "tenant_id = current_setting('app.current_tenant')::uuid")
+public class Patient {
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
+}
+
+// 2. Repository-level validation
+@Query("SELECT p FROM Patient p WHERE p.id = :id AND p.tenantId = :#{T(TenantContext).getCurrentTenant()}")
+Optional<Patient> findById(@Param("id") UUID id);
+
+// 3. Service-level double-check
+if (!entity.getTenantId().equals(TenantContext.getCurrentTenant())) {
+    throw new AccessDeniedException("Cross-tenant access attempt detected");
+}
 ```
 
 ### Monitoring
@@ -208,6 +276,34 @@ keycloak:
 - Feature usage analytics
 - Performance per schema
 - Cost allocation per tenant
+
+## Security Best Practices for Multi-Tenancy
+
+### 1. **Never Trust Client Headers**
+- Tenant ID must come from authenticated JWT tokens
+- Validate tenant access at multiple layers
+- Log all cross-tenant access attempts
+
+### 2. **Database Isolation**
+- Use schema-per-tenant for complete isolation
+- Add tenant_id column to all tables as backup
+- Use Row Level Security (RLS) in PostgreSQL
+
+### 3. **API Security**
+- Validate tenant context in all API endpoints
+- Use method-level security annotations
+- Implement rate limiting per tenant
+
+### 4. **Audit Trail**
+```java
+@EventListener
+public void handleSecurityEvent(AbstractAuthenticationEvent event) {
+    if (event instanceof AbstractAuthenticationFailureEvent) {
+        // Log failed cross-tenant access attempts
+        auditService.logSecurityEvent(event);
+    }
+}
+```
 
 ## Cost Optimization
 
@@ -231,6 +327,30 @@ keycloak:
 4. **Uptime**: 99.9% SLA
 5. **Cost per Clinic**: Predictable and scalable
 
+## Common Pitfalls to Avoid
+
+### ❌ Security Anti-Patterns
+1. **Client-Controlled Tenant Selection**
+   - Never use headers like `X-Tenant-ID` that clients can modify
+   - Always derive tenant from authenticated JWT tokens
+   
+2. **Missing Tenant Validation**
+   - Don't assume the framework handles tenant isolation
+   - Explicitly validate tenant access at every layer
+
+3. **Shared Sequences/IDs**
+   - Use UUIDs instead of sequential IDs
+   - Prevents tenant ID enumeration attacks
+
+### ❌ Architecture Anti-Patterns
+1. **Premature Microservices**
+   - Start with modular monolith
+   - Extract services only when proven necessary
+
+2. **Over-Engineering Features**
+   - Use simple feature flags first
+   - Add complexity only when needed
+
 ## Conclusion
 
 The **modular monolith with feature flags** approach provides:
@@ -238,5 +358,6 @@ The **modular monolith with feature flags** approach provides:
 - Flexibility for different clinic types
 - Cost-effective scaling
 - Future-proof architecture
+- **Secure multi-tenant isolation**
 
-Start simple, validate with customers, then evolve based on real needs. This approach lets you serve both dental and general clinics efficiently while maintaining a single, manageable codebase.
+Start simple, validate with customers, then evolve based on real needs. This approach lets you serve both dental and general clinics efficiently while maintaining a single, manageable codebase with proper security boundaries.

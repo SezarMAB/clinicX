@@ -55,6 +55,10 @@ public class Payment {
     @Column(name = "description", length = 255)
     private String description;
 
+    @Size(max = 100)
+    @Column(name = "reference_number", length = 100)
+    private String referenceNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Staff createdBy;

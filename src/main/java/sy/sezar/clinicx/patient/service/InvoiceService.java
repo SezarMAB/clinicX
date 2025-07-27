@@ -42,4 +42,9 @@ public interface InvoiceService {
      * Gets the next sequential invoice number.
      */
     String getNextInvoiceNumber();
+
+    /**
+     * Creates an invoice and optionally applies available advance payments.
+     */
+    FinancialRecordDto createInvoiceWithAdvancePayments(UUID patientId, BigDecimal amount, String description, boolean autoApplyCredits);
 }

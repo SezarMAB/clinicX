@@ -24,6 +24,7 @@ import java.util.UUID;
 public class InvoiceControllerImpl implements InvoiceControllerApi {
 
     private final InvoiceService invoiceService;
+    private final sy.sezar.clinicx.patient.service.AdvancePaymentService advancePaymentService;
 
     @Override
     public ResponseEntity<FinancialRecordDto> createInvoice(InvoiceCreateRequest request) {
@@ -40,6 +41,19 @@ public class InvoiceControllerImpl implements InvoiceControllerApi {
             log.debug("Calculated invoice total: {} for patient: {}", totalAmount, request.patientId());
 
             FinancialRecordDto invoice = invoiceService.createInvoice(request.patientId(), totalAmount, description);
+            
+            // Check if auto-apply advance payments is requested
+            if (Boolean.TRUE.equals(request.autoApplyAdvancePayments()) && invoice != null) {
+                try {
+                    log.info("Auto-applying advance payments to invoice: {}", invoice.recordId());
+                    invoice = advancePaymentService.autoApplyAdvancePaymentsToInvoice(invoice.recordId());
+                    log.info("Successfully auto-applied advance payments to invoice: {}", invoice.invoiceNumber());
+                } catch (Exception e) {
+                    log.warn("Could not auto-apply advance payments to invoice {}: {}", invoice.invoiceNumber(), e.getMessage());
+                    // Continue with the invoice even if auto-apply fails
+                }
+            }
+            
             log.info("Successfully created invoice: {} for patient: {} - Status: 201 CREATED", 
                     invoice.invoiceNumber(), request.patientId());
             return ResponseEntity.status(HttpStatus.CREATED).body(invoice);

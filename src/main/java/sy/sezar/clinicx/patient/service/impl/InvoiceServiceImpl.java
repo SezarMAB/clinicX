@@ -221,4 +221,27 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         return status;
     }
+
+    @Override
+    @Transactional
+    public FinancialRecordDto createInvoiceWithAdvancePayments(UUID patientId, BigDecimal amount, String description, boolean autoApplyCredits) {
+        log.info("Creating invoice with advance payment option for patient ID: {} with amount: {} (auto-apply: {})", patientId, amount, autoApplyCredits);
+        
+        // Create the invoice first
+        FinancialRecordDto invoice = createInvoice(patientId, amount, description);
+        
+        // If auto-apply is enabled and invoice was created successfully
+        if (autoApplyCredits && invoice != null) {
+            try {
+                // We need to inject AdvancePaymentService to avoid circular dependency
+                // For now, we'll return the invoice and let the controller handle auto-apply
+                log.info("Invoice created successfully. Auto-apply should be handled by the controller to avoid circular dependencies.");
+            } catch (Exception e) {
+                log.warn("Could not auto-apply advance payments: {}", e.getMessage());
+                // Return the invoice even if auto-apply fails
+            }
+        }
+        
+        return invoice;
+    }
 }

@@ -3,9 +3,15 @@ package sy.sezar.clinicx.config;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.SecurityFilterChain;
+import sy.sezar.clinicx.core.security.KeycloakJwtGrantedAuthoritiesConverter;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -17,13 +23,48 @@ import java.util.Map;
  * This allows testing without a running Keycloak instance.
  */
 @TestConfiguration
-@Profile("test")
+@EnableWebSecurity
+@EnableMethodSecurity
 public class TestSecurityConfig {
+
+    @Bean
+    @Primary
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(authz -> authz
+                // Public endpoints
+                .requestMatchers("/api/auth/test/public").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                
+                // All other endpoints require authentication
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                    .jwtAuthenticationConverter(testJwtAuthenticationConverter())
+                )
+            );
+
+        return http.build();
+    }
 
     @Bean
     @Primary
     public JwtDecoder jwtDecoder() {
         return token -> createMockJwt(token);
+    }
+    
+    @Bean
+    @Primary
+    public JwtAuthenticationConverter testJwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthoritiesConverter());
+        converter.setPrincipalClaimName("preferred_username");
+        return converter;
     }
 
     private Jwt createMockJwt(String token) {
@@ -40,7 +81,7 @@ public class TestSecurityConfig {
         
         // Standard JWT claims
         claims.put("sub", username);
-        claims.put("iss", "http://localhost:18081/realms/clinicx-dev");
+        claims.put("iss", "http://localhost:18081/realms/clinicx-test");
         claims.put("preferred_username", username);
         claims.put("email", username + "@test.com");
         claims.put("email_verified", true);

@@ -223,26 +223,6 @@ keycloak:
 - Feature consumption
 - Support level
 
-## Alternative Approaches (Not Recommended)
-
-### ❌ Separate Applications
-- Dental app + Appointment app
-- High maintenance cost
-- Code duplication
-- Inconsistent updates
-
-### ❌ Microservices from Start
-- Over-engineering
-- Complex deployment
-- Higher operational cost
-- Slower development
-
-### ❌ Single Schema Multi-tenant
-- Data isolation concerns
-- Performance issues
-- Complex queries
-- GDPR compliance harder
-
 ## Success Metrics
 
 1. **Time to Onboard**: < 1 hour per clinic

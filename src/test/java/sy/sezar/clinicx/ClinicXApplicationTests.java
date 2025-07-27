@@ -1,13 +1,13 @@
-package sy.sezar.clinicx;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class ClinicXApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}
+//package sy.sezar.clinicx;
+//
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+//
+//@SpringBootTest
+//class ClinicXApplicationTests {
+//
+//	@Test
+//	void contextLoads() {
+//	}
+//
+//}

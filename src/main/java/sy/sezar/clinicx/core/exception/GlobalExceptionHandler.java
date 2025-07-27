@@ -7,8 +7,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import sy.sezar.clinicx.core.dto.ValidationErrorResponse;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +41,57 @@ public class GlobalExceptionHandler {
             Instant.now()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(NotValidValueException.class)
+    public ResponseEntity<ValidationErrorResponse> handleNotValidValueException(NotValidValueException ex) {
+        log.error("Validation error for field '{}': {}", ex.getFieldName(), ex.getMessage());
+        ValidationErrorResponse response = new ValidationErrorResponse(
+            ex.getFieldName(),
+            ex.getInvalidValue(),
+            ex.getExpectedFormat(),
+            ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ValidationErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String paramName = ex.getName();
+        String invalidValue = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String expectedFormat = "";
+        
+        // Determine expected format based on the required type
+        if (ex.getRequiredType() != null) {
+            if (Instant.class.isAssignableFrom(ex.getRequiredType())) {
+                expectedFormat = "ISO 8601 format (e.g., 2024-01-15T10:00:00Z)";
+            } else if (java.time.LocalDate.class.isAssignableFrom(ex.getRequiredType())) {
+                expectedFormat = "YYYY-MM-DD format (e.g., 2024-01-15)";
+            } else {
+                expectedFormat = ex.getRequiredType().getSimpleName();
+            }
+        }
+        
+        log.error("Type mismatch for parameter '{}': {}", paramName, ex.getMessage());
+        ValidationErrorResponse response = new ValidationErrorResponse(
+            paramName,
+            invalidValue,
+            expectedFormat,
+            String.format("Invalid format for parameter '%s'. Expected %s", paramName, expectedFormat)
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ValidationErrorResponse> handleDateTimeParse(DateTimeParseException ex) {
+        log.error("Date/time parse error: {}", ex.getMessage());
+        ValidationErrorResponse response = new ValidationErrorResponse(
+            "dateTime",
+            ex.getParsedString(),
+            "ISO 8601 format (e.g., 2024-01-15T10:00:00Z)",
+            "Invalid date/time format: " + ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

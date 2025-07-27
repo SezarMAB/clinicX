@@ -64,6 +64,18 @@ server:
   servlet:
     context-path: /
 
+# Application-specific configuration
+app:
+  date:
+    formats:
+      datetime:
+        - "yyyy-MM-dd'T'HH:mm:ss"
+        - "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        - "yyyy-MM-dd'T'HH:mm:ssX"
+        - "yyyy-MM-dd HH:mm:ss"
+      date: "yyyy-MM-dd"
+    default-timezone: UTC
+
 # Springdoc OpenAPI configuration
 springdoc:
   api-docs:

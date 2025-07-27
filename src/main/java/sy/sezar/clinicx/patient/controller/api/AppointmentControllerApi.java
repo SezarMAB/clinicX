@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -46,9 +45,9 @@ public interface AppointmentControllerApi {
     @ApiResponse(responseCode = "200", description = "Appointments retrieved")
     ResponseEntity<List<AppointmentCardDto>> getAppointmentsByDateRange(
             @Parameter(name = "startDateTime", description = "Start date and time (ISO format)", required = true)
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDateTime,
+            @RequestParam Instant startDateTime,
             @Parameter(name = "endDateTime", description = "End date and time (ISO format)", required = true)
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDateTime);
+            @RequestParam Instant endDateTime);
 
     @GetMapping("/date/{date}")
     @Operation(
@@ -58,7 +57,7 @@ public interface AppointmentControllerApi {
     @ApiResponse(responseCode = "200", description = "Appointments retrieved")
     ResponseEntity<List<AppointmentCardDto>> getAppointmentsForDate(
             @Parameter(name = "date", description = "Date in YYYY-MM-DD format", required = true)
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
+            @PathVariable LocalDate date);
 
     @GetMapping("/patient/{patientId}/upcoming")
     @Operation(

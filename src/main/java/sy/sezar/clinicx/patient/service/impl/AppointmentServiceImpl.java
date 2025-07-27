@@ -6,7 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.core.exception.NotFoundException;
+import sy.sezar.clinicx.core.exception.NotValidValueException;
 import sy.sezar.clinicx.patient.dto.AppointmentCardDto;
 import sy.sezar.clinicx.patient.dto.AppointmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.UpcomingAppointmentDto;
@@ -18,9 +20,12 @@ import sy.sezar.clinicx.patient.service.AppointmentService;
 import sy.sezar.clinicx.clinic.repository.SpecialtyRepository;
 import sy.sezar.clinicx.staff.repository.StaffRepository;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +48,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public AppointmentCardDto createAppointment(AppointmentCreateRequest request) {
         log.info("Creating new appointment for patient: {}", request.patientId());
+        
+        // Validate appointment date/time
+        validateAppointmentDateTime(request.appointmentDatetime());
+        
+        // TODO: Add availability validation when doctor schedules are implemented
+        // validateAppointmentAvailability(request);
         
         Appointment appointment = appointmentMapper.toEntity(request);
         
@@ -75,6 +86,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentCardDto> getAppointmentsByDateRange(Instant startDateTime, Instant endDateTime) {
         log.info("Getting appointments between {} and {}", startDateTime, endDateTime);
+        
+        // Validate date range
+        validateDateRange(startDateTime, endDateTime);
 
         List<Appointment> appointments = appointmentRepository
                 .findByAppointmentDatetimeBetweenOrderByAppointmentDatetimeAsc(startDateTime, endDateTime);
@@ -137,5 +151,71 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.getPatient().getId(), appointment.getAppointmentDatetime());
         
         return appointmentMapper.toAppointmentCardDto(appointment);
+    }
+    
+    /**
+     * Validates appointment date/time according to business rules.
+     */
+    private void validateAppointmentDateTime(Instant appointmentDateTime) {
+        if (appointmentDateTime == null) {
+            throw new NotValidValueException("appointmentDatetime", null, 
+                "ISO 8601 format (e.g., 2024-01-15T10:30:00Z)", 
+                "Appointment date/time is required");
+        }
+        
+        Instant now = Instant.now();
+        if (appointmentDateTime.isBefore(now)) {
+            throw new NotValidValueException("appointmentDatetime", 
+                appointmentDateTime, 
+                "Future date/time in ISO 8601 format",
+                "Appointment must be scheduled in the future");
+        }
+        
+        // Check if appointment is on weekend (using system default timezone)
+        ZonedDateTime appointmentZoned = appointmentDateTime.atZone(ZoneId.systemDefault());
+        DayOfWeek dayOfWeek = appointmentZoned.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            throw new BusinessRuleException("Appointments cannot be scheduled on weekends");
+        }
+        
+        // Check if appointment is too far in the future (e.g., more than 6 months)
+        Instant sixMonthsFromNow = now.plus(Duration.ofDays(180));
+        if (appointmentDateTime.isAfter(sixMonthsFromNow)) {
+            throw new BusinessRuleException("Appointments cannot be scheduled more than 6 months in advance");
+        }
+    }
+    
+    /**
+     * Validates date range for queries.
+     */
+    private void validateDateRange(Instant startDateTime, Instant endDateTime) {
+        if (startDateTime == null || endDateTime == null) {
+            throw new IllegalArgumentException("Date range parameters cannot be null");
+        }
+        
+        if (startDateTime.isAfter(endDateTime)) {
+            throw new NotValidValueException("startDateTime", startDateTime,
+                "Must be before endDateTime",
+                String.format("Invalid date range: start date %s is after end date %s", 
+                    startDateTime, endDateTime));
+        }
+        
+        // Business rule: Can't query more than 1 year of data
+        long daysBetween = Duration.between(startDateTime, endDateTime).toDays();
+        if (daysBetween > 365) {
+            throw new BusinessRuleException(
+                String.format("Date range cannot exceed 365 days. Requested range is %d days", daysBetween));
+        }
+    }
+    
+    /**
+     * Validates appointment availability (to be implemented when doctor schedules are available).
+     */
+    private void validateAppointmentAvailability(AppointmentCreateRequest request) {
+        // TODO: Implement when doctor schedule functionality is available
+        // - Check if doctor is available at the requested time
+        // - Check for conflicts with existing appointments
+        // - Check clinic operating hours
+        log.debug("Appointment availability validation not yet implemented");
     }
 }

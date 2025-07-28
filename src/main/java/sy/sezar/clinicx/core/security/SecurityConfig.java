@@ -1,6 +1,7 @@
 package sy.sezar.clinicx.core.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.beans.factory.annotation.Value;
+import sy.sezar.clinicx.tenant.repository.TenantRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +25,18 @@ public class SecurityConfig {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
+    
+    @Value("${app.multi-tenant.enabled:true}")
+    private boolean multiTenantEnabled;
+    
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakBaseUrl;
+    
+    @Value("${app.multi-tenant.default-realm:master}")
+    private String defaultRealm;
+    
+    @Autowired
+    private TenantRepository tenantRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -38,6 +52,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/test/public").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                
+                // Tenant management endpoints (super admin only)
+                .requestMatchers("/api/tenants/**").hasRole("SUPER_ADMIN")
                 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -56,6 +73,14 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
+        if (multiTenantEnabled) {
+            MultiTenantJwtDecoder decoder = new MultiTenantJwtDecoder();
+            decoder.setTenantRepository(tenantRepository);
+            decoder.setKeycloakBaseUrl(keycloakBaseUrl);
+            decoder.setMultiTenantEnabled(multiTenantEnabled);
+            decoder.setDefaultRealm(defaultRealm);
+            return decoder;
+        }
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 

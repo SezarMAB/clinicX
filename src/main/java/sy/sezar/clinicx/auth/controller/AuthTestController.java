@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sy.sezar.clinicx.core.security.SecurityUtils;
-import sy.sezar.clinicx.core.tenant.TenantContext;
+import sy.sezar.clinicx.tenant.TenantContext;
 
 import java.util.HashMap;
 import java.util.Map;

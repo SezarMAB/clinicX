@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import sy.sezar.clinicx.config.TestApplicationConfig;
-import sy.sezar.clinicx.core.tenant.TenantInterceptor;
-import sy.sezar.clinicx.core.tenant.TenantResolver;
+import sy.sezar.clinicx.tenant.TenantInterceptor;
+import sy.sezar.clinicx.tenant.TenantResolver;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

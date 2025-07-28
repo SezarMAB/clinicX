@@ -11,9 +11,9 @@ import sy.sezar.clinicx.auth.controller.AuthTestController;
 import sy.sezar.clinicx.config.TestSecurityConfig;
 import sy.sezar.clinicx.config.TestWebConfig;
 import sy.sezar.clinicx.core.security.SecurityUtils;
-import sy.sezar.clinicx.core.tenant.TenantContext;
-import sy.sezar.clinicx.core.tenant.TenantInterceptor;
-import sy.sezar.clinicx.core.tenant.TenantResolver;
+import sy.sezar.clinicx.tenant.TenantContext;
+import sy.sezar.clinicx.tenant.TenantInterceptor;
+import sy.sezar.clinicx.tenant.TenantResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;

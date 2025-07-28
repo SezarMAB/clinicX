@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.core.tenant;
+package sy.sezar.clinicx.tenant;
 
 /**
  * Thread-local storage for the current tenant context.

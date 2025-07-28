@@ -76,6 +76,25 @@ app:
       date: "yyyy-MM-dd"
     default-timezone: UTC
 
+  # TODO merge clinix and app configuration
+
+  # Multi-tenant configuration
+  multi-tenant:
+    enabled: true
+    default-tenant: default
+    default-realm: master
+
+  # Domain configuration
+  domain: clinicx.com
+
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:18081
+  master-realm: master
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin
+
 # Springdoc OpenAPI configuration
 springdoc:
   api-docs:

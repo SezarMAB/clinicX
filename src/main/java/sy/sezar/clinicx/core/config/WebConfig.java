@@ -6,7 +6,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import sy.sezar.clinicx.core.converter.StringToInstantConverter;
-import sy.sezar.clinicx.core.tenant.TenantInterceptor;
+import sy.sezar.clinicx.tenant.TenantInterceptor;
 
 /**
  * Web MVC configuration.

@@ -20,11 +20,6 @@ spring:
   main:
     allow-circular-references: true
 
-# Development-specific tenant configuration
-clinicx:
-  tenant:
-    mode: multi  # Start with single tenant for simplicity
-    default-id: dev-tenant-001
 
 # Reduced logging in development
 logging:
@@ -50,3 +45,32 @@ cors:
   exposed-headers:
     - Authorization
   allow-credentials: true
+
+
+# TODO merge clinix and app configuration
+# Development-specific tenant configuration
+clinicx:
+  tenant:
+    mode: multi  # Start with single tenant for simplicity
+    default-id: dev-tenant-001
+
+
+# Application-specific configuration
+app:
+  # Multi-tenant configuration
+  multi-tenant:
+    enabled: true
+    tenant:
+      default-id: default
+    default-realm: master
+
+  # Domain configuration
+  domain: clinicx.com
+
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:18081
+  master-realm: master
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin

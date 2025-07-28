@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.core.tenant;
+package sy.sezar.clinicx.tenant;
 
 /**
  * Interface for resolving the current tenant.

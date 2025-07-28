@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.core.tenant;
+package sy.sezar.clinicx.tenant;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

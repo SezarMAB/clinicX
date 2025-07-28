@@ -16,7 +16,7 @@ import java.time.Instant;
 @Getter
 @Setter
 public class ClinicInfo {
-
+    //TODO fix the id type, it should be Long or UUID, not Boolean and extend BaseEntity
     @Id
     @Column(name = "id", nullable = false)
     private Boolean id;

@@ -24,7 +24,7 @@ You are a MapStruct expert specializing in efficient object mapping in Spring Bo
 
 ## Output
 - Mapper interfaces with @Mapper annotation
-- DTO classes with proper structure
+- DTO records with proper structure
 - Custom mapping methods
 - Configuration for specific use cases
 - Performance considerations

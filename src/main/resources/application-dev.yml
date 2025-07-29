@@ -26,7 +26,7 @@ spring:
         jwt:
           # Default issuer-uri for development (master realm)
           issuer-uri: http://localhost:18081/realms/master
-          jwk-set-uri: http://localhost:18081/realms/master/protocol/openid-connect/certs
+          # jwk-set-uri is dynamically determined by MultiTenantJwtDecoder
 #          audiences: clinicx-backend
 
 

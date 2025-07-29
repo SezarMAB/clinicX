@@ -41,8 +41,8 @@ logging:
 # CORS configuration for development
 cors:
   allowed-origins:
-    - http://localhost:3000
     - http://localhost:4200
+    - http://*.localhost:4200
   allowed-methods:
     - GET
     - POST

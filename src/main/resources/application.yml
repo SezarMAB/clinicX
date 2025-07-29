@@ -75,16 +75,14 @@ app:
   tenant:
     mode: ${TENANT_MODE:single}  # Options: single, multi
     default-tenant: ${DEFAULT_TENANT_ID:master}
-
   # Multi-tenant configuration
   multi-tenant:
     enabled: ${MULTI_TENANT_ENABLED:true}
     default-realm: ${DEFAULT_REALM:master}
     # Pattern for realm naming: clinic-{subdomain}
     realm-prefix: ${REALM_PREFIX:clinic-}
-
   # Domain configuration
-  domain: ${APP_DOMAIN:clinicx.com}
+#  domain: ${APP_DOMAIN:clinicx.com}
 
 # Keycloak configuration
 keycloak:

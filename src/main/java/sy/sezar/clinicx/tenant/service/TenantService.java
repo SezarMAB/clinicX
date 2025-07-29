@@ -15,9 +15,9 @@ public interface TenantService {
      * Creates a new tenant with Keycloak realm and admin user.
      *
      * @param request The tenant creation request.
-     * @return The created tenant summary.
+     * @return The created tenant with client configuration details.
      */
-    TenantSummaryDto createTenant(TenantCreateRequest request);
+    TenantCreationResponseDto createTenant(TenantCreateRequest request);
     
     /**
      * Retrieves a tenant by ID.

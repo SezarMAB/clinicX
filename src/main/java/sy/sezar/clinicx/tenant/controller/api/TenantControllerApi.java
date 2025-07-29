@@ -31,10 +31,10 @@ public interface TenantControllerApi {
         description = "Creates a new tenant with Keycloak realm and admin user"
     )
     @ApiResponse(responseCode = "201", description = "Tenant created successfully",
-                content = @Content(schema = @Schema(implementation = TenantSummaryDto.class)))
+                content = @Content(schema = @Schema(implementation = TenantCreationResponseDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid request data")
     @ApiResponse(responseCode = "409", description = "Tenant already exists")
-    ResponseEntity<TenantSummaryDto> createTenant(
+    ResponseEntity<TenantCreationResponseDto> createTenant(
             @Valid @RequestBody TenantCreateRequest request);
 
     @GetMapping

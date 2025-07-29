@@ -25,9 +25,9 @@ public class TenantControllerImpl implements TenantControllerApi {
     private final TenantService tenantService;
 
     @Override
-    public ResponseEntity<TenantSummaryDto> createTenant(TenantCreateRequest request) {
+    public ResponseEntity<TenantCreationResponseDto> createTenant(TenantCreateRequest request) {
         log.info("Creating new tenant with name: {}", request.name());
-        TenantSummaryDto tenant = tenantService.createTenant(request);
+        TenantCreationResponseDto tenant = tenantService.createTenant(request);
         log.info("Successfully created tenant with ID: {}", tenant.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(tenant);
     }

@@ -35,4 +35,6 @@ public interface KeycloakAdminService {
     List<RoleRepresentation> getRealmRoles(String realmName);
     
     Keycloak getKeycloakInstance();
+    
+    String getClientSecret(String realmName, String clientId);
 }

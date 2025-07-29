@@ -16,6 +16,7 @@ import sy.sezar.clinicx.tenant.repository.TenantRepository;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantService;
 import sy.sezar.clinicx.tenant.spec.TenantSpecifications;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -35,9 +36,12 @@ public class TenantServiceImpl implements TenantService {
     private final TenantRepository tenantRepository;
     private final TenantMapper tenantMapper;
     private final KeycloakAdminService keycloakAdminService;
+    
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakServerUrl;
 
     @Override
-    public TenantSummaryDto createTenant(TenantCreateRequest request) {
+    public TenantCreationResponseDto createTenant(TenantCreateRequest request) {
         log.info("Creating tenant with subdomain: {}", request.subdomain());
 
         // Validate subdomain uniqueness
@@ -91,9 +95,25 @@ public class TenantServiceImpl implements TenantService {
             tenant.setSubscriptionEndDate(Instant.now().plusSeconds(365 * 24 * 60 * 60));
 
             tenant = tenantRepository.save(tenant);
+            
+            // Get the backend client secret
+            String backendClientSecret = keycloakAdminService.getClientSecret(realmName, "clinicx-backend");
 
             log.info("Successfully created tenant with ID: {}", tenant.getId());
-            return tenantMapper.toSummaryDto(tenant, 0, 0);
+            
+            // Return the creation response with client configuration
+            return new TenantCreationResponseDto(
+                tenant.getId(),
+                tenant.getTenantId(),
+                tenant.getName(),
+                tenant.getSubdomain(),
+                tenant.getRealmName(),
+                "clinicx-backend",
+                backendClientSecret,
+                "clinicx-frontend",
+                keycloakServerUrl,
+                request.adminUsername()
+            );
 
         } catch (Exception e) {
             log.error("Failed to create tenant, rolling back", e);

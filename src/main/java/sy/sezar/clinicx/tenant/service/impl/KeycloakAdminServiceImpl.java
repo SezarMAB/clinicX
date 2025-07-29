@@ -15,7 +15,11 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
+import sy.sezar.clinicx.staff.model.enums.StaffRole;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -95,11 +99,11 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             // Create default roles
             createDefaultRoles(realmName);
 
-            // Create default client
-            ClientRepresentation client = createDefaultClient(realmName);
-
-            // Configure protocol mappers for tenant attributes
-            configureProtocolMappers(realmName, client.getId());
+            // Extract subdomain from realm name (format: clinic-subdomain)
+            String subdomain = realmName.startsWith("clinic-") ? realmName.substring(7) : realmName;
+            
+            // Create default clients (frontend and backend)
+            createDefaultClients(realmName, subdomain);
 
             return realm;
 
@@ -109,19 +113,100 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     private void createDefaultRoles(String realmName) {
-        createRealmRole(realmName, "ADMIN", "Administrator role with full access");
-        createRealmRole(realmName, "DOCTOR", "Doctor role with patient management access");
-        createRealmRole(realmName, "NURSE", "Nurse role with limited patient access");
-        createRealmRole(realmName, "RECEPTIONIST", "Receptionist role with appointment management");
-        createRealmRole(realmName, "ACCOUNTANT", "Accountant role with financial access");
+        // Create roles from StaffRole enum
+        for (StaffRole role : StaffRole.values()) {
+            String description = switch (role) {
+                case ADMIN -> "Administrator role with full access";
+                case DOCTOR -> "Doctor role with patient management access";
+                case NURSE -> "Nurse role with limited patient access";
+                case RECEPTIONIST -> "Receptionist role with appointment management";
+                case ACCOUNTANT -> "Accountant role with financial access";
+                case ASSISTANT -> "Assistant role with basic clinic access";
+            };
+            createRealmRole(realmName, role.name(), description);
+        }
+        
+        // Create additional system roles
+        createRealmRole(realmName, "SUPER_ADMIN", "Super administrator with tenant management access");
+        createRealmRole(realmName, "USER", "Basic user role");
     }
 
     private ClientRepresentation createDefaultClient(String realmName) {
-        String clientId = "clinicx-backend";
-        String clientSecret = UUID.randomUUID().toString();
-        List<String> redirectUris = Arrays.asList("http://localhost:4200/*", "https://*.clinicx.com/*");
-
-        return createClient(realmName, clientId, clientSecret, redirectUris);
+        // This method is no longer used, clients are created in createDefaultClients
+        return null;
+    }
+    
+    private void createDefaultClients(String realmName, String subdomain) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            
+            // Create backend client from template
+            ClientRepresentation backendClient = loadClientTemplate("keyclaok/clients/clinicx-backend.json");
+            if (backendClient != null) {
+                // Generate new secret for backend client
+                backendClient.setSecret(UUID.randomUUID().toString());
+                createClientFromTemplate(realmName, backendClient);
+                log.info("Created backend client for realm: {}", realmName);
+            }
+            
+            // Create frontend client from template
+            ClientRepresentation frontendClient = loadClientTemplate("keyclaok/clients/clinicx-frontend.json");
+            if (frontendClient != null) {
+                // Update redirect URIs dynamically based on subdomain
+                List<String> redirectUris = new ArrayList<>();
+                redirectUris.add("http://localhost:4200/*");
+                redirectUris.add("http://localhost:3000/*");
+                redirectUris.add(String.format("https://%s.clinicx.com/*", subdomain));
+                redirectUris.add(String.format("http://%s.clinicx.com/*", subdomain));
+                frontendClient.setRedirectUris(redirectUris);
+                
+                // Update web origins
+                List<String> webOrigins = new ArrayList<>();
+                webOrigins.add("+"); // Allow all redirect URIs as web origins
+                frontendClient.setWebOrigins(webOrigins);
+                
+                // Update root URL and admin URL
+                frontendClient.setRootUrl(String.format("https://%s.clinicx.com", subdomain));
+                frontendClient.setAdminUrl(String.format("https://%s.clinicx.com", subdomain));
+                
+                createClientFromTemplate(realmName, frontendClient);
+                log.info("Created frontend client for realm: {}", realmName);
+            }
+            
+        } catch (Exception e) {
+            log.error("Failed to create default clients", e);
+            throw new BusinessRuleException("Failed to create default clients: " + e.getMessage());
+        }
+    }
+    
+    private ClientRepresentation loadClientTemplate(String templatePath) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ClassPathResource resource = new ClassPathResource(templatePath);
+            return mapper.readValue(resource.getInputStream(), ClientRepresentation.class);
+        } catch (IOException e) {
+            log.error("Failed to load client template: {}", templatePath, e);
+            return null;
+        }
+    }
+    
+    private void createClientFromTemplate(String realmName, ClientRepresentation client) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            Response response = realmResource.clients().create(client);
+            
+            if (response.getStatus() == 201) {
+                String clientId = response.getLocation().getPath().replaceAll(".*/", "");
+                client.setId(clientId);
+                
+                // Configure protocol mappers for this client
+                configureProtocolMappers(realmName, clientId);
+            } else {
+                throw new BusinessRuleException("Failed to create client " + client.getClientId() + ": " + response.getStatusInfo().getReasonPhrase());
+            }
+        } catch (Exception e) {
+            throw new BusinessRuleException("Failed to create client from template: " + e.getMessage());
+        }
     }
 
     private void configureUserProfile(String realmName) {
@@ -311,15 +396,24 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             clinicTypeConfig.put("userinfo.token.claim", "true");
             clinicTypeMapper.setConfig(clinicTypeConfig);
 
-            // Add mappers to the client - need to use the client's internal ID
-            List<ClientRepresentation> clients = realmResource.clients().findByClientId("clinicx-backend");
-            if (!clients.isEmpty()) {
-                String internalClientId = clients.get(0).getId();
-                realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(tenantIdMapper);
-                realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicNameMapper);
-                realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicTypeMapper);
-            } else {
-                log.warn("Could not find client 'clinicx-backend' to add protocol mappers");
+            // Add mappers to both clients
+            List<String> clientIds = Arrays.asList("clinicx-backend", "clinicx-frontend");
+            
+            for (String clientIdName : clientIds) {
+                List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientIdName);
+                if (!clients.isEmpty()) {
+                    String internalClientId = clients.get(0).getId();
+                    try {
+                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(tenantIdMapper);
+                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicNameMapper);
+                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicTypeMapper);
+                        log.info("Added protocol mappers to client: {}", clientIdName);
+                    } catch (Exception e) {
+                        log.warn("Failed to add protocol mappers to client {}: {}", clientIdName, e.getMessage());
+                    }
+                } else {
+                    log.warn("Could not find client '{}' to add protocol mappers", clientIdName);
+                }
             }
 
             log.info("Successfully configured protocol mappers for realm: {}", realmName);
@@ -589,6 +683,24 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             log.error("Failed to update user profile via REST", e);
             throw new BusinessRuleException("Failed to update user profile via REST: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public String getClientSecret(String realmName, String clientId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientId);
+            
+            if (!clients.isEmpty()) {
+                String internalClientId = clients.get(0).getId();
+                return realmResource.clients().get(internalClientId).getSecret().getValue();
+            } else {
+                throw new BusinessRuleException("Client not found: " + clientId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to get client secret", e);
+            throw new BusinessRuleException("Failed to get client secret: " + e.getMessage());
         }
     }
 }

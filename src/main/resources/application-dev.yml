@@ -12,13 +12,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-
   flyway:
     locations: classpath:db/migration,classpath:db/local_demo_data
 
   # Allow circular references in dev (for rapid development)
   main:
     allow-circular-references: true
+
+  # Security configuration for multi-tenant Keycloak
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Default issuer-uri for development (master realm)
+          issuer-uri: http://localhost:18081/realms/master
+          jwk-set-uri: http://localhost:18081/realms/master/protocol/openid-connect/certs
+          audiences: clinicx-backend
 
 
 # Reduced logging in development
@@ -47,25 +56,33 @@ cors:
   allow-credentials: true
 
 
-# TODO merge clinix and app configuration
 # Development-specific tenant configuration
-clinicx:
-  tenant:
-    mode: multi  # Start with single tenant for simplicity
-    default-id: dev-tenant-001
+#clinicx:
+#  tenant:
+#    mode: single  # Enable multi-tenant mode to match Angular
+#    default-id: dev-tenant-001
 
+  security:
+    keycloak:
+      # Default realm for development (matches Angular's detectRealm() for localhost)
+      realm: master
+      client-id: clinicx-backend
+      client-secret: ${KEYCLOAK_CLIENT_SECRET:SERq6fNbsj9GXaFJ2P87YthsKK64cUKp}
 
 # Application-specific configuration
 app:
+  tenant:
+    mode: single  # Enable multi-tenant mode to match Angular
+    default-tenant: dev-tenant-001
   # Multi-tenant configuration
   multi-tenant:
-    enabled: true
-    tenant:
-      default-id: default
+    enabled: false
     default-realm: master
+    # Pattern for realm naming: clinic-{subdomain}
+    realm-prefix: clinic-
 
   # Domain configuration
-  domain: clinicx.com
+  domain: localhost  # For development
 
 # Keycloak configuration
 keycloak:
@@ -74,3 +91,8 @@ keycloak:
   admin-client-id: admin-cli
   admin-username: admin
   admin-password: admin
+
+  # Frontend client configuration (public client)
+  frontend:
+    client-id: clinicx-frontend
+    # No secret needed for public client

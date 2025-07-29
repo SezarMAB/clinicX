@@ -27,42 +27,42 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class KeycloakTenantResolver implements TenantResolver {
-    
+
     @Autowired
     private TenantRepository tenantRepository;
-    
-    @Value("${clinicx.tenant.mode:single}")
+
+    @Value("${app.tenant.mode:single}")
     private String tenantMode;
-    
-    @Value("${clinicx.tenant.default-id:default-tenant}")
+
+    @Value("${app.tenant.default-tenant:default-tenant}")
     private String defaultTenantId;
-    
+
     @Value("${app.multi-tenant.enabled:true}")
     private boolean multiTenantEnabled;
-    
+
     @Value("${app.domain:clinicx.com}")
     private String appDomain;
-    
+
     @Override
     public String resolveTenant() {
         // In single-tenant mode or if multi-tenancy is disabled, always return default
         if ("single".equalsIgnoreCase(tenantMode) || !multiTenantEnabled) {
             return defaultTenantId;
         }
-        
+
         HttpServletRequest request = getCurrentRequest();
-        
+
         // 1. Try to get tenant from header first (useful for API clients)
         if (request != null) {
             String tenantHeader = request.getHeader("X-Tenant-ID");
             if (tenantHeader != null && !tenantHeader.isEmpty()) {
                 return validateAndReturnTenant(tenantHeader);
             }
-            
+
             // 2. Extract subdomain from host
             String host = request.getServerName();
             String subdomain = extractSubdomain(host);
-            
+
             if (subdomain != null && !subdomain.isEmpty()) {
                 Optional<Tenant> tenant = tenantRepository.findBySubdomain(subdomain);
                 if (tenant.isPresent() && tenant.get().isActive()) {
@@ -70,10 +70,10 @@ public class KeycloakTenantResolver implements TenantResolver {
                 }
             }
         }
-        
+
         // 3. Try to extract from JWT
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             // First try to get tenant_id from custom claim
             String tenantId = jwt.getClaimAsString("tenant_id");
@@ -81,7 +81,7 @@ public class KeycloakTenantResolver implements TenantResolver {
                 log.debug("Resolved tenant from JWT claim: {}", tenantId);
                 return tenantId;
             }
-            
+
             // Fallback: extract from realm name if using realm-per-tenant
             String issuer = jwt.getIssuer().toString();
             if (issuer.contains("/realms/clinic-")) {
@@ -97,54 +97,54 @@ public class KeycloakTenantResolver implements TenantResolver {
                 }
             }
         }
-        
+
         // Default fallback
         log.debug("Using default tenant: {}", defaultTenantId);
         return defaultTenantId;
     }
-    
+
     @Override
     public boolean isMultiTenant() {
         return "multi".equalsIgnoreCase(tenantMode) && multiTenantEnabled;
     }
-    
+
     private HttpServletRequest getCurrentRequest() {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         return attributes != null ? attributes.getRequest() : null;
     }
-    
+
     private String extractSubdomain(String host) {
         if (host == null || host.isEmpty()) {
             return null;
         }
-        
+
         // Remove port if present
         int portIndex = host.indexOf(':');
         if (portIndex > 0) {
             host = host.substring(0, portIndex);
         }
-        
+
         // Handle localhost
         if (host.equals("localhost") || host.equals("127.0.0.1")) {
             return null;
         }
-        
+
         // Extract subdomain
         String domainPattern = "." + appDomain;
         if (host.endsWith(domainPattern)) {
             int subdomainEndIndex = host.length() - domainPattern.length();
             return host.substring(0, subdomainEndIndex);
         }
-        
+
         // For development, check if host contains a subdomain pattern
         int firstDot = host.indexOf('.');
         if (firstDot > 0) {
             return host.substring(0, firstDot);
         }
-        
+
         return null;
     }
-    
+
     private String validateAndReturnTenant(String tenantId) {
         Optional<Tenant> tenant = tenantRepository.findByTenantId(tenantId);
         if (tenant.isPresent() && tenant.get().isActive()) {

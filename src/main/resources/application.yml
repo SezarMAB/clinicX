@@ -35,20 +35,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:18081/realms/clinicx-dev
-          jwk-set-uri: http://localhost:18081/realms/clinicx-dev/protocol/openid-connect/certs
+          # Dynamic issuer-uri will be handled by MultiTenantJwtDecoder
+          # These are fallback values for single-tenant mode
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:18081/realms/master}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:18081/realms/master/protocol/openid-connect/certs}
 
 # ClinicX specific configuration
-clinicx:
-  tenant:
-    mode: single  # Options: single, multi
-    default-id: default-tenant
+#clinicx:
+#  tenant:
+#    mode: ${TENANT_MODE:single}  # Options: single, multi
+#    default-id: ${DEFAULT_TENANT_ID:default-tenant}
 
-  security:
-    keycloak:
-      realm: clinicx-dev
-      client-id: clinicx-backend
-      client-secret: tHFYKZ1bgyLz6dOWHsAa8ir3yXdzbcjk
 
 # Logging configuration
 logging:
@@ -75,17 +72,19 @@ app:
         - "yyyy-MM-dd HH:mm:ss"
       date: "yyyy-MM-dd"
     default-timezone: UTC
-
-  # TODO merge clinix and app configuration
+  tenant:
+    mode: ${TENANT_MODE:single}  # Options: single, multi
+    default-tenant: ${DEFAULT_TENANT_ID:master}
 
   # Multi-tenant configuration
   multi-tenant:
-    enabled: true
-    default-tenant: default
-    default-realm: master
+    enabled: ${MULTI_TENANT_ENABLED:true}
+    default-realm: ${DEFAULT_REALM:master}
+    # Pattern for realm naming: clinic-{subdomain}
+    realm-prefix: ${REALM_PREFIX:clinic-}
 
   # Domain configuration
-  domain: clinicx.com
+  domain: ${APP_DOMAIN:clinicx.com}
 
 # Keycloak configuration
 keycloak:

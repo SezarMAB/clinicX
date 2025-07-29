@@ -27,7 +27,7 @@ spring:
           # Default issuer-uri for development (master realm)
           issuer-uri: http://localhost:18081/realms/master
           jwk-set-uri: http://localhost:18081/realms/master/protocol/openid-connect/certs
-          audiences: clinicx-backend
+#          audiences: clinicx-backend
 
 
 # Reduced logging in development
@@ -62,18 +62,18 @@ cors:
 #    mode: single  # Enable multi-tenant mode to match Angular
 #    default-id: dev-tenant-001
 
-  security:
-    keycloak:
-      # Default realm for development (matches Angular's detectRealm() for localhost)
-      realm: master
-      client-id: clinicx-backend
-      client-secret: ${KEYCLOAK_CLIENT_SECRET:SERq6fNbsj9GXaFJ2P87YthsKK64cUKp}
+#  security:
+#    keycloak:
+#      # Default realm for development (matches Angular's detectRealm() for localhost)
+#      realm: master
+#      client-id: clinicx-backend
+#      client-secret: ${KEYCLOAK_CLIENT_SECRET:SERq6fNbsj9GXaFJ2P87YthsKK64cUKp}
 
 # Application-specific configuration
 app:
   tenant:
     mode: single  # Enable multi-tenant mode to match Angular
-    default-tenant: dev-tenant-001
+    default-tenant: master
   # Multi-tenant configuration
   multi-tenant:
     enabled: false

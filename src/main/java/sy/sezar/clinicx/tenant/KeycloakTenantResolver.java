@@ -34,13 +34,13 @@ public class KeycloakTenantResolver implements TenantResolver {
     @Value("${app.tenant.mode:single}")
     private String tenantMode;
 
-    @Value("${app.tenant.default-tenant:default-tenant}")
+    @Value("${app.tenant.default-tenant}")
     private String defaultTenantId;
 
     @Value("${app.multi-tenant.enabled:true}")
     private boolean multiTenantEnabled;
 
-    @Value("${app.domain:clinicx.com}")
+    @Value("${app.domain}")
     private String appDomain;
 
     @Override

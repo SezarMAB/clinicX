@@ -82,7 +82,7 @@ app:
     realm-prefix: clinic-
 
   # Domain configuration
-  domain: localhost  # For development
+  domain: "localhost:4200"  # For development
 
 # Keycloak configuration
 keycloak:

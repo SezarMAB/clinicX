@@ -82,7 +82,7 @@ app:
     # Pattern for realm naming: clinic-{subdomain}
     realm-prefix: ${REALM_PREFIX:clinic-}
   # Domain configuration
-  domain: ${APP_DOMAIN:clinicx.com}
+  domain: ${APP_DOMAIN}
 
 # CORS configuration
 cors:

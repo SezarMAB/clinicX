@@ -41,6 +41,9 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     @Value("${keycloak.admin-password}")
     private String adminPassword;
 
+    @Value("${app.domain}")
+    private String appDomain;
+
     private Keycloak keycloak;
 
     @Override
@@ -101,7 +104,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
             // Extract subdomain from realm name (format: clinic-subdomain)
             String subdomain = realmName.startsWith("clinic-") ? realmName.substring(7) : realmName;
-            
+
             // Create default clients (frontend and backend)
             createDefaultClients(realmName, subdomain);
 
@@ -125,7 +128,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             };
             createRealmRole(realmName, role.name(), description);
         }
-        
+
         // Create additional system roles
         createRealmRole(realmName, "SUPER_ADMIN", "Super administrator with tenant management access");
         createRealmRole(realmName, "USER", "Basic user role");
@@ -135,11 +138,11 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         // This method is no longer used, clients are created in createDefaultClients
         return null;
     }
-    
+
     private void createDefaultClients(String realmName, String subdomain) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            
+
             // Create backend client from template
             ClientRepresentation backendClient = loadClientTemplate("keyclaok/clients/clinicx-backend.json");
             if (backendClient != null) {
@@ -148,37 +151,35 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 createClientFromTemplate(realmName, backendClient);
                 log.info("Created backend client for realm: {}", realmName);
             }
-            
+
             // Create frontend client from template
             ClientRepresentation frontendClient = loadClientTemplate("keyclaok/clients/clinicx-frontend.json");
             if (frontendClient != null) {
                 // Update redirect URIs dynamically based on subdomain
                 List<String> redirectUris = new ArrayList<>();
-                redirectUris.add("http://localhost:4200/*");
-                redirectUris.add("http://localhost:3000/*");
-                redirectUris.add(String.format("https://%s.clinicx.com/*", subdomain));
-                redirectUris.add(String.format("http://%s.clinicx.com/*", subdomain));
+                redirectUris.add(String.format("https://%s.%s/*", subdomain, appDomain));
+                redirectUris.add(String.format("http://%s.%s/*", subdomain, appDomain));
                 frontendClient.setRedirectUris(redirectUris);
-                
+
                 // Update web origins
                 List<String> webOrigins = new ArrayList<>();
                 webOrigins.add("+"); // Allow all redirect URIs as web origins
                 frontendClient.setWebOrigins(webOrigins);
-                
+
                 // Update root URL and admin URL
-                frontendClient.setRootUrl(String.format("https://%s.clinicx.com", subdomain));
-                frontendClient.setAdminUrl(String.format("https://%s.clinicx.com", subdomain));
-                
+                frontendClient.setRootUrl(String.format("https://%s.%s", subdomain, appDomain));
+                frontendClient.setAdminUrl(String.format("https://%s.%s", subdomain, appDomain));
+
                 createClientFromTemplate(realmName, frontendClient);
                 log.info("Created frontend client for realm: {}", realmName);
             }
-            
+
         } catch (Exception e) {
             log.error("Failed to create default clients", e);
             throw new BusinessRuleException("Failed to create default clients: " + e.getMessage());
         }
     }
-    
+
     private ClientRepresentation loadClientTemplate(String templatePath) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -189,16 +190,16 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             return null;
         }
     }
-    
+
     private void createClientFromTemplate(String realmName, ClientRepresentation client) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             Response response = realmResource.clients().create(client);
-            
+
             if (response.getStatus() == 201) {
                 String clientId = response.getLocation().getPath().replaceAll(".*/", "");
                 client.setId(clientId);
-                
+
                 // Configure protocol mappers for this client
                 configureProtocolMappers(realmName, clientId);
             } else {
@@ -398,7 +399,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
             // Add mappers to both clients
             List<String> clientIds = Arrays.asList("clinicx-backend", "clinicx-frontend");
-            
+
             for (String clientIdName : clientIds) {
                 List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientIdName);
                 if (!clients.isEmpty()) {
@@ -685,13 +686,13 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to update user profile via REST: " + e.getMessage());
         }
     }
-    
+
     @Override
     public String getClientSecret(String realmName, String clientId) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientId);
-            
+
             if (!clients.isEmpty()) {
                 String internalClientId = clients.get(0).getId();
                 return realmResource.clients().get(internalClientId).getSecret().getValue();

@@ -58,6 +58,11 @@ DROP FUNCTION IF EXISTS validate_appointment_schedule();
 DROP FUNCTION IF EXISTS update_appointment_slot();
 DROP FUNCTION IF EXISTS update_patient_balance();
 
+-- Drop financial functions
+DROP FUNCTION IF EXISTS update_updated_at_column();
+
+
+
 -- ====================================================================
 -- STEP 3: DROP VIEWS (Optional - CASCADE on tables will drop these too)
 -- ====================================================================
@@ -132,6 +137,10 @@ DROP TABLE IF EXISTS staff CASCADE;
 -- Drop core tables
 DROP TABLE IF EXISTS specialties CASCADE;
 DROP TABLE IF EXISTS clinic_info CASCADE;
+
+-- Drop Tenant Management tables
+DROP TABLE IF EXISTS tenants CASCADE;
+
 
 
 DROP TABLE IF EXISTS flyway_schema_history CASCADE;

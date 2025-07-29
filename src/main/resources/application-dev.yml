@@ -72,11 +72,11 @@ cors:
 # Application-specific configuration
 app:
   tenant:
-    mode: single  # Enable multi-tenant mode to match Angular
+    mode: multi  # Enable multi-tenant mode to match Angular
     default-tenant: master
   # Multi-tenant configuration
   multi-tenant:
-    enabled: false
+    enabled: true
     default-realm: master
     # Pattern for realm naming: clinic-{subdomain}
     realm-prefix: clinic-

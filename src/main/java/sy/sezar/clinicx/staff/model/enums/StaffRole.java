@@ -6,5 +6,6 @@ public enum StaffRole {
     ASSISTANT,
     RECEPTIONIST,
     ACCOUNTANT,
-    ADMIN
+    ADMIN,
+    SUPER_ADMIN
 }

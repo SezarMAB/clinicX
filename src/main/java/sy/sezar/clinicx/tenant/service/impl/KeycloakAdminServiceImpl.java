@@ -119,6 +119,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         // Create roles from StaffRole enum
         for (StaffRole role : StaffRole.values()) {
             String description = switch (role) {
+                case SUPER_ADMIN -> "Super administrator with tenant management access";
                 case ADMIN -> "Administrator role with full access";
                 case DOCTOR -> "Doctor role with patient management access";
                 case NURSE -> "Nurse role with limited patient access";
@@ -130,7 +131,6 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         }
 
         // Create additional system roles
-        createRealmRole(realmName, "SUPER_ADMIN", "Super administrator with tenant management access");
         createRealmRole(realmName, "USER", "Basic user role");
     }
 

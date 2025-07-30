@@ -58,8 +58,6 @@ DROP FUNCTION IF EXISTS validate_appointment_schedule();
 DROP FUNCTION IF EXISTS update_appointment_slot();
 DROP FUNCTION IF EXISTS update_patient_balance();
 
--- Drop financial functions
-DROP FUNCTION IF EXISTS update_updated_at_column();
 
 
 
@@ -140,8 +138,14 @@ DROP TABLE IF EXISTS clinic_info CASCADE;
 
 -- Drop Tenant Management tables
 DROP TABLE IF EXISTS tenants CASCADE;
+DROP TABLE IF EXISTS specialty_types CASCADE;
+DROP TABLE IF EXISTS user_tenant_access CASCADE;
 
 
+
+
+-- Drop financial functions
+DROP FUNCTION IF EXISTS update_updated_at_column();
 
 DROP TABLE IF EXISTS flyway_schema_history CASCADE;
 
@@ -192,6 +196,10 @@ DROP INDEX IF EXISTS idx_patients_email_lower;
 DROP INDEX IF EXISTS idx_treatments_date;
 DROP INDEX IF EXISTS idx_treatments_status;
 DROP INDEX IF EXISTS idx_treatments_tooth_number;
+
+DROP INDEX IF EXISTS idx_user_tenant_access_user_id;
+DROP INDEX IF EXISTS idx_user_tenant_access_tenant_id;
+DROP INDEX IF EXISTS idx_tenants_specialty;
 
 -- ================================
 -- DROP TABLES

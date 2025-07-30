@@ -43,6 +43,7 @@ dependencies {
 	// Database
 	runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'com.h2database:h2'
+	implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.0'
 
 	// Flyway
 	implementation "org.flywaydb:flyway-core"

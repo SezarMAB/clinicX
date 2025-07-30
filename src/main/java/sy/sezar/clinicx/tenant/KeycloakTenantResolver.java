@@ -75,7 +75,14 @@ public class KeycloakTenantResolver implements TenantResolver {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            // First try to get tenant_id from custom claim
+            // First try to get active_tenant_id (for multi-tenant users)
+            String activeTenantId = jwt.getClaimAsString("active_tenant_id");
+            if (activeTenantId != null && !activeTenantId.isEmpty()) {
+                log.debug("Resolved active tenant from JWT claim: {}", activeTenantId);
+                return validateAndReturnTenant(activeTenantId);
+            }
+            
+            // Then try to get tenant_id from custom claim
             String tenantId = jwt.getClaimAsString("tenant_id");
             if (tenantId != null && !tenantId.isEmpty()) {
                 log.debug("Resolved tenant from JWT claim: {}", tenantId);

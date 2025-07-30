@@ -55,31 +55,31 @@ CREATE INDEX idx_tenants_subscription_end_date ON tenants(subscription_end_date)
 -- ====================================================================
 
 -- Insert a default tenant for single-tenant mode or development
-INSERT INTO tenants (
-    tenant_id,
-    name,
-    subdomain,
-    realm_name,
-    is_active,
-    contact_email,
-    subscription_plan,
-    subscription_start_date,
-    subscription_end_date,
-    created_by,
-    updated_by
-) VALUES (
-    'default',
-    'Default Clinic',
-    'default',
-    'clinicx-dev',
-    TRUE,
-    'admin@clinicx.com',
-    'development',
-    NOW(),
-    NOW() + INTERVAL '100 years',
-    'system',
-    'system'
-);
+-- INSERT INTO tenants (
+--     tenant_id,
+--     name,
+--     subdomain,
+--     realm_name,
+--     is_active,
+--     contact_email,
+--     subscription_plan,
+--     subscription_start_date,
+--     subscription_end_date,
+--     created_by,
+--     updated_by
+-- ) VALUES (
+--     'default',
+--     'Default Clinic',
+--     'default',
+--     'clinicx-dev',
+--     TRUE,
+--     'admin@clinicx.com',
+--     'development',
+--     NOW(),
+--     NOW() + INTERVAL '100 years',
+--     'system',
+--     'system'
+-- );
 
 -- ====================================================================
 -- TRIGGERS

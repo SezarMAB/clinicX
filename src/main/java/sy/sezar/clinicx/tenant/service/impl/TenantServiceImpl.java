@@ -82,6 +82,7 @@ public class TenantServiceImpl implements TenantService {
             tenant.setName(request.name());
             tenant.setSubdomain(request.subdomain());
             tenant.setRealmName(realmName);
+            tenant.setSpecialty(request.specialty() != null ? request.specialty() : "CLINIC");
             tenant.setActive(true);
             tenant.setContactEmail(request.contactEmail());
             tenant.setContactPhone(request.contactPhone());
@@ -300,6 +301,7 @@ public class TenantServiceImpl implements TenantService {
             dto.name(),
             dto.subdomain(),
             dto.realmName(),
+            dto.specialty(),
             dto.isActive(),
             dto.contactEmail(),
             dto.contactPhone(),

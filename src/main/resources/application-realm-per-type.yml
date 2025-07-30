@@ -1,0 +1,42 @@
+# Configuration for realm-per-type multi-tenant architecture
+
+app:
+  multi-tenant:
+    enabled: true
+    realm-per-type: true  # Enable realm-per-type instead of realm-per-tenant
+  tenant:
+    mode: multi
+    validation:
+      enabled: true  # Enable tenant access validation
+    specialty-realm-mapping:
+      enabled: true
+      auto-create-realm: true
+      default-features:
+        - APPOINTMENTS  # All specialties get appointments by default
+  
+# Specialty type configurations
+specialty:
+  types:
+    - code: CLINIC
+      name: General Clinic
+      realm-name: clinic-realm
+      features:
+        - ALL
+    - code: DENTAL
+      name: Dental Clinic
+      realm-name: dental-realm
+      features:
+        - DENTAL
+        - APPOINTMENTS
+    - code: APPOINTMENTS
+      name: Appointments Only
+      realm-name: appointments-realm
+      features:
+        - APPOINTMENTS
+
+# Cache configuration for specialty registry
+spring:
+  cache:
+    cache-names: specialties, specialty
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=60m

@@ -12,6 +12,7 @@ public record TenantDetailDto(
     String name,
     String subdomain,
     String realmName,
+    String specialty,
     Boolean isActive,
     String contactEmail,
     String contactPhone,

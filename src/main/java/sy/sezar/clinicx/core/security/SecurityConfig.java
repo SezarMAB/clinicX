@@ -4,6 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.access.vote.AuthenticatedVoter;
+import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,10 +22,17 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import sy.sezar.clinicx.tenant.repository.TenantRepository;
+import sy.sezar.clinicx.tenant.security.TenantAccessDecisionVoter;
+import sy.sezar.clinicx.tenant.security.TenantAuthorizationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableAspectJAutoProxy
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -37,6 +50,12 @@ public class SecurityConfig {
     
     @Autowired
     private TenantRepository tenantRepository;
+    
+    @Autowired
+    private TenantAccessDecisionVoter tenantAccessDecisionVoter;
+    
+    @Autowired
+    private TenantAuthorizationFilter tenantAuthorizationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,6 +75,9 @@ public class SecurityConfig {
                 // Tenant management endpoints (super admin only)
                 .requestMatchers("/api/tenants/**").hasRole("SUPER_ADMIN")
                 
+                // Tenant switching endpoint
+                .requestMatchers("/api/v1/tenant-switch/**").authenticated()
+                
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 
@@ -67,6 +89,11 @@ public class SecurityConfig {
                     .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 )
             );
+
+        // Add tenant authorization filter if multi-tenant is enabled
+        if (multiTenantEnabled) {
+            http.addFilterAfter(tenantAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+        }
 
         return http.build();
     }
@@ -95,5 +122,15 @@ public class SecurityConfig {
     @Bean
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new NullAuthenticatedSessionStrategy();
+    }
+    
+    @Bean
+    public AccessDecisionManager accessDecisionManager() {
+        List<AccessDecisionVoter<?>> decisionVoters = Arrays.asList(
+            new RoleVoter(),
+            new AuthenticatedVoter(),
+            tenantAccessDecisionVoter
+        );
+        return new AffirmativeBased(decisionVoters);
     }
 }

@@ -4,6 +4,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -702,6 +703,136 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             log.error("Failed to get client secret", e);
             throw new BusinessRuleException("Failed to get client secret: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void updateUserAttributes(String realmName, String username, Map<String, List<String>> attributes) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<UserRepresentation> users = realmResource.users().search(username);
+            
+            if (!users.isEmpty()) {
+                UserRepresentation user = users.get(0);
+                Map<String, List<String>> existingAttributes = user.getAttributes();
+                if (existingAttributes == null) {
+                    existingAttributes = new HashMap<>();
+                }
+                existingAttributes.putAll(attributes);
+                user.setAttributes(existingAttributes);
+                
+                realmResource.users().get(user.getId()).update(user);
+                log.info("Updated attributes for user {} in realm {}", username, realmName);
+            } else {
+                throw new BusinessRuleException("User not found: " + username);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update user attributes", e);
+            throw new BusinessRuleException("Failed to update user attributes: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public UserRepresentation getUserByUsername(String realmName, String username) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<UserRepresentation> users = realmResource.users().search(username);
+            
+            if (!users.isEmpty()) {
+                return users.get(0);
+            } else {
+                throw new BusinessRuleException("User not found: " + username);
+            }
+        } catch (Exception e) {
+            log.error("Failed to get user by username", e);
+            throw new BusinessRuleException("Failed to get user: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void copyClientsFromRealm(String sourceRealmName, String targetRealmName) {
+        try {
+            Keycloak keycloak = getKeycloakInstance();
+            RealmResource sourceRealm = keycloak.realm(sourceRealmName);
+            RealmResource targetRealm = keycloak.realm(targetRealmName);
+            
+            List<ClientRepresentation> sourceClients = sourceRealm.clients().findAll();
+            
+            for (ClientRepresentation sourceClient : sourceClients) {
+                // Skip built-in clients
+                if (sourceClient.getClientId().startsWith("clinicx-")) {
+                    ClientRepresentation targetClient = new ClientRepresentation();
+                    targetClient.setClientId(sourceClient.getClientId());
+                    targetClient.setName(sourceClient.getName());
+                    targetClient.setDescription(sourceClient.getDescription());
+                    targetClient.setEnabled(sourceClient.isEnabled());
+                    targetClient.setPublicClient(sourceClient.isPublicClient());
+                    targetClient.setDirectAccessGrantsEnabled(sourceClient.isDirectAccessGrantsEnabled());
+                    targetClient.setServiceAccountsEnabled(sourceClient.isServiceAccountsEnabled());
+                    // Authorization services configuration might not be available in all Keycloak versions
+                    // targetClient.setAuthorizationServicesEnabled(sourceClient.isAuthorizationServicesEnabled());
+                    targetClient.setRedirectUris(sourceClient.getRedirectUris());
+                    targetClient.setWebOrigins(sourceClient.getWebOrigins());
+                    targetClient.setProtocol(sourceClient.getProtocol());
+                    targetClient.setAttributes(sourceClient.getAttributes());
+                    
+                    // Generate new secret for confidential clients
+                    if (!sourceClient.isPublicClient()) {
+                        targetClient.setSecret(UUID.randomUUID().toString());
+                    }
+                    
+                    targetRealm.clients().create(targetClient);
+                    log.info("Copied client {} from {} to {}", sourceClient.getClientId(), sourceRealmName, targetRealmName);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to copy clients between realms", e);
+            throw new BusinessRuleException("Failed to copy clients: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void ensureProtocolMapper(String realmName, String clientId, String mapperName, String attributeName) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientId);
+            
+            if (!clients.isEmpty()) {
+                String internalClientId = clients.get(0).getId();
+                ClientResource clientResource = realmResource.clients().get(internalClientId);
+                
+                // Check if mapper already exists
+                List<ProtocolMapperRepresentation> existingMappers = clientResource.getProtocolMappers().getMappers();
+                boolean mapperExists = existingMappers.stream()
+                    .anyMatch(mapper -> mapper.getName().equals(mapperName));
+                
+                if (!mapperExists) {
+                    ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
+                    mapper.setName(mapperName);
+                    mapper.setProtocol("openid-connect");
+                    mapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
+                    
+                    Map<String, String> config = new HashMap<>();
+                    config.put("user.attribute", attributeName);
+                    config.put("claim.name", attributeName);
+                    config.put("jsonType.label", "String");
+                    config.put("id.token.claim", "true");
+                    config.put("access.token.claim", "true");
+                    config.put("userinfo.token.claim", "true");
+                    config.put("multivalued", "false");
+                    config.put("aggregate.attrs", "false");
+                    
+                    mapper.setConfig(config);
+                    
+                    clientResource.getProtocolMappers().createMapper(mapper);
+                    log.info("Created protocol mapper {} for attribute {} in client {}", mapperName, attributeName, clientId);
+                }
+            } else {
+                throw new BusinessRuleException("Client not found: " + clientId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to ensure protocol mapper", e);
+            throw new BusinessRuleException("Failed to ensure protocol mapper: " + e.getMessage());
         }
     }
 }

@@ -71,4 +71,9 @@ public class Tenant extends BaseEntity {
     @Column(name = "max_patients")
     private Integer maxPatients = 1000;
 
+    @NotNull
+    @Size(max = 50)
+    @Column(name = "specialty", nullable = false, length = 50)
+    private String specialty = "CLINIC";
+
 }

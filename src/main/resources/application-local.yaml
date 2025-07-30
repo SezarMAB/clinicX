@@ -1,5 +1,9 @@
 # Development profile with Keycloak
 spring:
+  cache:
+    cache-names: specialties, specialty
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=60m
 
   datasource:
     url: jdbc:postgresql://localhost:5432/clinicx?currentSchema=public
@@ -71,19 +75,48 @@ cors:
 
 # Application-specific configuration
 app:
-  tenant:
-    mode: multi  # Enable multi-tenant mode to match Angular
-    default-tenant: master
   # Multi-tenant configuration
   multi-tenant:
     enabled: true
     default-realm: master
+    realm-per-type: true  # Enable realm-per-type instead of realm-per-tenant
     # Pattern for realm naming: clinic-{subdomain}
     realm-prefix: clinic-
+  tenant:
+    mode: multi  # Enable multi-tenant mode to match Angular
+    default-tenant: master
+    validation:
+      enabled: true  # Enable tenant access validation
+    specialty-realm-mapping:
+      enabled: true
+      auto-create-realm: true
+      default-features:
+        - APPOINTMENTS  # All specialties get appointments by default
 
   # Domain configuration
   domain: "localhost:4200"  # For development
 
+
+# Specialty type configurations
+specialty:
+  types:
+    - code: CLINIC
+      name: General Clinic
+      realm-name: clinic-realm
+      features:
+        - ALL
+    - code: DENTAL
+      name: Dental Clinic
+      realm-name: dental-realm
+      features:
+        - DENTAL
+        - APPOINTMENTS
+    - code: APPOINTMENTS
+      name: Appointments Only
+      realm-name: appointments-realm
+      features:
+        - APPOINTMENTS
+        -
 # Keycloak configuration
 keycloak:
   auth-server-url: http://localhost:18081

@@ -37,4 +37,40 @@ public interface KeycloakAdminService {
     Keycloak getKeycloakInstance();
     
     String getClientSecret(String realmName, String clientId);
+    
+    /**
+     * Update user attributes in Keycloak.
+     * 
+     * @param realmName the realm name
+     * @param username the username
+     * @param attributes the attributes to update
+     */
+    void updateUserAttributes(String realmName, String username, java.util.Map<String, List<String>> attributes);
+    
+    /**
+     * Get user by username.
+     * 
+     * @param realmName the realm name
+     * @param username the username
+     * @return the user representation
+     */
+    UserRepresentation getUserByUsername(String realmName, String username);
+    
+    /**
+     * Copy clients from one realm to another.
+     * 
+     * @param sourceRealmName the source realm
+     * @param targetRealmName the target realm
+     */
+    void copyClientsFromRealm(String sourceRealmName, String targetRealmName);
+    
+    /**
+     * Create or update a protocol mapper for a client.
+     * 
+     * @param realmName the realm name
+     * @param clientId the client ID
+     * @param mapperName the mapper name
+     * @param attributeName the user attribute name
+     */
+    void ensureProtocolMapper(String realmName, String clientId, String mapperName, String attributeName);
 }

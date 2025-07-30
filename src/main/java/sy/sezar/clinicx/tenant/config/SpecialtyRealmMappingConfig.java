@@ -32,4 +32,10 @@ public class SpecialtyRealmMappingConfig {
      * These are added to every specialty's feature list.
      */
     private List<String> defaultFeatures = new ArrayList<>();
+    
+    /**
+     * Template realm to copy clients from when creating new realms.
+     * If not specified, will attempt to copy from 'master' realm.
+     */
+    private String templateRealm;
 }

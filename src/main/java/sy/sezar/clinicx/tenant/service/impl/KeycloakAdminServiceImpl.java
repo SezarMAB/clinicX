@@ -22,6 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -227,7 +228,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             // Wait a bit for the realm update to take effect
             Thread.sleep(500);
 
-            // Now configure the user profile with custom attributes
+            // Now configure the user profile with custom attributes including multi-tenant support
             String userProfileConfig = """
                 {
                   "attributes": [
@@ -286,42 +287,106 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     },
                     {
                       "name": "tenant_id",
-                      "displayName": "tenant id",
-                      "validations": {},
-                      "annotations": {},
+                      "displayName": "Tenant ID",
+                      "validations": {
+                        "length": { "min": 1, "max": 255 }
+                      },
+                      "annotations": {
+                        "inputType": "text"
+                      },
                       "required": {
                         "roles": ["admin", "user"]
                       },
                       "permissions": {
-                        "view": [],
+                        "view": ["admin", "user"],
                         "edit": ["admin"]
                       },
                       "multivalued": false
                     },
                     {
                       "name": "clinic_name",
-                      "displayName": "clinic name",
-                      "validations": {},
-                      "annotations": {},
+                      "displayName": "Clinic Name",
+                      "validations": {
+                        "length": { "min": 1, "max": 255 }
+                      },
+                      "annotations": {
+                        "inputType": "text"
+                      },
                       "required": {
                         "roles": ["admin", "user"]
                       },
                       "permissions": {
-                        "view": [],
+                        "view": ["admin", "user"],
                         "edit": ["admin"]
                       },
                       "multivalued": false
                     },
                     {
                       "name": "clinic_type",
-                      "displayName": "clinic type",
-                      "validations": {},
-                      "annotations": {},
+                      "displayName": "Clinic Type",
+                      "validations": {
+                        "length": { "min": 1, "max": 255 }
+                      },
+                      "annotations": {
+                        "inputType": "text"
+                      },
                       "required": {
                         "roles": ["admin", "user"]
                       },
                       "permissions": {
-                        "view": [],
+                        "view": ["admin", "user"],
+                        "edit": ["admin"]
+                      },
+                      "multivalued": false
+                    },
+                    {
+                      "name": "active_tenant_id",
+                      "displayName": "Active Tenant ID",
+                      "validations": {
+                        "length": { "max": 255 }
+                      },
+                      "annotations": {
+                        "inputType": "text"
+                      },
+                      "required": {
+                        "roles": ["admin", "user"]
+                      },
+                      "permissions": {
+                        "view": ["admin", "user"],
+                        "edit": ["admin"]
+                      },
+                      "multivalued": false
+                    },
+                    {
+                      "name": "accessible_tenants",
+                      "displayName": "Accessible Tenants",
+                      "validations": {
+                        "length": { "max": 4000 }
+                      },
+                      "annotations": {
+                        "inputType": "textarea",
+                        "inputHelperTextBefore": "JSON array of accessible tenants"
+                      },
+                      "required": null,
+                      "permissions": {
+                        "view": ["admin", "user"],
+                        "edit": ["admin"]
+                      },
+                      "multivalued": false
+                    },
+                    {
+                      "name": "user_tenant_roles",
+                      "displayName": "User Tenant Roles",
+                      "validations": {
+                        "length": { "max": 4000 }
+                      },
+                      "annotations": {
+                        "inputType": "textarea",
+                        "inputHelperTextBefore": "JSON object mapping tenant IDs to roles"
+                      },
+                      "required": null,
+                      "permissions": {
+                        "view": ["admin", "user"],
                         "edit": ["admin"]
                       },
                       "multivalued": false
@@ -332,6 +397,11 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                       "name": "user-metadata",
                       "displayHeader": "User metadata",
                       "displayDescription": "Attributes, which refer to user metadata"
+                    },
+                    {
+                      "name": "tenant-metadata",
+                      "displayHeader": "Tenant metadata",
+                      "displayDescription": "Multi-tenant attributes for user access control"
                     }
                   ]
                 }
@@ -353,50 +423,71 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
 
-            // Create protocol mapper for tenant_id
-            ProtocolMapperRepresentation tenantIdMapper = new ProtocolMapperRepresentation();
-            tenantIdMapper.setName("tenant-id-mapper");
-            tenantIdMapper.setProtocol("openid-connect");
-            tenantIdMapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
+            // Define all required mappers for multi-tenant support
+            List<ProtocolMapperRepresentation> mappers = new ArrayList<>();
 
-            Map<String, String> tenantIdConfig = new HashMap<>();
-            tenantIdConfig.put("userAttribute", "tenant_id");
-            tenantIdConfig.put("claim.name", "tenant_id");
-            tenantIdConfig.put("jsonType.label", "String");
-            tenantIdConfig.put("id.token.claim", "true");
-            tenantIdConfig.put("access.token.claim", "true");
-            tenantIdConfig.put("userinfo.token.claim", "true");
-            tenantIdMapper.setConfig(tenantIdConfig);
+            // 1. Tenant ID Mapper
+            mappers.add(createUserAttributeMapper(
+                "tenant_id",
+                "tenant_id",
+                "tenant_id",
+                "String",
+                true, true, true
+            ));
 
-            // Create protocol mapper for clinic_name
-            ProtocolMapperRepresentation clinicNameMapper = new ProtocolMapperRepresentation();
-            clinicNameMapper.setName("clinic-name-mapper");
-            clinicNameMapper.setProtocol("openid-connect");
-            clinicNameMapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
+            // 2. Active Tenant ID Mapper
+            mappers.add(createUserAttributeMapper(
+                "active_tenant_id",
+                "active_tenant_id",
+                "active_tenant_id",
+                "String",
+                false, true, true
+            ));
 
-            Map<String, String> clinicNameConfig = new HashMap<>();
-            clinicNameConfig.put("userAttribute", "clinic_name");
-            clinicNameConfig.put("claim.name", "clinic_name");
-            clinicNameConfig.put("jsonType.label", "String");
-            clinicNameConfig.put("id.token.claim", "true");
-            clinicNameConfig.put("access.token.claim", "true");
-            clinicNameConfig.put("userinfo.token.claim", "true");
-            clinicNameMapper.setConfig(clinicNameConfig);
+            // 3. Accessible Tenants Mapper (JSON)
+            mappers.add(createUserAttributeMapper(
+                "accessible_tenants",
+                "accessible_tenants",
+                "accessible_tenants",
+                "String",  // Use String type, the content will be JSON string
+                false, true, true
+            ));
 
-            // Create protocol mapper for clinic_type
-            ProtocolMapperRepresentation clinicTypeMapper = new ProtocolMapperRepresentation();
-            clinicTypeMapper.setName("clinic-type-mapper");
-            clinicTypeMapper.setProtocol("openid-connect");
-            clinicTypeMapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
+            // 4. Specialty Mapper (maps clinic_type to specialty claim)
+            mappers.add(createUserAttributeMapper(
+                "specialty",
+                "clinic_type",
+                "specialty",
+                "String",
+                false, true, true
+            ));
 
-            Map<String, String> clinicTypeConfig = new HashMap<>();
-            clinicTypeConfig.put("userAttribute", "clinic_type");
-            clinicTypeConfig.put("claim.name", "clinic_type");
-            clinicTypeConfig.put("jsonType.label", "String");
-            clinicTypeConfig.put("id.token.claim", "true");
-            clinicTypeConfig.put("access.token.claim", "true");
-            clinicTypeConfig.put("userinfo.token.claim", "true");
-            clinicTypeMapper.setConfig(clinicTypeConfig);
+            // 5. User Tenant Roles Mapper (JSON)
+            mappers.add(createUserAttributeMapper(
+                "user_tenant_roles",
+                "user_tenant_roles",
+                "user_tenant_roles",
+                "String",  // Use String type, the content will be JSON string
+                false, true, true
+            ));
+
+            // 6. Clinic Name Mapper
+            mappers.add(createUserAttributeMapper(
+                "clinic_name",
+                "clinic_name",
+                "clinic_name",
+                "String",
+                true, true, true
+            ));
+
+            // 7. Clinic Type Mapper
+            mappers.add(createUserAttributeMapper(
+                "clinic_type",
+                "clinic_type",
+                "clinic_type",
+                "String",
+                true, true, true
+            ));
 
             // Add mappers to both clients
             List<String> clientIds = Arrays.asList("clinicx-backend", "clinicx-frontend");
@@ -405,13 +496,25 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientIdName);
                 if (!clients.isEmpty()) {
                     String internalClientId = clients.get(0).getId();
-                    try {
-                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(tenantIdMapper);
-                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicNameMapper);
-                        realmResource.clients().get(internalClientId).getProtocolMappers().createMapper(clinicTypeMapper);
-                        log.info("Added protocol mappers to client: {}", clientIdName);
-                    } catch (Exception e) {
-                        log.warn("Failed to add protocol mappers to client {}: {}", clientIdName, e.getMessage());
+                    ClientResource clientResource = realmResource.clients().get(internalClientId);
+                    
+                    // Get existing mappers to avoid duplicates
+                    List<ProtocolMapperRepresentation> existingMappers = clientResource.getProtocolMappers().getMappers();
+                    Set<String> existingMapperNames = existingMappers.stream()
+                        .map(ProtocolMapperRepresentation::getName)
+                        .collect(Collectors.toSet());
+                    
+                    // Add only new mappers
+                    for (ProtocolMapperRepresentation mapper : mappers) {
+                        if (!existingMapperNames.contains(mapper.getName())) {
+                            try {
+                                clientResource.getProtocolMappers().createMapper(mapper);
+                                log.info("Added protocol mapper '{}' to client: {}", mapper.getName(), clientIdName);
+                            } catch (Exception e) {
+                                log.warn("Failed to add protocol mapper '{}' to client {}: {}", 
+                                    mapper.getName(), clientIdName, e.getMessage());
+                            }
+                        }
                     }
                 } else {
                     log.warn("Could not find client '{}' to add protocol mappers", clientIdName);
@@ -424,6 +527,37 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             log.error("Failed to configure protocol mappers", e);
             throw new BusinessRuleException("Failed to configure protocol mappers: " + e.getMessage());
         }
+    }
+
+    /**
+     * Helper method to create a user attribute protocol mapper
+     */
+    private ProtocolMapperRepresentation createUserAttributeMapper(
+            String mapperName,
+            String userAttribute,
+            String claimName,
+            String jsonType,
+            boolean addToIdToken,
+            boolean addToAccessToken,
+            boolean addToUserInfo) {
+        
+        ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
+        mapper.setName(mapperName);
+        mapper.setProtocol("openid-connect");
+        mapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
+
+        Map<String, String> config = new HashMap<>();
+        config.put("user.attribute", userAttribute);
+        config.put("claim.name", claimName);
+        config.put("jsonType.label", jsonType);
+        config.put("id.token.claim", String.valueOf(addToIdToken));
+        config.put("access.token.claim", String.valueOf(addToAccessToken));
+        config.put("userinfo.token.claim", String.valueOf(addToUserInfo));
+        config.put("multivalued", "false");
+        config.put("aggregate.attrs", "false");
+        
+        mapper.setConfig(config);
+        return mapper;
     }
 
     @Override
@@ -560,11 +694,25 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             user.setEnabled(true);
             user.setEmailVerified(true);
 
-            // Set tenant attributes
+            // Set multi-tenant attributes
             Map<String, List<String>> attributes = new HashMap<>();
             attributes.put("tenant_id", Arrays.asList(tenantId));
             attributes.put("clinic_name", Arrays.asList(clinicName));
             attributes.put("clinic_type", Arrays.asList(clinicType));
+            attributes.put("active_tenant_id", Arrays.asList(tenantId)); // Set active tenant same as primary tenant initially
+            
+            // Initialize accessible_tenants with the primary tenant
+            String accessibleTenants = String.format(
+                "[{\"tenant_id\":\"%s\",\"clinic_name\":\"%s\",\"clinic_type\":\"%s\",\"specialty\":\"%s\",\"roles\":%s}]",
+                tenantId, clinicName, clinicType, clinicType, 
+                convertRolesToJson(roles)
+            );
+            attributes.put("accessible_tenants", Arrays.asList(accessibleTenants));
+            
+            // Initialize user_tenant_roles
+            String userTenantRoles = String.format("{\"%s\":%s}", tenantId, convertRolesToJson(roles));
+            attributes.put("user_tenant_roles", Arrays.asList(userTenantRoles));
+            
             user.setAttributes(attributes);
 
             Response response = usersResource.create(user);
@@ -586,7 +734,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     assignRoleToUser(realmName, userId, roleName);
                 }
 
-                log.info("Successfully created user {} with tenant attributes in realm {}", username, realmName);
+                log.info("Successfully created user {} with multi-tenant attributes in realm {}", username, realmName);
                 return user;
             } else {
                 throw new BusinessRuleException("Failed to create user: " + response.getStatusInfo().getReasonPhrase());
@@ -595,6 +743,18 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             throw new BusinessRuleException("Failed to create user with tenant info: " + e.getMessage());
         }
+    }
+
+    /**
+     * Convert list of roles to JSON array string
+     */
+    private String convertRolesToJson(List<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return "[]";
+        }
+        return "[" + roles.stream()
+            .map(role -> "\"" + role + "\"")
+            .collect(Collectors.joining(",")) + "]";
     }
 
     @Override
@@ -833,6 +993,166 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             log.error("Failed to ensure protocol mapper", e);
             throw new BusinessRuleException("Failed to ensure protocol mapper: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void grantAdditionalTenantAccess(String realmName, String username, String newTenantId,
+                                           String newClinicName, String newClinicType, List<String> roles) {
+        try {
+            UserRepresentation user = getUserByUsername(realmName, username);
+            Map<String, List<String>> attributes = user.getAttributes();
+            if (attributes == null) {
+                attributes = new HashMap<>();
+            }
+            
+            // Update accessible_tenants
+            String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
+            List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
+            
+            // Check if tenant already exists
+            boolean tenantExists = accessibleTenants.stream()
+                .anyMatch(t -> newTenantId.equals(t.get("tenant_id")));
+            
+            if (!tenantExists) {
+                Map<String, Object> newTenant = new HashMap<>();
+                newTenant.put("tenant_id", newTenantId);
+                newTenant.put("clinic_name", newClinicName);
+                newTenant.put("clinic_type", newClinicType);
+                newTenant.put("specialty", newClinicType);
+                newTenant.put("roles", roles);
+                accessibleTenants.add(newTenant);
+                
+                attributes.put("accessible_tenants", Arrays.asList(toJsonString(accessibleTenants)));
+            }
+            
+            // Update user_tenant_roles
+            String userTenantRolesJson = attributes.getOrDefault("user_tenant_roles", Arrays.asList("{}")).get(0);
+            Map<String, Object> userTenantRoles = parseJsonObject(userTenantRolesJson);
+            userTenantRoles.put(newTenantId, roles);
+            attributes.put("user_tenant_roles", Arrays.asList(toJsonString(userTenantRoles)));
+            
+            // Update user
+            user.setAttributes(attributes);
+            getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
+            
+            log.info("Granted access to tenant {} for user {} in realm {}", newTenantId, username, realmName);
+            
+        } catch (Exception e) {
+            log.error("Failed to grant additional tenant access", e);
+            throw new BusinessRuleException("Failed to grant additional tenant access: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void revokeTenantAccess(String realmName, String username, String tenantId) {
+        try {
+            UserRepresentation user = getUserByUsername(realmName, username);
+            Map<String, List<String>> attributes = user.getAttributes();
+            if (attributes == null) {
+                return;
+            }
+            
+            // Update accessible_tenants
+            String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
+            List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
+            accessibleTenants.removeIf(t -> tenantId.equals(t.get("tenant_id")));
+            attributes.put("accessible_tenants", Arrays.asList(toJsonString(accessibleTenants)));
+            
+            // Update user_tenant_roles
+            String userTenantRolesJson = attributes.getOrDefault("user_tenant_roles", Arrays.asList("{}")).get(0);
+            Map<String, Object> userTenantRoles = parseJsonObject(userTenantRolesJson);
+            userTenantRoles.remove(tenantId);
+            attributes.put("user_tenant_roles", Arrays.asList(toJsonString(userTenantRoles)));
+            
+            // If active tenant was revoked, switch to first available tenant
+            String activeTenantId = attributes.getOrDefault("active_tenant_id", Arrays.asList("")).get(0);
+            if (tenantId.equals(activeTenantId) && !accessibleTenants.isEmpty()) {
+                String newActiveTenantId = (String) accessibleTenants.get(0).get("tenant_id");
+                attributes.put("active_tenant_id", Arrays.asList(newActiveTenantId));
+            }
+            
+            // Update user
+            user.setAttributes(attributes);
+            getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
+            
+            log.info("Revoked access to tenant {} for user {} in realm {}", tenantId, username, realmName);
+            
+        } catch (Exception e) {
+            log.error("Failed to revoke tenant access", e);
+            throw new BusinessRuleException("Failed to revoke tenant access: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void updateUserActiveTenant(String realmName, String username, String newActiveTenantId) {
+        try {
+            UserRepresentation user = getUserByUsername(realmName, username);
+            Map<String, List<String>> attributes = user.getAttributes();
+            if (attributes == null) {
+                attributes = new HashMap<>();
+            }
+            
+            // Verify user has access to the new tenant
+            String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
+            List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
+            
+            boolean hasAccess = accessibleTenants.stream()
+                .anyMatch(t -> newActiveTenantId.equals(t.get("tenant_id")));
+            
+            if (!hasAccess) {
+                throw new BusinessRuleException("User does not have access to tenant: " + newActiveTenantId);
+            }
+            
+            // Update active tenant
+            attributes.put("active_tenant_id", Arrays.asList(newActiveTenantId));
+            user.setAttributes(attributes);
+            getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
+            
+            log.info("Updated active tenant to {} for user {} in realm {}", newActiveTenantId, username, realmName);
+            
+        } catch (Exception e) {
+            log.error("Failed to update user active tenant", e);
+            throw new BusinessRuleException("Failed to update user active tenant: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Parse JSON array string to List of Maps
+     */
+    private List<Map<String, Object>> parseJsonArray(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            log.warn("Failed to parse JSON array: {}", json, e);
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * Parse JSON object string to Map
+     */
+    private Map<String, Object> parseJsonObject(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            log.warn("Failed to parse JSON object: {}", json, e);
+            return new HashMap<>();
+        }
+    }
+    
+    /**
+     * Convert object to JSON string
+     */
+    private String toJsonString(Object obj) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            log.error("Failed to convert to JSON", e);
+            return obj.toString();
         }
     }
 }

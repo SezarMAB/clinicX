@@ -1,0 +1,288 @@
+{
+  "clientId": "clinicx-frontend",
+  "name": "ClickX Frontend",
+  "description": "",
+  "rootUrl": "https://dental-realm.localhost:4200",
+  "adminUrl": "https://dental-realm.localhost:4200",
+  "baseUrl": "",
+  "surrogateAuthRequired": false,
+  "enabled": true,
+  "alwaysDisplayInConsole": false,
+  "clientAuthenticatorType": "client-secret",
+  "redirectUris": [
+    "https://dental-realm.localhost:4200/*",
+    "http://dental-realm.localhost:4200/*"
+  ],
+  "webOrigins": [
+    "+"
+  ],
+  "notBefore": 0,
+  "bearerOnly": false,
+  "consentRequired": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": true,
+  "serviceAccountsEnabled": false,
+  "publicClient": true,
+  "frontchannelLogout": true,
+  "protocol": "openid-connect",
+  "attributes": {
+    "realm_client": "false",
+    "oidc.ciba.grant.enabled": "false",
+    "backchannel.logout.session.required": "true",
+    "standard.token.exchange.enabled": "false",
+    "frontchannel.logout.session.required": "true",
+    "display.on.consent.screen": "false",
+    "oauth2.device.authorization.grant.enabled": "true",
+    "backchannel.logout.revoke.offline.tokens": "false"
+  },
+  "authenticationFlowBindingOverrides": {},
+  "fullScopeAllowed": true,
+  "nodeReRegistrationTimeout": -1,
+  "protocolMappers": [
+    {
+      "name": "specialty-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "clinic_type",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clinic_type",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "clinic_name-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "clinic_name",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clinic_name",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "user_tenant_roles-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "user_tenant_roles",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "user_tenant_roles",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "clinic_name",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "clinic_name",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clinic_name",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "tenant_id",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "tenant_id",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "tenant_id",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "specialty",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "clinic_type",
+        "id.token.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "specialty",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "active_tenant_id",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "active_tenant_id",
+        "id.token.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "active_tenant_id",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "clinic_type",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "clinic_type",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clinic_type",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "active_tenant_id-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "active_tenant_id",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "active_tenant_id",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "tenant_id-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "tenant_id",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "tenant_id",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "accessible_tenants-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "accessible_tenants",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "accessible_tenants",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "user_tenant_roles",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "user_tenant_roles",
+        "id.token.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "user_tenant_roles",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "clinic_type-mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "clinic_type",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clinic_type",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "accessible_tenants",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "userinfo.token.claim": "true",
+        "multivalued": "false",
+        "user.attribute": "accessible_tenants",
+        "id.token.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "accessible_tenants",
+        "jsonType.label": "String"
+      }
+    }
+  ],
+  "defaultClientScopes": [
+    "web-origins",
+    "acr",
+    "roles",
+    "profile",
+    "basic",
+    "email"
+  ],
+  "optionalClientScopes": [
+    "address",
+    "phone",
+    "offline_access",
+    "organization",
+    "microprofile-jwt"
+  ],
+  "access": {
+    "view": true,
+    "configure": true,
+    "manage": true
+  }
+}

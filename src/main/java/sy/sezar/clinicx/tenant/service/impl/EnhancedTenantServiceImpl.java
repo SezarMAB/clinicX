@@ -32,36 +32,36 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class EnhancedTenantServiceImpl implements TenantService {
-    
+
     private final TenantRepository tenantRepository;
     private final TenantMapper tenantMapper;
     private final KeycloakAdminService keycloakAdminService;
-    
+
     @Autowired
     private DynamicRealmService dynamicRealmService;
-    
+
     @Autowired
     private UserTenantAccessRepository userTenantAccessRepository;
-    
+
     @Value("${app.multi-tenant.realm-per-type:true}")
     private boolean realmPerTypeEnabled;
-    
+
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerUrl;
-    
+
     @Override
     public TenantCreationResponseDto createTenant(TenantCreateRequest request) {
-        log.info("Creating tenant with subdomain: {} and specialty: {}", 
+        log.info("Creating tenant with subdomain: {} and specialty: {}",
                 request.subdomain(), request.specialty());
-        
+
         // Validate subdomain uniqueness
         if (tenantRepository.existsBySubdomain(request.subdomain())) {
             throw new BusinessRuleException("Subdomain already exists: " + request.subdomain());
         }
-        
+
         String realmName;
         String specialty = request.specialty() != null ? request.specialty() : "CLINIC";
-        
+
         // Determine realm based on configuration
         if (realmPerTypeEnabled) {
             // Use realm-per-type approach
@@ -75,11 +75,11 @@ public class EnhancedTenantServiceImpl implements TenantService {
             }
             keycloakAdminService.createRealm(realmName, request.name());
         }
-        
+
         try {
             // Generate unique tenant ID
             String tenantId = generateTenantId(request.subdomain());
-            
+
             // Create admin user in the realm with tenant attributes
             keycloakAdminService.createUserWithTenantInfo(
                 realmName,
@@ -88,12 +88,12 @@ public class EnhancedTenantServiceImpl implements TenantService {
                 request.adminFirstName(),
                 request.adminLastName(),
                 request.adminPassword(),
-                Arrays.asList("ADMIN"),
+                List.of("ADMIN"),
                 tenantId,
                 request.name(),
                 specialty
             );
-            
+
             // For multi-tenant support, update user attributes
             if (realmPerTypeEnabled) {
                 Map<String, List<String>> attributes = new HashMap<>();
@@ -102,10 +102,10 @@ public class EnhancedTenantServiceImpl implements TenantService {
                     tenantId + "|" + request.name() + "|ADMIN"
                 ));
                 attributes.put("active_tenant_id", Arrays.asList(tenantId));
-                
+
                 keycloakAdminService.updateUserAttributes(realmName, request.adminUsername(), attributes);
             }
-            
+
             // Create tenant entity
             Tenant tenant = new Tenant();
             tenant.setTenantId(tenantId);
@@ -122,9 +122,9 @@ public class EnhancedTenantServiceImpl implements TenantService {
             tenant.setMaxPatients(request.maxPatients());
             tenant.setSubscriptionStartDate(Instant.now());
             tenant.setSubscriptionEndDate(Instant.now().plusSeconds(365 * 24 * 60 * 60));
-            
+
             tenant = tenantRepository.save(tenant);
-            
+
             // Create user-tenant access record
             if (realmPerTypeEnabled) {
                 UserTenantAccess userAccess = new UserTenantAccess();
@@ -134,7 +134,7 @@ public class EnhancedTenantServiceImpl implements TenantService {
                 userAccess.setPrimary(true);
                 userTenantAccessRepository.save(userAccess);
             }
-            
+
             // Get the backend client secret
             String backendClientSecret = "";
             try {
@@ -142,9 +142,9 @@ public class EnhancedTenantServiceImpl implements TenantService {
             } catch (Exception e) {
                 log.warn("Could not retrieve client secret: {}", e.getMessage());
             }
-            
+
             log.info("Successfully created tenant with ID: {} in realm: {}", tenant.getId(), realmName);
-            
+
             // Return the creation response
             return new TenantCreationResponseDto(
                 tenant.getId(),
@@ -158,7 +158,7 @@ public class EnhancedTenantServiceImpl implements TenantService {
                 keycloakServerUrl,
                 request.adminUsername()
             );
-            
+
         } catch (Exception e) {
             log.error("Failed to create tenant, rolling back", e);
             // Rollback Keycloak changes if tenant creation fails
@@ -172,71 +172,71 @@ public class EnhancedTenantServiceImpl implements TenantService {
             throw new BusinessRuleException("Failed to create tenant: " + e.getMessage());
         }
     }
-    
+
     // Delegate other methods to the original implementation
     @Autowired
     private TenantServiceImpl originalService;
-    
+
     @Override
     public TenantDetailDto getTenantById(UUID id) {
         return originalService.getTenantById(id);
     }
-    
+
     @Override
     public TenantDetailDto getTenantByTenantId(String tenantId) {
         return originalService.getTenantByTenantId(tenantId);
     }
-    
+
     @Override
     public TenantDetailDto getTenantBySubdomain(String subdomain) {
         return originalService.getTenantBySubdomain(subdomain);
     }
-    
+
     @Override
     public Page<TenantSummaryDto> getAllTenants(String searchTerm, Boolean isActive, Pageable pageable) {
         return originalService.getAllTenants(searchTerm, isActive, pageable);
     }
-    
+
     @Override
     public Page<TenantSummaryDto> searchTenants(String searchTerm, Boolean isActive, Pageable pageable) {
         return originalService.searchTenants(searchTerm, isActive, pageable);
     }
-    
+
     @Override
     public TenantDetailDto updateTenant(UUID id, TenantUpdateRequest request) {
         return originalService.updateTenant(id, request);
     }
-    
+
     @Override
     public void activateTenant(UUID id) {
         originalService.activateTenant(id);
     }
-    
+
     @Override
     public void deactivateTenant(UUID id) {
         originalService.deactivateTenant(id);
     }
-    
+
     @Override
     public void deleteTenant(UUID id) {
         originalService.deleteTenant(id);
     }
-    
+
     @Override
     public boolean isTenantActive(String tenantId) {
         return originalService.isTenantActive(tenantId);
     }
-    
+
     @Override
     public SubdomainAvailabilityDto checkSubdomainAvailability(String subdomain) {
         return originalService.checkSubdomainAvailability(subdomain);
     }
-    
+
     @Override
     public void updateTenantUsageStats(String tenantId) {
         originalService.updateTenantUsageStats(tenantId);
     }
-    
+
     private String generateTenantId(String subdomain) {
         return subdomain + "-" + UUID.randomUUID().toString().substring(0, 8);
     }

@@ -75,12 +75,22 @@ app:
   tenant:
     mode: ${TENANT_MODE:single}  # Options: single, multi
     default-tenant: ${DEFAULT_TENANT_ID:master}
+    # Specialty realm mapping configuration
+    specialty-realm-mapping:
+      enabled: ${SPECIALTY_REALM_MAPPING_ENABLED:false}
+      auto-create-realm: ${AUTO_CREATE_REALM:true}
+      template-realm: ${TEMPLATE_REALM:master}
+      default-features:
+        - CORE
+        - APPOINTMENTS
   # Multi-tenant configuration
   multi-tenant:
     enabled: ${MULTI_TENANT_ENABLED:true}
     default-realm: ${DEFAULT_REALM:master}
     # Pattern for realm naming: clinic-{subdomain}
     realm-prefix: ${REALM_PREFIX:clinic-}
+    # Realm-per-type configuration
+    realm-per-type: ${REALM_PER_TYPE:false}
   # Domain configuration
   domain: ${APP_DOMAIN}
 

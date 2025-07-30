@@ -50,7 +50,8 @@ public record TenantCreateRequest(
     @Size(min = 8, message = "Admin password must be at least 8 characters")
     String adminPassword,
 
-    @Pattern(regexp = "^(CLINIC|DENTAL|APPOINTMENTS|CHRORG)$",
+    @NotBlank(
+//        regexp = "^(CLINIC|DENTAL|APPOINTMENTS|CHRORG)$",
              message = "Specialty must be one of: CLINIC, DENTAL, APPOINTMENTS, CHRORG")
     String specialty
 ) {

@@ -79,17 +79,20 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         // Update active tenant in context
         TenantContext.setCurrentTenant(tenantId);
         
-        // Update user attributes in Keycloak
+        // Update user attributes in Keycloak using the dedicated method
         try {
-            Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put("active_tenant_id", Arrays.asList(tenantId));
-            
-            // Get current JWT to find realm
+            // Get current JWT to find realm and username
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
                 String issuer = jwt.getIssuer().toString();
                 String realmName = extractRealmFromIssuer(issuer);
-                keycloakAdminService.updateUserAttributes(realmName, userId, attributes);
+                String username = jwt.getClaimAsString("preferred_username");
+                if (username == null) {
+                    username = userId; // Fallback to userId
+                }
+                
+                // Use the dedicated method for updating active tenant
+                keycloakAdminService.updateUserActiveTenant(realmName, username, tenantId);
             }
             
             // Note: In a real implementation, you would need to refresh the JWT token
@@ -156,9 +159,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         log.info("Granting user {} access to tenant {} with role {}", userId, tenantId, role);
         
         // Verify tenant exists
-        if (!tenantRepository.existsByTenantId(tenantId)) {
-            throw new NotFoundException("Tenant not found: " + tenantId);
-        }
+        Tenant tenant = tenantRepository.findByTenantId(tenantId)
+            .orElseThrow(() -> new NotFoundException("Tenant not found: " + tenantId));
         
         // Check if access already exists
         if (userTenantAccessRepository.existsByUserIdAndTenantId(userId, tenantId)) {
@@ -184,8 +186,31 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         
         userTenantAccessRepository.save(access);
         
-        // Update user attributes in Keycloak
-        updateUserAccessibleTenants(userId);
+        // Update user attributes in Keycloak using the dedicated method
+        try {
+            // Get realm from current authentication context or tenant configuration
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+                String issuer = jwt.getIssuer().toString();
+                String realmName = extractRealmFromIssuer(issuer);
+                
+                // Grant additional tenant access in Keycloak
+                keycloakAdminService.grantAdditionalTenantAccess(
+                    realmName,
+                    userId, // This should be the username, not user ID
+                    tenantId,
+                    tenant.getName(),
+                    tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC",
+                    Arrays.asList(role)
+                );
+            } else {
+                // Fallback to updating accessible tenants the old way
+                updateUserAccessibleTenants(userId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update Keycloak attributes for user {}", userId, e);
+            // Continue anyway - local database is updated
+        }
     }
     
     @Override
@@ -201,8 +226,24 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         
         userTenantAccessRepository.delete(access);
         
-        // Update user attributes in Keycloak
-        updateUserAccessibleTenants(userId);
+        // Update user attributes in Keycloak using the dedicated method
+        try {
+            // Get realm from current authentication context
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+                String issuer = jwt.getIssuer().toString();
+                String realmName = extractRealmFromIssuer(issuer);
+                
+                // Revoke tenant access in Keycloak
+                keycloakAdminService.revokeTenantAccess(realmName, userId, tenantId);
+            } else {
+                // Fallback to updating accessible tenants the old way
+                updateUserAccessibleTenants(userId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update Keycloak attributes for user {}", userId, e);
+            // Continue anyway - local database is updated
+        }
     }
     
     private String getCurrentUserId() {

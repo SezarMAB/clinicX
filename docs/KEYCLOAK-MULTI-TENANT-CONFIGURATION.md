@@ -233,10 +233,11 @@ Name: accessible_tenants
 Mapper Type: User Attribute
 User Attribute: accessible_tenants
 Token Claim Name: accessible_tenants
-Claim JSON Type: JSON
+Claim JSON Type: String
 Add to ID token: ✗
 Add to access token: ✓
 Add to userinfo: ✓
+Note: The content is a JSON string, but the type must be String for Keycloak to process it correctly
 ```
 
 ### 4. Specialty Mapper
@@ -259,10 +260,11 @@ Name: user_tenant_roles
 Mapper Type: User Attribute
 User Attribute: user_tenant_roles
 Token Claim Name: user_tenant_roles
-Claim JSON Type: JSON
+Claim JSON Type: String
 Add to ID token: ✗
 Add to access token: ✓
 Add to userinfo: ✓
+Note: The content is a JSON string, but the type must be String for Keycloak to process it correctly
 ```
 
 ### 6. Clinic Name Mapper

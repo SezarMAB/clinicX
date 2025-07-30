@@ -73,4 +73,35 @@ public interface KeycloakAdminService {
      * @param attributeName the user attribute name
      */
     void ensureProtocolMapper(String realmName, String clientId, String mapperName, String attributeName);
+    
+    /**
+     * Grant access to an additional tenant for an existing user.
+     * 
+     * @param realmName the realm name where the user exists
+     * @param username the username
+     * @param newTenantId the new tenant ID to grant access to
+     * @param newClinicName the clinic name for the new tenant
+     * @param newClinicType the clinic type for the new tenant
+     * @param roles the roles to assign for the new tenant
+     */
+    void grantAdditionalTenantAccess(String realmName, String username, String newTenantId, 
+                                     String newClinicName, String newClinicType, List<String> roles);
+    
+    /**
+     * Revoke access to a tenant for a user.
+     * 
+     * @param realmName the realm name where the user exists
+     * @param username the username
+     * @param tenantId the tenant ID to revoke access from
+     */
+    void revokeTenantAccess(String realmName, String username, String tenantId);
+    
+    /**
+     * Update the active tenant for a user.
+     * 
+     * @param realmName the realm name
+     * @param username the username
+     * @param newActiveTenantId the new active tenant ID
+     */
+    void updateUserActiveTenant(String realmName, String username, String newActiveTenantId);
 }

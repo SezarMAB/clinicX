@@ -1,6 +1,9 @@
 version: "3.9"
 
 services:
+  # ───────────────────────────
+  # 1) Postgres
+  # ───────────────────────────
   db:
     image: postgres:16-alpine            # multi-arch (arm64/amd64) manifest
     platform: linux/arm64                # ← forces the ARM layer on M-series Macs
@@ -19,6 +22,10 @@ services:
       retries: 5
     networks: [keycloak_net_clinicX]
 
+  # ───────────────────────────
+  # 3) One-shot export helper
+  #    (run with: docker compose run --rm keycloak-export)
+  # ───────────────────────────
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2   # current GA (July 2025) [docs](https://www.keycloak.org/getting-started/getting-started-docker)
     platform: linux/arm64
@@ -39,7 +46,40 @@ services:
     command: ["start-dev"]                    # use 'start' for prod
     ports:
       - "18081:8080"
+    volumes:
+      - ./import:/opt/keycloak/data/import
     restart: unless-stopped
+    networks: [keycloak_net_clinicX]
+
+  # ───────────────────────────
+  # 3) One-shot export helper
+  #    (run with: docker compose run --rm keycloak-export)
+  # ───────────────────────────
+  # excerpt – ONLY the export helper changed
+  keycloak-export:
+    image: quay.io/keycloak/keycloak:26.3.2
+    platform: linux/arm64
+    profiles: ["export"]
+    entrypoint: ["/opt/keycloak/bin/kc.sh"]
+    command:
+      - export
+      - --realm
+      - master
+      - --dir
+      - /opt/keycloak/data       # ← no --optimized here
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: change-me
+      QUARKUS_HTTP_ENABLED: 'false'
+      QUARKUS_MANAGEMENT_ENABLED: 'false'
+    volumes:
+      - ./backup:/opt/keycloak/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
     networks: [keycloak_net_clinicX]
 
 networks:

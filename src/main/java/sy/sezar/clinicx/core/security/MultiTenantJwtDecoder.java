@@ -42,14 +42,21 @@ public class MultiTenantJwtDecoder implements JwtDecoder {
                 // For default/master realm, set the default tenant context
                 TenantContext.setCurrentTenant(defaultRealm);
             } else {
-                // Validate tenant exists and is active for non-default realms
-                Optional<Tenant> tenant = tenantRepository.findByRealmName(realm);
+                // In realm-per-type architecture, get tenant_id from the token claims
+                String tenantId = (String) jwt.getJWTClaimsSet().getClaim("tenant_id");
+                
+                if (tenantId == null) {
+                    throw new JwtException("No tenant_id found in token");
+                }
+                
+                // Validate tenant exists and is active
+                Optional<Tenant> tenant = tenantRepository.findByTenantId(tenantId);
                 if (tenant.isEmpty() || !tenant.get().isActive()) {
                     throw new JwtException("Invalid or inactive tenant");
                 }
                 
                 // Set tenant context from token
-                TenantContext.setCurrentTenant(tenant.get().getTenantId());
+                TenantContext.setCurrentTenant(tenantId);
             }
             
             // Get or create decoder for this realm

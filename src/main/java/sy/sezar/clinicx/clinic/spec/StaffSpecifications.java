@@ -1,22 +1,22 @@
-package sy.sezar.clinicx.staff.spec;
+package sy.sezar.clinicx.clinic.spec;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import sy.sezar.clinicx.clinic.model.Specialty;
-import sy.sezar.clinicx.staff.dto.StaffSearchCriteria;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.dto.StaffSearchCriteria;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StaffSpecifications {
-    
+
     public static Specification<Staff> withCriteria(StaffSearchCriteria criteria) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            
+
             // Search term (name, email, phone)
             if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearchTerm().toLowerCase() + "%";
@@ -26,24 +26,24 @@ public class StaffSpecifications {
                         cb.like(cb.lower(root.get("phoneNumber")), searchPattern)
                 ));
             }
-            
+
             // Role filter
             if (criteria.getRole() != null) {
                 predicates.add(cb.equal(root.get("role"), criteria.getRole()));
             }
-            
+
             // Active status filter
             if (criteria.getIsActive() != null) {
                 predicates.add(cb.equal(root.get("isActive"), criteria.getIsActive()));
             }
-            
+
             // Specialty filter
             if (criteria.getSpecialtyIds() != null && !criteria.getSpecialtyIds().isEmpty()) {
                 Join<Staff, Specialty> specialtyJoin = root.join("specialties", JoinType.INNER);
                 predicates.add(specialtyJoin.get("id").in(criteria.getSpecialtyIds()));
                 query.distinct(true); // Avoid duplicates when joining
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

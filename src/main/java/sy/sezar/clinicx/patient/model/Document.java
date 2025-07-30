@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import sy.sezar.clinicx.patient.model.enums.DocumentType;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.time.Instant;
 import java.util.UUID;

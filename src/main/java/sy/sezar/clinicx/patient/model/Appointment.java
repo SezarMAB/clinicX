@@ -7,7 +7,7 @@ import lombok.Setter;
 import sy.sezar.clinicx.clinic.model.Specialty;
 import sy.sezar.clinicx.core.model.BaseEntity;
 import sy.sezar.clinicx.patient.model.enums.AppointmentStatus;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.time.Instant;
 import java.util.HashSet;

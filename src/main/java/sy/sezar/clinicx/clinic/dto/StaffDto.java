@@ -1,8 +1,7 @@
-package sy.sezar.clinicx.staff.dto;
+package sy.sezar.clinicx.clinic.dto;
 
 import lombok.Data;
-import sy.sezar.clinicx.clinic.dto.SpecialtyDto;
-import sy.sezar.clinicx.staff.model.enums.StaffRole;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.time.Instant;
 import java.util.Set;

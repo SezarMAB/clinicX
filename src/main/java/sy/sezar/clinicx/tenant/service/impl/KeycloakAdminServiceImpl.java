@@ -16,7 +16,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
-import sy.sezar.clinicx.staff.model.enums.StaffRole;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
 
@@ -497,13 +497,13 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 if (!clients.isEmpty()) {
                     String internalClientId = clients.get(0).getId();
                     ClientResource clientResource = realmResource.clients().get(internalClientId);
-                    
+
                     // Get existing mappers to avoid duplicates
                     List<ProtocolMapperRepresentation> existingMappers = clientResource.getProtocolMappers().getMappers();
                     Set<String> existingMapperNames = existingMappers.stream()
                         .map(ProtocolMapperRepresentation::getName)
                         .collect(Collectors.toSet());
-                    
+
                     // Add only new mappers
                     for (ProtocolMapperRepresentation mapper : mappers) {
                         if (!existingMapperNames.contains(mapper.getName())) {
@@ -511,7 +511,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                                 clientResource.getProtocolMappers().createMapper(mapper);
                                 log.info("Added protocol mapper '{}' to client: {}", mapper.getName(), clientIdName);
                             } catch (Exception e) {
-                                log.warn("Failed to add protocol mapper '{}' to client {}: {}", 
+                                log.warn("Failed to add protocol mapper '{}' to client {}: {}",
                                     mapper.getName(), clientIdName, e.getMessage());
                             }
                         }
@@ -540,7 +540,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             boolean addToIdToken,
             boolean addToAccessToken,
             boolean addToUserInfo) {
-        
+
         ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
         mapper.setName(mapperName);
         mapper.setProtocol("openid-connect");
@@ -555,7 +555,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         config.put("userinfo.token.claim", String.valueOf(addToUserInfo));
         config.put("multivalued", "false");
         config.put("aggregate.attrs", "false");
-        
+
         mapper.setConfig(config);
         return mapper;
     }
@@ -700,19 +700,19 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             attributes.put("clinic_name", Arrays.asList(clinicName));
             attributes.put("clinic_type", Arrays.asList(clinicType));
             attributes.put("active_tenant_id", Arrays.asList(tenantId)); // Set active tenant same as primary tenant initially
-            
+
             // Initialize accessible_tenants with the primary tenant
             String accessibleTenants = String.format(
                 "[{\"tenant_id\":\"%s\",\"clinic_name\":\"%s\",\"clinic_type\":\"%s\",\"specialty\":\"%s\",\"roles\":%s}]",
-                tenantId, clinicName, clinicType, clinicType, 
+                tenantId, clinicName, clinicType, clinicType,
                 convertRolesToJson(roles)
             );
             attributes.put("accessible_tenants", Arrays.asList(accessibleTenants));
-            
+
             // Initialize user_tenant_roles
             String userTenantRoles = String.format("{\"%s\":%s}", tenantId, convertRolesToJson(roles));
             attributes.put("user_tenant_roles", Arrays.asList(userTenantRoles));
-            
+
             user.setAttributes(attributes);
 
             Response response = usersResource.create(user);
@@ -865,13 +865,13 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to get client secret: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void updateUserAttributes(String realmName, String username, Map<String, List<String>> attributes) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<UserRepresentation> users = realmResource.users().search(username);
-            
+
             if (!users.isEmpty()) {
                 UserRepresentation user = users.get(0);
                 Map<String, List<String>> existingAttributes = user.getAttributes();
@@ -880,7 +880,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 }
                 existingAttributes.putAll(attributes);
                 user.setAttributes(existingAttributes);
-                
+
                 realmResource.users().get(user.getId()).update(user);
                 log.info("Updated attributes for user {} in realm {}", username, realmName);
             } else {
@@ -891,13 +891,13 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to update user attributes: " + e.getMessage());
         }
     }
-    
+
     @Override
     public UserRepresentation getUserByUsername(String realmName, String username) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<UserRepresentation> users = realmResource.users().search(username);
-            
+
             if (!users.isEmpty()) {
                 return users.get(0);
             } else {
@@ -908,16 +908,16 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to get user: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void copyClientsFromRealm(String sourceRealmName, String targetRealmName) {
         try {
             Keycloak keycloak = getKeycloakInstance();
             RealmResource sourceRealm = keycloak.realm(sourceRealmName);
             RealmResource targetRealm = keycloak.realm(targetRealmName);
-            
+
             List<ClientRepresentation> sourceClients = sourceRealm.clients().findAll();
-            
+
             for (ClientRepresentation sourceClient : sourceClients) {
                 // Skip built-in clients
                 if (sourceClient.getClientId().startsWith("clinicx-")) {
@@ -935,12 +935,12 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     targetClient.setWebOrigins(sourceClient.getWebOrigins());
                     targetClient.setProtocol(sourceClient.getProtocol());
                     targetClient.setAttributes(sourceClient.getAttributes());
-                    
+
                     // Generate new secret for confidential clients
                     if (!sourceClient.isPublicClient()) {
                         targetClient.setSecret(UUID.randomUUID().toString());
                     }
-                    
+
                     targetRealm.clients().create(targetClient);
                     log.info("Copied client {} from {} to {}", sourceClient.getClientId(), sourceRealmName, targetRealmName);
                 }
@@ -950,28 +950,28 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to copy clients: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void ensureProtocolMapper(String realmName, String clientId, String mapperName, String attributeName) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientId);
-            
+
             if (!clients.isEmpty()) {
                 String internalClientId = clients.get(0).getId();
                 ClientResource clientResource = realmResource.clients().get(internalClientId);
-                
+
                 // Check if mapper already exists
                 List<ProtocolMapperRepresentation> existingMappers = clientResource.getProtocolMappers().getMappers();
                 boolean mapperExists = existingMappers.stream()
                     .anyMatch(mapper -> mapper.getName().equals(mapperName));
-                
+
                 if (!mapperExists) {
                     ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
                     mapper.setName(mapperName);
                     mapper.setProtocol("openid-connect");
                     mapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
-                    
+
                     Map<String, String> config = new HashMap<>();
                     config.put("user.attribute", attributeName);
                     config.put("claim.name", attributeName);
@@ -981,9 +981,9 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     config.put("userinfo.token.claim", "true");
                     config.put("multivalued", "false");
                     config.put("aggregate.attrs", "false");
-                    
+
                     mapper.setConfig(config);
-                    
+
                     clientResource.getProtocolMappers().createMapper(mapper);
                     log.info("Created protocol mapper {} for attribute {} in client {}", mapperName, attributeName, clientId);
                 }
@@ -995,7 +995,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to ensure protocol mapper: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void grantAdditionalTenantAccess(String realmName, String username, String newTenantId,
                                            String newClinicName, String newClinicType, List<String> roles) {
@@ -1005,15 +1005,15 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             if (attributes == null) {
                 attributes = new HashMap<>();
             }
-            
+
             // Update accessible_tenants
             String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
             List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
-            
+
             // Check if tenant already exists
             boolean tenantExists = accessibleTenants.stream()
                 .anyMatch(t -> newTenantId.equals(t.get("tenant_id")));
-            
+
             if (!tenantExists) {
                 Map<String, Object> newTenant = new HashMap<>();
                 newTenant.put("tenant_id", newTenantId);
@@ -1022,28 +1022,28 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 newTenant.put("specialty", newClinicType);
                 newTenant.put("roles", roles);
                 accessibleTenants.add(newTenant);
-                
+
                 attributes.put("accessible_tenants", Arrays.asList(toJsonString(accessibleTenants)));
             }
-            
+
             // Update user_tenant_roles
             String userTenantRolesJson = attributes.getOrDefault("user_tenant_roles", Arrays.asList("{}")).get(0);
             Map<String, Object> userTenantRoles = parseJsonObject(userTenantRolesJson);
             userTenantRoles.put(newTenantId, roles);
             attributes.put("user_tenant_roles", Arrays.asList(toJsonString(userTenantRoles)));
-            
+
             // Update user
             user.setAttributes(attributes);
             getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
-            
+
             log.info("Granted access to tenant {} for user {} in realm {}", newTenantId, username, realmName);
-            
+
         } catch (Exception e) {
             log.error("Failed to grant additional tenant access", e);
             throw new BusinessRuleException("Failed to grant additional tenant access: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void revokeTenantAccess(String realmName, String username, String tenantId) {
         try {
@@ -1052,38 +1052,38 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             if (attributes == null) {
                 return;
             }
-            
+
             // Update accessible_tenants
             String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
             List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
             accessibleTenants.removeIf(t -> tenantId.equals(t.get("tenant_id")));
             attributes.put("accessible_tenants", Arrays.asList(toJsonString(accessibleTenants)));
-            
+
             // Update user_tenant_roles
             String userTenantRolesJson = attributes.getOrDefault("user_tenant_roles", Arrays.asList("{}")).get(0);
             Map<String, Object> userTenantRoles = parseJsonObject(userTenantRolesJson);
             userTenantRoles.remove(tenantId);
             attributes.put("user_tenant_roles", Arrays.asList(toJsonString(userTenantRoles)));
-            
+
             // If active tenant was revoked, switch to first available tenant
             String activeTenantId = attributes.getOrDefault("active_tenant_id", Arrays.asList("")).get(0);
             if (tenantId.equals(activeTenantId) && !accessibleTenants.isEmpty()) {
                 String newActiveTenantId = (String) accessibleTenants.get(0).get("tenant_id");
                 attributes.put("active_tenant_id", Arrays.asList(newActiveTenantId));
             }
-            
+
             // Update user
             user.setAttributes(attributes);
             getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
-            
+
             log.info("Revoked access to tenant {} for user {} in realm {}", tenantId, username, realmName);
-            
+
         } catch (Exception e) {
             log.error("Failed to revoke tenant access", e);
             throw new BusinessRuleException("Failed to revoke tenant access: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void updateUserActiveTenant(String realmName, String username, String newActiveTenantId) {
         try {
@@ -1092,31 +1092,31 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             if (attributes == null) {
                 attributes = new HashMap<>();
             }
-            
+
             // Verify user has access to the new tenant
             String accessibleTenantsJson = attributes.getOrDefault("accessible_tenants", Arrays.asList("[]")).get(0);
             List<Map<String, Object>> accessibleTenants = parseJsonArray(accessibleTenantsJson);
-            
+
             boolean hasAccess = accessibleTenants.stream()
                 .anyMatch(t -> newActiveTenantId.equals(t.get("tenant_id")));
-            
+
             if (!hasAccess) {
                 throw new BusinessRuleException("User does not have access to tenant: " + newActiveTenantId);
             }
-            
+
             // Update active tenant
             attributes.put("active_tenant_id", Arrays.asList(newActiveTenantId));
             user.setAttributes(attributes);
             getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
-            
+
             log.info("Updated active tenant to {} for user {} in realm {}", newActiveTenantId, username, realmName);
-            
+
         } catch (Exception e) {
             log.error("Failed to update user active tenant", e);
             throw new BusinessRuleException("Failed to update user active tenant: " + e.getMessage());
         }
     }
-    
+
     /**
      * Parse JSON array string to List of Maps
      */
@@ -1129,7 +1129,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             return new ArrayList<>();
         }
     }
-    
+
     /**
      * Parse JSON object string to Map
      */
@@ -1142,7 +1142,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             return new HashMap<>();
         }
     }
-    
+
     /**
      * Convert object to JSON string
      */

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
 import sy.sezar.clinicx.patient.model.*;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public final class TreatmentSpecifications {
             // Notes search
             if (StringUtils.hasText(criteria.notesContain())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("treatmentNotes")), 
+                    criteriaBuilder.lower(root.get("treatmentNotes")),
                     "%" + criteria.notesContain().toLowerCase() + "%"
                 ));
             }
@@ -90,7 +90,7 @@ public final class TreatmentSpecifications {
             if (StringUtils.hasText(criteria.procedureName())) {
                 Join<Treatment, Procedure> procedureJoin = root.join("procedure", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(procedureJoin.get("name")), 
+                    criteriaBuilder.lower(procedureJoin.get("name")),
                     "%" + criteria.procedureName().toLowerCase() + "%"
                 ));
             }
@@ -99,7 +99,7 @@ public final class TreatmentSpecifications {
             if (StringUtils.hasText(criteria.doctorName())) {
                 Join<Treatment, Staff> doctorJoin = root.join("doctor", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(doctorJoin.get("fullName")), 
+                    criteriaBuilder.lower(doctorJoin.get("fullName")),
                     "%" + criteria.doctorName().toLowerCase() + "%"
                 ));
             }
@@ -108,7 +108,7 @@ public final class TreatmentSpecifications {
             if (StringUtils.hasText(criteria.patientName())) {
                 Join<Treatment, Patient> patientJoin = root.join("patient", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(patientJoin.get("fullName")), 
+                    criteriaBuilder.lower(patientJoin.get("fullName")),
                     "%" + criteria.patientName().toLowerCase() + "%"
                 ));
             }
@@ -127,13 +127,13 @@ public final class TreatmentSpecifications {
             // Creation date range
             if (criteria.createdFrom() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdFrom()
                 ));
             }
             if (criteria.createdTo() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdTo()
                 ));
             }
@@ -149,7 +149,7 @@ public final class TreatmentSpecifications {
      * @return A Specification for Treatments
      */
     public static Specification<Treatment> byPatientId(java.util.UUID patientId) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("patient").get("id"), patientId);
     }
 
@@ -160,7 +160,7 @@ public final class TreatmentSpecifications {
      * @return A Specification for Treatments
      */
     public static Specification<Treatment> byDoctorId(java.util.UUID doctorId) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("doctor").get("id"), doctorId);
     }
 
@@ -171,7 +171,7 @@ public final class TreatmentSpecifications {
      * @return A Specification for Treatments
      */
     public static Specification<Treatment> byToothNumber(Integer toothNumber) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("toothNumber"), toothNumber);
     }
 

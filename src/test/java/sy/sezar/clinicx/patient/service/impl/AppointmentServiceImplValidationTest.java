@@ -20,13 +20,12 @@ import sy.sezar.clinicx.patient.repository.AppointmentRepository;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.clinic.model.Specialty;
 import sy.sezar.clinicx.clinic.repository.SpecialtyRepository;
-import sy.sezar.clinicx.staff.model.Staff;
-import sy.sezar.clinicx.staff.repository.StaffRepository;
+import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -73,13 +72,13 @@ class AppointmentServiceImplValidationTest {
         patientId = UUID.randomUUID();
         specialtyId = UUID.randomUUID();
         doctorId = UUID.randomUUID();
-        
+
         patient = new Patient();
         patient.setId(patientId);
-        
+
         specialty = new Specialty();
         specialty.setId(specialtyId);
-        
+
         doctor = new Staff();
         doctor.setId(doctorId);
     }
@@ -88,7 +87,7 @@ class AppointmentServiceImplValidationTest {
     @DisplayName("Should throw NotValidValueException when appointment datetime is null")
     void createAppointment_NullDateTime_ThrowsNotValidValueException() {
         AppointmentCreateRequest request = new AppointmentCreateRequest(
-            specialtyId, patientId, doctorId, null, 30, 
+            specialtyId, patientId, doctorId, null, 30,
             AppointmentStatus.SCHEDULED, "Test notes", null
         );
 
@@ -124,7 +123,7 @@ class AppointmentServiceImplValidationTest {
             nextSaturday = nextSaturday.plusDays(1);
         }
         nextSaturday = nextSaturday.withHour(10).withMinute(0).withSecond(0).withNano(0);
-        
+
         AppointmentCreateRequest request = new AppointmentCreateRequest(
             specialtyId, patientId, doctorId, nextSaturday.toInstant(), 30,
             AppointmentStatus.SCHEDULED, "Test notes", null
@@ -144,7 +143,7 @@ class AppointmentServiceImplValidationTest {
             nextSunday = nextSunday.plusDays(1);
         }
         nextSunday = nextSunday.withHour(10).withMinute(0).withSecond(0).withNano(0);
-        
+
         AppointmentCreateRequest request = new AppointmentCreateRequest(
             specialtyId, patientId, doctorId, nextSunday.toInstant(), 30,
             AppointmentStatus.SCHEDULED, "Test notes", null
@@ -178,7 +177,7 @@ class AppointmentServiceImplValidationTest {
             nextMonday = nextMonday.plusDays(1);
         }
         nextMonday = nextMonday.withHour(10).withMinute(0).withSecond(0).withNano(0);
-        
+
         AppointmentCreateRequest request = new AppointmentCreateRequest(
             specialtyId, patientId, doctorId, nextMonday.toInstant(), 30,
             AppointmentStatus.SCHEDULED, "Test notes", null
@@ -257,7 +256,7 @@ class AppointmentServiceImplValidationTest {
         when(appointmentMapper.toAppointmentCardDtoList(appointments)).thenReturn(List.of());
 
         List<AppointmentCardDto> result = appointmentService.getAppointmentsByDateRange(startDate, endDate);
-        
+
         assertThat(result).isNotNull();
     }
 

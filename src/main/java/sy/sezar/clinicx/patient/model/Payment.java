@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.math.BigDecimal;
 import java.time.Instant;

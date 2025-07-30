@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.staff.model;
+package sy.sezar.clinicx.clinic.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -6,12 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import sy.sezar.clinicx.clinic.model.Specialty;
 import sy.sezar.clinicx.core.model.BaseEntity;
 
 import java.util.HashSet;
 import java.util.Set;
-import sy.sezar.clinicx.staff.model.enums.StaffRole;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 @Entity
 @Table(name = "staff")

@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.staff.controller.api;
+package sy.sezar.clinicx.clinic.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,11 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sy.sezar.clinicx.staff.dto.StaffCreateRequest;
-import sy.sezar.clinicx.staff.dto.StaffDto;
-import sy.sezar.clinicx.staff.dto.StaffSearchCriteria;
-import sy.sezar.clinicx.staff.dto.StaffUpdateRequest;
-import sy.sezar.clinicx.staff.model.enums.StaffRole;
+import sy.sezar.clinicx.clinic.dto.StaffCreateRequest;
+import sy.sezar.clinicx.clinic.dto.StaffDto;
+import sy.sezar.clinicx.clinic.dto.StaffSearchCriteria;
+import sy.sezar.clinicx.clinic.dto.StaffUpdateRequest;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/staff")
 @Tag(name = "Staff", description = "Operations related to staff management")
 public interface StaffControllerApi {
-    
+
     @GetMapping("/{id}")
     @Operation(
         summary = "Get staff member by ID",
@@ -35,7 +35,7 @@ public interface StaffControllerApi {
     @ApiResponse(responseCode = "404", description = "Staff member not found")
     ResponseEntity<StaffDto> getStaffById(
             @Parameter(description = "Staff ID") @PathVariable UUID id);
-    
+
     @GetMapping
     @Operation(
         summary = "Get all staff members",
@@ -49,7 +49,7 @@ public interface StaffControllerApi {
     @ApiResponse(responseCode = "200", description = "Staff members retrieved")
     ResponseEntity<Page<StaffDto>> getAllStaff(
             @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable);
-    
+
     @GetMapping("/active")
     @Operation(
         summary = "Get active staff members",
@@ -63,7 +63,7 @@ public interface StaffControllerApi {
     @ApiResponse(responseCode = "200", description = "Active staff members retrieved")
     ResponseEntity<Page<StaffDto>> getActiveStaff(
             @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable);
-    
+
     @GetMapping("/by-role/{role}")
     @Operation(
         summary = "Get staff members by role",
@@ -78,7 +78,7 @@ public interface StaffControllerApi {
     ResponseEntity<Page<StaffDto>> getStaffByRole(
             @Parameter(description = "Staff role") @PathVariable StaffRole role,
             @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable);
-    
+
     @GetMapping("/search")
     @Operation(
         summary = "Search staff members",
@@ -94,7 +94,7 @@ public interface StaffControllerApi {
             @Parameter(name = "searchTerm", description = "Search term for filtering staff members")
             @RequestParam(required = false) String searchTerm,
             @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable);
-    
+
     @PostMapping("/search/advanced")
     @Operation(
         summary = "Advanced staff search",
@@ -109,7 +109,7 @@ public interface StaffControllerApi {
     ResponseEntity<Page<StaffDto>> advancedSearchStaff(
             @Valid @RequestBody StaffSearchCriteria criteria,
             @Parameter(hidden = true) @PageableDefault(sort = "fullName") Pageable pageable);
-    
+
     @PostMapping
     @Operation(
         summary = "Create new staff member",
@@ -120,7 +120,7 @@ public interface StaffControllerApi {
     @ApiResponse(responseCode = "400", description = "Validation error or email already exists")
     ResponseEntity<StaffDto> createStaff(
             @Valid @RequestBody StaffCreateRequest request);
-    
+
     @PutMapping("/{id}")
     @Operation(
         summary = "Update staff member",
@@ -133,7 +133,7 @@ public interface StaffControllerApi {
     ResponseEntity<StaffDto> updateStaff(
             @Parameter(description = "Staff ID") @PathVariable UUID id,
             @Valid @RequestBody StaffUpdateRequest request);
-    
+
     @DeleteMapping("/{id}")
     @Operation(
         summary = "Delete staff member",

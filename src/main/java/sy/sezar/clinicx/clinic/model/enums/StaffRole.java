@@ -1,4 +1,4 @@
-package sy.sezar.clinicx.staff.model.enums;
+package sy.sezar.clinicx.clinic.model.enums;
 
 public enum StaffRole {
     DOCTOR,

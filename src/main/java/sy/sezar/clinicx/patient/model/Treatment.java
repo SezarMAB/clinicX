@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import sy.sezar.clinicx.core.model.BaseEntity;
 import sy.sezar.clinicx.patient.model.enums.TreatmentStatus;
-import sy.sezar.clinicx.staff.model.Staff;
+import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

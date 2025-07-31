@@ -49,4 +49,12 @@ public interface TenantSwitchingService {
      * @param tenantId the tenant ID
      */
     void revokeUserTenantAccess(String userId, String tenantId);
+    
+    /**
+     * Get all tenants accessible by a specific user.
+     * 
+     * @param userId the user ID
+     * @return List of accessible tenants
+     */
+    List<TenantAccessDto> getUserTenants(String userId);
 }

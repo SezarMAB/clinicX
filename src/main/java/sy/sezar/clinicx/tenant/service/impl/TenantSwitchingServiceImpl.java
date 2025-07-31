@@ -295,4 +295,34 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             return issuer.substring(realmStart, realmEnd);
         }
     }
+    
+    @Override
+    public List<TenantAccessDto> getUserTenants(String userId) {
+        log.info("Getting all tenants for user {}", userId);
+        
+        // Get all staff records for this user
+        List<Staff> staffRecords = staffRepository.findByUserId(userId);
+        
+        if (staffRecords.isEmpty()) {
+            log.warn("No tenant access found for user {}", userId);
+            return List.of();
+        }
+        
+        // Convert to TenantAccessDto list
+        return staffRecords.stream()
+            .map(staff -> {
+                Tenant tenant = tenantRepository.findByTenantId(staff.getTenantId())
+                    .orElseThrow(() -> new NotFoundException("Tenant not found: " + staff.getTenantId()));
+                
+                return new TenantAccessDto(
+                    tenant.getTenantId(),
+                    tenant.getName(),
+                    tenant.getSubdomain(),
+                    staff.getRole().name(),
+                    staff.isPrimary(),
+                    false // isActive - would need to check against current context
+                );
+            })
+            .toList();
+    }
 }

@@ -106,7 +106,7 @@ public class UserTenantAccessController {
         
         log.info("Getting tenant access for user {}", userId);
         
-        List<TenantAccessDto> tenantAccess = tenantSwitchingService.getCurrentUserTenants();
+        List<TenantAccessDto> tenantAccess = tenantSwitchingService.getUserTenants(userId);
         
         return ResponseEntity.ok(tenantAccess);
     }

@@ -159,6 +159,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             if (frontendClient != null) {
                 // Update redirect URIs dynamically based on subdomain
                 List<String> redirectUris = new ArrayList<>();
+                subdomain = subdomain.replace("-realm", "");
                 redirectUris.add(String.format("https://%s.%s/*", subdomain, appDomain));
                 redirectUris.add(String.format("http://%s.%s/*", subdomain, appDomain));
                 frontendClient.setRedirectUris(redirectUris);

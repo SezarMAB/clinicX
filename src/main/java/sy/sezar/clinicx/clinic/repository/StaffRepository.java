@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import sy.sezar.clinicx.clinic.model.Staff;
 import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,4 +35,20 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
 
     @Query("SELECT s FROM Staff s JOIN s.specialties sp WHERE sp.id = :specialtyId")
     Page<Staff> findBySpecialtyId(@Param("specialtyId") UUID specialtyId, Pageable pageable);
+    
+    // Methods from UserTenantAccessRepository
+    List<Staff> findByUserId(String userId);
+    
+    List<Staff> findByTenantId(String tenantId);
+    
+    Optional<Staff> findByUserIdAndTenantId(String userId, String tenantId);
+    
+    boolean existsByUserIdAndTenantId(String userId, String tenantId);
+    
+    Optional<Staff> findByUserIdAndIsPrimaryTrue(String userId);
+    
+    @Query("SELECT s.tenantId FROM Staff s WHERE s.userId = :userId")
+    List<String> findTenantIdsByUserId(@Param("userId") String userId);
+    
+    void deleteByUserId(String userId);
 }

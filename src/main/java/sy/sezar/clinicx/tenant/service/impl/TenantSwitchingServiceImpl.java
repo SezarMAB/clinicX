@@ -13,9 +13,10 @@ import sy.sezar.clinicx.tenant.TenantContext;
 import sy.sezar.clinicx.tenant.dto.TenantAccessDto;
 import sy.sezar.clinicx.tenant.dto.TenantSwitchResponseDto;
 import sy.sezar.clinicx.tenant.model.Tenant;
-import sy.sezar.clinicx.tenant.model.UserTenantAccess;
+import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import sy.sezar.clinicx.tenant.repository.TenantRepository;
-import sy.sezar.clinicx.tenant.repository.UserTenantAccessRepository;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantSwitchingService;
 
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TenantSwitchingServiceImpl implements TenantSwitchingService {
     
-    private final UserTenantAccessRepository userTenantAccessRepository;
+    private final StaffRepository staffRepository;
     private final TenantRepository tenantRepository;
     private final KeycloakAdminService keycloakAdminService;
     
@@ -40,19 +41,19 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         String userId = getCurrentUserId();
         log.debug("Getting accessible tenants for user: {}", userId);
         
-        List<UserTenantAccess> accesses = userTenantAccessRepository.findByUserId(userId);
+        List<Staff> staffList = staffRepository.findByUserId(userId);
         
-        return accesses.stream()
-            .map(access -> {
-                Tenant tenant = tenantRepository.findByTenantId(access.getTenantId())
-                    .orElseThrow(() -> new NotFoundException("Tenant not found: " + access.getTenantId()));
+        return staffList.stream()
+            .map(staff -> {
+                Tenant tenant = tenantRepository.findByTenantId(staff.getTenantId())
+                    .orElseThrow(() -> new NotFoundException("Tenant not found: " + staff.getTenantId()));
                 
                 return new TenantAccessDto(
                     tenant.getTenantId(),
                     tenant.getName(),
                     tenant.getSubdomain(),
-                    access.getRole(),
-                    access.isPrimary(),
+                    staff.getRole().name(),
+                    staff.isPrimary(),
                     tenant.isActive()
                 );
             })
@@ -65,7 +66,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         log.info("User {} switching to tenant {}", userId, tenantId);
         
         // Verify user has access to the tenant
-        UserTenantAccess access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
+        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
             .orElseThrow(() -> new BusinessRuleException("You don't have access to tenant: " + tenantId));
         
         // Get tenant information
@@ -104,7 +105,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                 "current-refresh-token", // This should be the new refresh token
                 tenant.getTenantId(),
                 tenant.getName(),
-                access.getRole(),
+                staff.getRole().name(),
                 "Successfully switched to tenant: " + tenant.getName()
             );
             
@@ -132,13 +133,13 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         
         if (currentTenantId == null) {
             // Fall back to primary tenant
-            UserTenantAccess primaryAccess = userTenantAccessRepository.findByUserIdAndIsPrimaryTrue(userId)
+            Staff primaryStaff = staffRepository.findByUserIdAndIsPrimaryTrue(userId)
                 .orElseThrow(() -> new BusinessRuleException("No primary tenant found for user"));
-            currentTenantId = primaryAccess.getTenantId();
+            currentTenantId = primaryStaff.getTenantId();
         }
         
         final String tenantId = currentTenantId;
-        UserTenantAccess access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
+        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
             .orElseThrow(() -> new BusinessRuleException("No access to tenant: " + tenantId));
         
         Tenant tenant = tenantRepository.findByTenantId(tenantId)
@@ -148,8 +149,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             tenant.getTenantId(),
             tenant.getName(),
             tenant.getSubdomain(),
-            access.getRole(),
-            access.isPrimary(),
+            staff.getRole().name(),
+            staff.isPrimary(),
             tenant.isActive()
         );
     }
@@ -163,28 +164,31 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             .orElseThrow(() -> new NotFoundException("Tenant not found: " + tenantId));
         
         // Check if access already exists
-        if (userTenantAccessRepository.existsByUserIdAndTenantId(userId, tenantId)) {
+        if (staffRepository.existsByUserIdAndTenantId(userId, tenantId)) {
             throw new BusinessRuleException("User already has access to this tenant");
         }
         
         // If setting as primary, unset other primary tenants
         if (isPrimary) {
-            userTenantAccessRepository.findByUserId(userId).forEach(access -> {
-                if (access.isPrimary()) {
-                    access.setPrimary(false);
-                    userTenantAccessRepository.save(access);
+            staffRepository.findByUserId(userId).forEach(staff -> {
+                if (staff.isPrimary()) {
+                    staff.setPrimary(false);
+                    staffRepository.save(staff);
                 }
             });
         }
         
-        // Create new access
-        UserTenantAccess access = new UserTenantAccess();
-        access.setUserId(userId);
-        access.setTenantId(tenantId);
-        access.setRole(role);
-        access.setPrimary(isPrimary);
+        // Create new staff entry
+        Staff staff = new Staff();
+        staff.setUserId(userId);
+        staff.setTenantId(tenantId);
+        staff.setRole(StaffRole.valueOf(role));
+        staff.setPrimary(isPrimary);
+        staff.setActive(true);
+        staff.setFullName("User " + userId); // This should be fetched from Keycloak
+        staff.setEmail(userId + "@temp.com"); // This should be fetched from Keycloak
         
-        userTenantAccessRepository.save(access);
+        staffRepository.save(staff);
         
         // Update user attributes in Keycloak using the dedicated method
         try {
@@ -200,62 +204,76 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     userId, // This should be the username, not user ID
                     tenantId,
                     tenant.getName(),
-                    tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC",
+                    tenant.getSpecialty(),
                     Arrays.asList(role)
                 );
-            } else {
-                // Fallback to updating accessible tenants the old way
-                updateUserAccessibleTenants(userId);
             }
         } catch (Exception e) {
-            log.error("Failed to update Keycloak attributes for user {}", userId, e);
-            // Continue anyway - local database is updated
+            log.error("Failed to update Keycloak attributes", e);
+            // Don't fail the operation, but log the error
         }
+        
+        log.info("Successfully granted access to tenant {}", tenantId);
     }
     
     @Override
     public void revokeUserTenantAccess(String userId, String tenantId) {
         log.info("Revoking user {} access to tenant {}", userId, tenantId);
         
-        UserTenantAccess access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
-            .orElseThrow(() -> new NotFoundException("Access not found"));
+        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
+            .orElseThrow(() -> new NotFoundException("User tenant access not found"));
         
-        if (access.isPrimary()) {
-            throw new BusinessRuleException("Cannot revoke access to primary tenant. Set another tenant as primary first.");
+        if (staff.isPrimary()) {
+            throw new BusinessRuleException("Cannot revoke access to primary tenant");
         }
         
-        userTenantAccessRepository.delete(access);
+        staffRepository.delete(staff);
         
-        // Update user attributes in Keycloak using the dedicated method
+        // Update Keycloak attributes using the dedicated method
         try {
-            // Get realm from current authentication context
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
                 String issuer = jwt.getIssuer().toString();
                 String realmName = extractRealmFromIssuer(issuer);
                 
                 // Revoke tenant access in Keycloak
-                keycloakAdminService.revokeTenantAccess(realmName, userId, tenantId);
-            } else {
-                // Fallback to updating accessible tenants the old way
-                updateUserAccessibleTenants(userId);
+                // TODO: Implement revokeAdditionalTenantAccess in KeycloakAdminService
+                log.warn("Keycloak tenant access revocation not implemented yet");
             }
         } catch (Exception e) {
-            log.error("Failed to update Keycloak attributes for user {}", userId, e);
-            // Continue anyway - local database is updated
+            log.error("Failed to update Keycloak attributes", e);
+            // Don't fail the operation, but log the error
+        }
+        
+        log.info("Successfully revoked access to tenant {}", tenantId);
+    }
+    
+    // This method was removed from the interface
+    // Keeping implementation for future use if needed
+    private void updateUserAccessibleTenants(String userId, List<String> accessibleTenants) {
+        log.info("Updating accessible tenants for user {}: {}", userId, accessibleTenants);
+        
+        // Get realm from current authentication context
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+            String issuer = jwt.getIssuer().toString();
+            String realmName = extractRealmFromIssuer(issuer);
+            
+            Map<String, List<String>> attributes = new HashMap<>();
+            attributes.put("accessible_tenants", accessibleTenants);
+            
+            // Update user attributes in Keycloak
+            keycloakAdminService.updateUserAttributes(realmName, userId, attributes);
         }
     }
     
     private String getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-            // Try different claims that might contain the username
-            String userId = jwt.getClaimAsString("preferred_username");
+            // Try to get user ID from token
+            String userId = jwt.getClaimAsString("sub");
             if (userId == null) {
-                userId = jwt.getClaimAsString("sub");
-            }
-            if (userId == null) {
-                userId = jwt.getClaimAsString("email");
+                userId = jwt.getClaimAsString("preferred_username");
             }
             return userId;
         }
@@ -263,39 +281,18 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
     }
     
     private String extractRealmFromIssuer(String issuer) {
-        // Extract realm name from issuer URL
-        // Example: http://localhost:18081/realms/dental-realm -> dental-realm
-        int lastSlash = issuer.lastIndexOf('/');
-        if (lastSlash > 0) {
-            return issuer.substring(lastSlash + 1);
+        // Issuer format: http://localhost:8080/realms/clinic-123
+        if (issuer == null || !issuer.contains("/realms/")) {
+            throw new BusinessRuleException("Invalid issuer format");
         }
-        return null;
-    }
-    
-    private void updateUserAccessibleTenants(String userId) {
-        try {
-            List<UserTenantAccess> accesses = userTenantAccessRepository.findByUserId(userId);
-            
-            List<String> accessibleTenants = accesses.stream()
-                .map(access -> {
-                    Tenant tenant = tenantRepository.findByTenantId(access.getTenantId()).orElse(null);
-                    if (tenant != null) {
-                        return access.getTenantId() + "|" + tenant.getName() + "|" + access.getRole();
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-            
-            Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put("accessible_tenants", accessibleTenants);
-            
-            // Update in all possible realms where user might exist
-            // In production, you'd need to track which realm the user belongs to
-            log.info("Updated accessible tenants for user {}: {}", userId, accessibleTenants);
-            
-        } catch (Exception e) {
-            log.error("Failed to update user accessible tenants in Keycloak", e);
+        
+        int realmStart = issuer.indexOf("/realms/") + 8;
+        int realmEnd = issuer.indexOf("/", realmStart);
+        
+        if (realmEnd == -1) {
+            return issuer.substring(realmStart);
+        } else {
+            return issuer.substring(realmStart, realmEnd);
         }
     }
 }

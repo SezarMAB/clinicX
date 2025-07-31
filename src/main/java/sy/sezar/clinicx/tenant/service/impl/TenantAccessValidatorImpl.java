@@ -7,8 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import sy.sezar.clinicx.tenant.TenantContext;
-import sy.sezar.clinicx.tenant.model.UserTenantAccess;
-import sy.sezar.clinicx.tenant.repository.UserTenantAccessRepository;
+import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.TenantAccessValidator;
 
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import java.util.Optional;
 @Slf4j
 public class TenantAccessValidatorImpl implements TenantAccessValidator {
     
-    private final UserTenantAccessRepository userTenantAccessRepository;
+    private final StaffRepository staffRepository;
     
     @Override
     public boolean validateAccess(String tenantId) {
@@ -75,7 +75,7 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
         }
         
         // Fall back to database check
-        return userTenantAccessRepository.existsByUserIdAndTenantId(userId, tenantId);
+        return staffRepository.existsByUserIdAndTenantId(userId, tenantId);
     }
     
     @Override
@@ -131,8 +131,8 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
         }
         
         // Fall back to database
-        Optional<UserTenantAccess> access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId);
-        return access.map(UserTenantAccess::getRole).orElse(null);
+        Optional<Staff> staff = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+        return staff.map(s -> s.getRole().name()).orElse(null);
     }
     
     private String getCurrentUserId() {

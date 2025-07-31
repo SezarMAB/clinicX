@@ -24,7 +24,6 @@ public class Staff extends BaseEntity {
     private String fullName;
 
     @NotNull
-    @Size(max = 50)
     @Column(name = "role", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private StaffRole role;
@@ -42,6 +41,18 @@ public class Staff extends BaseEntity {
     @NotNull
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
+
+    // Fields from UserTenantAccess
+    @Size(max = 255)
+    @Column(name = "user_id", length = 255)
+    private String userId; // Keycloak user ID
+
+    @Size(max = 255)
+    @Column(name = "tenant_id", length = 255)
+    private String tenantId;
+
+    @Column(name = "is_primary", nullable = false)
+    private boolean isPrimary = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

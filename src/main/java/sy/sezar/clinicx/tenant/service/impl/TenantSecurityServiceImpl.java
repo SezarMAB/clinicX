@@ -10,8 +10,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.tenant.TenantContext;
-import sy.sezar.clinicx.tenant.model.UserTenantAccess;
-import sy.sezar.clinicx.tenant.repository.UserTenantAccessRepository;
+import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.TenantAccessValidator;
 import sy.sezar.clinicx.tenant.service.TenantSecurityService;
 
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class TenantSecurityServiceImpl implements TenantSecurityService {
     
     private final TenantAccessValidator tenantAccessValidator;
-    private final UserTenantAccessRepository userTenantAccessRepository;
+    private final StaffRepository staffRepository;
     
     // Role hierarchy definitions
     private static final Map<String, Set<String>> ROLE_PERMISSIONS = Map.of(
@@ -110,12 +110,12 @@ public class TenantSecurityServiceImpl implements TenantSecurityService {
             return Collections.emptyList();
         }
         
-        // Get all tenant access records for the user
-        List<UserTenantAccess> accessList = userTenantAccessRepository.findByUserId(userId);
+        // Get all staff records for the user
+        List<Staff> staffList = staffRepository.findByUserId(userId);
         
-        return accessList.stream()
-            .filter(UserTenantAccess::isActive)
-            .map(UserTenantAccess::getTenantId)
+        return staffList.stream()
+            .filter(Staff::isActive)
+            .map(Staff::getTenantId)
             .collect(Collectors.toList());
     }
     

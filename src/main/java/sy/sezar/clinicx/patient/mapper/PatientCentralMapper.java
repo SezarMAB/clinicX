@@ -59,6 +59,7 @@ public interface PatientCentralMapper {
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
     @Mapping(target = "patientTeeth", ignore = true)
+    @Mapping(target = "treatments", ignore = true)
     void updatePatientFromRequest(PatientUpdateRequest request, @MappingTarget Patient patient);
 
     default Integer calculateAge(LocalDate dateOfBirth) {

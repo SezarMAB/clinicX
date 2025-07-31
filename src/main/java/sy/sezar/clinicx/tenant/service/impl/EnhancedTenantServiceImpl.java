@@ -2,6 +2,7 @@ package sy.sezar.clinicx.tenant.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -13,9 +14,10 @@ import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.tenant.dto.*;
 import sy.sezar.clinicx.tenant.mapper.TenantMapper;
 import sy.sezar.clinicx.tenant.model.Tenant;
-import sy.sezar.clinicx.tenant.model.UserTenantAccess;
 import sy.sezar.clinicx.tenant.repository.TenantRepository;
-import sy.sezar.clinicx.tenant.repository.UserTenantAccessRepository;
+import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.DynamicRealmService;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantService;
@@ -41,7 +43,7 @@ public class EnhancedTenantServiceImpl implements TenantService {
     private DynamicRealmService dynamicRealmService;
 
     @Autowired
-    private UserTenantAccessRepository userTenantAccessRepository;
+    private StaffRepository staffRepository;
 
     @Value("${app.multi-tenant.realm-per-type:true}")
     private boolean realmPerTypeEnabled;
@@ -81,7 +83,7 @@ public class EnhancedTenantServiceImpl implements TenantService {
             String tenantId = generateTenantId(request.subdomain());
 
             // Create admin user in the realm with tenant attributes
-            keycloakAdminService.createUserWithTenantInfo(
+            UserRepresentation createdUser = keycloakAdminService.createUserWithTenantInfo(
                 realmName,
                 request.adminUsername(),
                 request.adminEmail(),
@@ -93,6 +95,9 @@ public class EnhancedTenantServiceImpl implements TenantService {
                 request.name(),
                 specialty
             );
+
+            // Get the Keycloak user ID
+            String keycloakUserId = createdUser.getId();
 
             // For multi-tenant support, update user attributes
             if (realmPerTypeEnabled) {
@@ -125,14 +130,18 @@ public class EnhancedTenantServiceImpl implements TenantService {
 
             tenant = tenantRepository.save(tenant);
 
-            // Create user-tenant access record
+            // Create staff record for the admin user
             if (realmPerTypeEnabled) {
-                UserTenantAccess userAccess = new UserTenantAccess();
-                userAccess.setUserId(request.adminUsername()); // In production, use actual Keycloak user ID
-                userAccess.setTenantId(tenantId);
-                userAccess.setRole("ADMIN");
-                userAccess.setPrimary(true);
-                userTenantAccessRepository.save(userAccess);
+                Staff staff = new Staff();
+                staff.setUserId(keycloakUserId); // Use actual Keycloak user ID
+                staff.setTenantId(tenantId);
+                staff.setRole(StaffRole.ADMIN);
+                staff.setPrimary(true);
+                staff.setPhoneNumber(request.contactPhone());
+                staff.setActive(true);
+                staff.setFullName(request.adminFirstName() + " " + request.adminLastName());
+                staff.setEmail(request.adminEmail());
+                staffRepository.save(staff);
             }
 
             // Get the backend client secret

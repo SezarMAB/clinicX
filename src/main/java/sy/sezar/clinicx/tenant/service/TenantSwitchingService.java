@@ -57,4 +57,14 @@ public interface TenantSwitchingService {
      * @return List of accessible tenants
      */
     List<TenantAccessDto> getUserTenants(String userId);
+    
+    /**
+     * Sync user's accessible tenants from backend to Keycloak.
+     * This ensures Keycloak user attributes match the backend Staff records.
+     * 
+     * @param userId the user ID
+     * @param realmName the Keycloak realm name
+     * @param username the username in Keycloak
+     */
+    void syncUserTenantsToKeycloak(String userId, String realmName, String username);
 }

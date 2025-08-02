@@ -57,4 +57,32 @@ public class TenantSwitchController {
         TenantAccessDto currentTenant = tenantSwitchingService.getCurrentActiveTenant();
         return ResponseEntity.ok(currentTenant);
     }
+    
+    @PostMapping("/sync-tenants")
+    @Operation(summary = "Sync user tenants to Keycloak", 
+               description = "Sync the current user's accessible tenants from backend to Keycloak")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> syncTenants() {
+        log.info("Syncing tenants for current user");
+        
+        // Get current user info from JWT
+        String userId = org.springframework.security.core.context.SecurityContextHolder.getContext()
+            .getAuthentication().getName();
+        
+        org.springframework.security.core.Authentication auth = 
+            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        
+        if (auth != null && auth.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt jwt) {
+            String issuer = jwt.getIssuer().toString();
+            String realmName = issuer.substring(issuer.lastIndexOf("/") + 1);
+            String username = jwt.getClaimAsString("preferred_username");
+            
+            if (username != null) {
+                tenantSwitchingService.syncUserTenantsToKeycloak(userId, realmName, username);
+                return ResponseEntity.ok("Tenants synced successfully");
+            }
+        }
+        
+        return ResponseEntity.badRequest().body("Failed to sync tenants");
+    }
 }

@@ -9,5 +9,6 @@ public record TenantAccessDto(
     String subdomain,
     String role,
     boolean isPrimary,
-    boolean isActive
+    boolean isActive,
+    String specialty
 ) {}

@@ -1120,14 +1120,30 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
     /**
      * Parse JSON array string to List of Maps
+     * Also handles legacy pipe-delimited format for backward compatibility
      */
     private List<Map<String, Object>> parseJsonArray(String json) {
         try {
+            // First try to parse as JSON
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
         } catch (Exception e) {
-            log.warn("Failed to parse JSON array: {}", json, e);
-            return new ArrayList<>();
+            // If JSON parsing fails, try pipe-delimited format (legacy)
+            log.warn("Failed to parse as JSON, trying pipe-delimited format: {}", json);
+            
+            List<Map<String, Object>> result = new ArrayList<>();
+            if (json != null && !json.isEmpty() && !json.equals("[]")) {
+                // Format: tenant_id|clinic_name|role1,role2
+                String[] parts = json.split("\\|");
+                if (parts.length >= 3) {
+                    Map<String, Object> tenant = new HashMap<>();
+                    tenant.put("tenant_id", parts[0]);
+                    tenant.put("clinic_name", parts[1]);
+                    tenant.put("roles", Arrays.asList(parts[2].split(",")));
+                    result.add(tenant);
+                }
+            }
+            return result;
         }
     }
 

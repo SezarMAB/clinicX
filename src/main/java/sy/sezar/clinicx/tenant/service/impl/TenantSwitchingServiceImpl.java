@@ -22,6 +22,7 @@ import sy.sezar.clinicx.tenant.service.TenantSwitchingService;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Implementation of tenant switching service.
@@ -43,6 +44,24 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         
         List<Staff> staffList = staffRepository.findByUserId(userId);
         
+        // If multiple staff records exist, sync them to Keycloak
+        if (staffList.size() > 1) {
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+                    String issuer = jwt.getIssuer().toString();
+                    String realmName = extractRealmFromIssuer(issuer);
+                    String username = jwt.getClaimAsString("preferred_username");
+                    if (username != null) {
+                        syncUserTenantsToKeycloak(userId, realmName, username);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to sync tenants to Keycloak during getCurrentUserTenants", e);
+                // Continue with the operation
+            }
+        }
+        
         return staffList.stream()
             .map(staff -> {
                 Tenant tenant = tenantRepository.findByTenantId(staff.getTenantId())
@@ -54,7 +73,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getSubdomain(),
                     staff.getRole().name(),
                     staff.isPrimary(),
-                    tenant.isActive()
+                    tenant.isActive(),
+                    tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
                 );
             })
             .collect(Collectors.toList());
@@ -151,7 +171,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             tenant.getSubdomain(),
             staff.getRole().name(),
             staff.isPrimary(),
-            tenant.isActive()
+            tenant.isActive(),
+            tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
         );
     }
     
@@ -320,9 +341,79 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getSubdomain(),
                     staff.getRole().name(),
                     staff.isPrimary(),
-                    false // isActive - would need to check against current context
+                    false, // isActive - would need to check against current context
+                    tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
                 );
             })
             .toList();
+    }
+    
+    @Override
+    public void syncUserTenantsToKeycloak(String userId, String realmName, String username) {
+        log.info("Syncing user {} tenants to Keycloak", userId);
+        
+        try {
+            // Get all staff records for this user
+            List<Staff> staffRecords = staffRepository.findByUserId(userId);
+            
+            if (staffRecords.isEmpty()) {
+                log.warn("No staff records found for user {}", userId);
+                return;
+            }
+            
+            // Build accessible_tenants list
+            List<Map<String, Object>> accessibleTenants = new ArrayList<>();
+            Map<String, List<String>> userTenantRoles = new HashMap<>();
+            
+            for (Staff staff : staffRecords) {
+                Tenant tenant = tenantRepository.findByTenantId(staff.getTenantId())
+                    .orElseThrow(() -> new NotFoundException("Tenant not found: " + staff.getTenantId()));
+                
+                // Add to accessible tenants
+                Map<String, Object> tenantAccess = new HashMap<>();
+                tenantAccess.put("tenant_id", tenant.getTenantId());
+                tenantAccess.put("clinic_name", tenant.getName());
+                tenantAccess.put("clinic_type", tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC");
+                tenantAccess.put("specialty", tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC");
+                tenantAccess.put("roles", Arrays.asList(staff.getRole().name()));
+                accessibleTenants.add(tenantAccess);
+                
+                // Add to user tenant roles
+                userTenantRoles.put(tenant.getTenantId(), Arrays.asList(staff.getRole().name()));
+            }
+            
+            // Find primary tenant
+            Staff primaryStaff = staffRecords.stream()
+                .filter(Staff::isPrimary)
+                .findFirst()
+                .orElse(staffRecords.get(0)); // Fallback to first if no primary
+            
+            // Update Keycloak user attributes
+            Map<String, List<String>> attributes = new HashMap<>();
+            attributes.put("accessible_tenants", Arrays.asList(toJsonString(accessibleTenants)));
+            attributes.put("user_tenant_roles", Arrays.asList(toJsonString(userTenantRoles)));
+            attributes.put("tenant_id", Arrays.asList(primaryStaff.getTenantId()));
+            attributes.put("active_tenant_id", Arrays.asList(primaryStaff.getTenantId()));
+            
+            keycloakAdminService.updateUserAttributes(realmName, username, attributes);
+            log.info("Successfully synced user {} tenants to Keycloak", userId);
+            
+        } catch (Exception e) {
+            log.error("Failed to sync user tenants to Keycloak", e);
+            throw new BusinessRuleException("Failed to sync user tenants: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Convert object to JSON string
+     */
+    private String toJsonString(Object obj) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            log.error("Failed to convert to JSON", e);
+            return obj.toString();
+        }
     }
 }

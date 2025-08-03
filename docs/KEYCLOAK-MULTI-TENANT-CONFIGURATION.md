@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides detailed instructions for configuring Keycloak 26 to support multi-tenant functionality in the ClickX medical application, enabling users to switch between different tenants (clinics) they have access to.
+This guide provides detailed instructions for configuring Keycloak 26 to support multi-tenant functionality in the clinicx medical application, enabling users to switch between different tenants (clinics) they have access to.
 
 ## Table of Contents
 

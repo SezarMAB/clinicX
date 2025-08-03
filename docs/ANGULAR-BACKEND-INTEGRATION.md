@@ -57,7 +57,7 @@ ng serve
 
 The JWT token from your request shows:
 - **Issuer**: `http://localhost:18081/realms/master`
-- **Client**: `clickx-frontend` (public client)
+- **Client**: `clinicx-frontend` (public client)
 - **Audience**: Includes multiple realms
 
 The Spring Boot backend expects:
@@ -68,7 +68,7 @@ The Spring Boot backend expects:
 
 You need to ensure your Keycloak clients are configured correctly:
 
-#### Frontend Client (clickx-frontend)
+#### Frontend Client (clinicx-frontend)
 - **Access Type**: public
 - **Valid Redirect URIs**: `http://localhost:4200/*`
 - **Web Origins**: `http://localhost:4200`
@@ -87,7 +87,7 @@ Ensure your Angular service includes the backend in the audience:
 const keycloakConfig = {
   url: 'http://localhost:18081',
   realm: 'master',
-  clientId: 'clickx-frontend'
+  clientId: 'clinicx-frontend'
 };
 
 // When getting token, ensure it includes backend audience
@@ -114,7 +114,7 @@ spring:
       resourceserver:
         jwt:
           audiences:
-            - clickx-frontend
+            - clinicx-frontend
             - clinicx-backend
             - account
 ```

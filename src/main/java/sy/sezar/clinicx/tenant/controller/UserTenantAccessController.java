@@ -34,8 +34,8 @@ public class UserTenantAccessController {
      * Grant a user access to an additional tenant.
      */
     @PostMapping("/{userId}/tenant-access")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @Operation(summary = "Grant tenant access", 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Grant tenant access",
                description = "Grant a user access to an additional tenant with specified role")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Access granted successfully"),

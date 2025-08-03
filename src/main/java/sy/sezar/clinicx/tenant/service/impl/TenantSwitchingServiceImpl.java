@@ -189,15 +189,6 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             throw new BusinessRuleException("User already has access to this tenant");
         }
 
-        // If setting as primary, unset other primary tenants
-        if (isPrimary) {
-            staffRepository.findByUserId(userId).forEach(staff -> {
-                if (staff.isPrimary()) {
-                    staff.setPrimary(false);
-                    staffRepository.save(staff);
-                }
-            });
-        }
 
         // Create new staff entry
         Staff staff = new Staff();
@@ -206,30 +197,50 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         staff.setRole(StaffRole.valueOf(role));
         staff.setPrimary(isPrimary);
         staff.setActive(true);
-        
+
         // Fetch user details from Keycloak
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-                String issuer = jwt.getIssuer().toString();
-                String realmName = extractRealmFromIssuer(issuer);
-                
-                org.keycloak.representations.idm.UserRepresentation keycloakUser = 
+            if (auth == null || !(auth.getPrincipal() instanceof Jwt)) {
+                throw new BusinessRuleException("Keycloak not reachable: Authentication context is not available");
+            }
+
+            Jwt jwt = (Jwt) auth.getPrincipal();
+            String issuer = jwt.getIssuer().toString();
+            String realmName = extractRealmFromIssuer(issuer);
+
+            try {
+                org.keycloak.representations.idm.UserRepresentation keycloakUser =
                     keycloakAdminService.getUserByUsername(realmName, userId);
-                
+
                 // Set user details from Keycloak
                 String fullName = keycloakUser.getFirstName() + " " + keycloakUser.getLastName();
                 staff.setFullName(fullName.trim().isEmpty() ? keycloakUser.getUsername() : fullName.trim());
                 staff.setEmail(keycloakUser.getEmail() != null ? keycloakUser.getEmail() : userId + "@example.com");
-            } else {
-                // Fallback if authentication context is not available
-                staff.setFullName("User " + userId);
-                staff.setEmail(userId + "@example.com");
+            } catch (BusinessRuleException be) {
+                // Keycloak user not found or Keycloak not reachable
+                throw new BusinessRuleException("Keycloak not reachable: " + be.getMessage());
+            } catch (Exception e) {
+                // Any other exception while fetching from Keycloak
+                log.error("Failed to fetch user details from Keycloak", e);
+                throw new BusinessRuleException("Keycloak not reachable: Failed to fetch user details");
             }
+        } catch (BusinessRuleException be) {
+            // Re-throw BusinessRuleException to UI
+            throw be;
         } catch (Exception e) {
-            log.warn("Failed to fetch user details from Keycloak for user {}, using defaults: {}", userId, e.getMessage());
-            staff.setFullName("User " + userId);
-            staff.setEmail(userId + "@example.com");
+            log.error("Unexpected error while accessing Keycloak", e);
+            throw new BusinessRuleException("Keycloak not reachable: " + e.getMessage());
+        }
+
+        // If setting as primary, unset other primary tenants
+        if (isPrimary) {
+            staffRepository.findByUserId(userId).forEach(sf -> {
+                if (sf.isPrimary()) {
+                    sf.setPrimary(false);
+                    staffRepository.save(sf);
+                }
+            });
         }
 
         staffRepository.save(staff);

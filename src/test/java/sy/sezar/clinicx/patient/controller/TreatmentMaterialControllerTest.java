@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import sy.sezar.clinicx.tenant.TenantInterceptor;
+import sy.sezar.clinicx.tenant.TenantResolver;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,9 +39,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import sy.sezar.clinicx.tenant.service.TenantAccessValidator;
+import sy.sezar.clinicx.tenant.service.TenantAuditService;
 
 @WebMvcTest(TreatmentMaterialControllerApi.class)
 @Import({TestSecurityConfig.class, TestWebConfig.class, TreatmentMaterialControllerImpl.class})
+@AutoConfigureMockMvc(addFilters = false)
 @WithMockUser(username = "test-user", roles = {"ADMIN"})
 class TreatmentMaterialControllerTest {
 
@@ -48,14 +54,20 @@ class TreatmentMaterialControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private TreatmentMaterialService treatmentMaterialService;
-    
-    @MockBean
-    private sy.sezar.clinicx.core.tenant.TenantResolver tenantResolver;
-    
-    @MockBean
-    private sy.sezar.clinicx.core.tenant.TenantInterceptor tenantInterceptor;
+
+    @MockitoBean
+    private TenantResolver tenantResolver;
+
+    @MockitoBean
+    private TenantInterceptor tenantInterceptor;
+
+    @MockitoBean
+    private TenantAccessValidator tenantAccessValidator;
+
+    @MockitoBean
+    private TenantAuditService tenantAuditService;
 
     private UUID treatmentId;
     private UUID patientId;

@@ -2,6 +2,7 @@ package sy.sezar.clinicx.core.tenant;
 
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
+import sy.sezar.clinicx.tenant.TenantContext;
 
 /**
  * Test implementation of TenantContext for unit tests.

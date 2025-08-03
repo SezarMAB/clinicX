@@ -2,8 +2,9 @@ package sy.sezar.clinicx.security;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,6 +15,8 @@ import sy.sezar.clinicx.core.security.SecurityUtils;
 import sy.sezar.clinicx.tenant.TenantContext;
 import sy.sezar.clinicx.tenant.TenantInterceptor;
 import sy.sezar.clinicx.tenant.TenantResolver;
+import sy.sezar.clinicx.tenant.service.TenantAccessValidator;
+import sy.sezar.clinicx.tenant.service.TenantAuditService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -26,17 +29,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(AuthTestController.class)
 @Import({TestSecurityConfig.class, TestWebConfig.class})
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class KeycloakSecurityIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
     
-    @MockBean
+    @MockitoBean
     private TenantResolver tenantResolver;
     
-    @MockBean
+    @MockitoBean
     private TenantInterceptor tenantInterceptor;
+    
+    @MockitoBean
+    private TenantAccessValidator tenantAccessValidator;
+    
+    @MockitoBean
+    private TenantAuditService tenantAuditService;
 
     @Test
     void testCompleteKeycloakAuthenticationFlow() throws Exception {

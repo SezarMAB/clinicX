@@ -142,7 +142,8 @@ class AppointmentServiceImplValidationTest {
         while (nextSunday.getDayOfWeek() != DayOfWeek.SUNDAY) {
             nextSunday = nextSunday.plusDays(1);
         }
-        nextSunday = nextSunday.withHour(10).withMinute(0).withSecond(0).withNano(0);
+        // Ensure the time is in the future by adding 2 hours to current time
+        nextSunday = nextSunday.plusHours(2);
 
         AppointmentCreateRequest request = new AppointmentCreateRequest(
             specialtyId, patientId, doctorId, nextSunday.toInstant(), 30,
@@ -157,9 +158,15 @@ class AppointmentServiceImplValidationTest {
     @Test
     @DisplayName("Should throw BusinessRuleException when appointment is more than 6 months in advance")
     void createAppointment_TooFarInFuture_ThrowsBusinessRuleException() {
-        Instant sevenMonthsFromNow = Instant.now().plus(Duration.ofDays(210));
+        // Find a weekday 7 months from now
+        ZonedDateTime sevenMonthsFromNow = ZonedDateTime.now(ZoneId.systemDefault()).plusMonths(7);
+        while (sevenMonthsFromNow.getDayOfWeek() == DayOfWeek.SATURDAY || 
+               sevenMonthsFromNow.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            sevenMonthsFromNow = sevenMonthsFromNow.plusDays(1);
+        }
+        
         AppointmentCreateRequest request = new AppointmentCreateRequest(
-            specialtyId, patientId, doctorId, sevenMonthsFromNow, 30,
+            specialtyId, patientId, doctorId, sevenMonthsFromNow.toInstant(), 30,
             AppointmentStatus.SCHEDULED, "Test notes", null
         );
 

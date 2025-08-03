@@ -5,7 +5,13 @@
     "username" : "admin",
     "emailVerified" : false,
     "attributes" : {
-      "is_temporary_admin" : [ "true" ]
+      "tenant_id" : [ "mahmoud_barakat" ],
+      "user_tenant_roles" : [ "sarah" ],
+      "is_temporary_admin" : [ "true" ],
+      "clinic_name" : [ "barakat" ],
+      "accessible_tenants" : [ "[{\"tenant_id\":\"master\",\"specialty\":\"APPOINTMENTS\",\"roles\":[\"ADMIN\"],\"clinic_name\":\"Dental Main anas\",\"clinic_type\":\"APPOINTMENTS\"}]" ],
+      "active_tenant_id" : [ "master" ],
+      "clinic_type" : [ "mahmoud" ]
     },
     "enabled" : true,
     "createdTimestamp" : 1753636454139,
@@ -19,7 +25,32 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-master", "admin", "SUPER_ADMIN" ],
+    "realmRoles" : [ "default-roles-master", "ADMIN", "admin", "DOCTOR", "SUPER_ADMIN" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "9da54556-9018-49a1-9442-bbbacbe6b577",
+    "username" : "doctor",
+    "emailVerified" : false,
+    "attributes" : {
+      "tenant_id" : [ "doctor_12" ],
+      "clinic_name" : [ "doctor" ],
+      "active_tenant_id" : [ "doctor" ],
+      "clinic_type" : [ "doctor" ]
+    },
+    "enabled" : true,
+    "createdTimestamp" : 1753909328835,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "cf67bd0d-627b-43ba-b9a6-2dcff6674b9a",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1753909336955,
+      "secretData" : "{\"value\":\"pSJBKn6XhEtGUKjkgM8gFy2cKZQCif8GAFCHmxbdCNk=\",\"salt\":\"hB54TsHvlTyUIZbcepViKg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
     "notBefore" : 0,
     "groups" : [ ]
   } ]

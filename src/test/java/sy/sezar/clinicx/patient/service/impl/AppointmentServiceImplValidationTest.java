@@ -137,13 +137,13 @@ class AppointmentServiceImplValidationTest {
     @Test
     @DisplayName("Should throw BusinessRuleException when appointment is on Sunday")
     void createAppointment_Sunday_ThrowsBusinessRuleException() {
-        // Find next Sunday
-        ZonedDateTime nextSunday = ZonedDateTime.now(ZoneId.systemDefault());
+        // Find next Sunday at 10 AM to avoid timezone issues
+        ZonedDateTime nextSunday = ZonedDateTime.now(ZoneId.systemDefault()).plusDays(1);
         while (nextSunday.getDayOfWeek() != DayOfWeek.SUNDAY) {
             nextSunday = nextSunday.plusDays(1);
         }
-        // Ensure the time is in the future by adding 2 hours to current time
-        nextSunday = nextSunday.plusHours(2);
+        // Set to 10 AM to ensure it stays on Sunday after timezone conversions
+        nextSunday = nextSunday.withHour(10).withMinute(0).withSecond(0).withNano(0);
 
         AppointmentCreateRequest request = new AppointmentCreateRequest(
             specialtyId, patientId, doctorId, nextSunday.toInstant(), 30,

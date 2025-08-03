@@ -1,5 +1,6 @@
 package sy.sezar.clinicx.tenant.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -103,9 +104,26 @@ public class EnhancedTenantServiceImpl implements TenantService {
             if (realmPerTypeEnabled) {
                 Map<String, List<String>> attributes = new HashMap<>();
                 attributes.put("primary_tenant_id", Arrays.asList(tenantId));
-                attributes.put("accessible_tenants", Arrays.asList(
-                    tenantId + "|" + request.name() + "|ADMIN"
-                ));
+                
+                // Create proper JSON structure for accessible_tenants
+                List<Map<String, Object>> accessibleTenants = new ArrayList<>();
+                Map<String, Object> tenantAccess = new HashMap<>();
+                tenantAccess.put("tenant_id", tenantId);
+                tenantAccess.put("clinic_name", request.name());
+                tenantAccess.put("clinic_type", specialty);
+                tenantAccess.put("specialty", specialty);
+                tenantAccess.put("roles", List.of("ADMIN"));
+                accessibleTenants.add(tenantAccess);
+                
+                try {
+                    String accessibleTenantsJson = new ObjectMapper().writeValueAsString(accessibleTenants);
+                    attributes.put("accessible_tenants", Arrays.asList(accessibleTenantsJson));
+                } catch (Exception e) {
+                    log.error("Failed to serialize accessible_tenants", e);
+                    // Fallback to empty array
+                    attributes.put("accessible_tenants", Arrays.asList("[]"));
+                }
+                
                 attributes.put("active_tenant_id", Arrays.asList(tenantId));
 
                 keycloakAdminService.updateUserAttributes(realmName, request.adminUsername(), attributes);

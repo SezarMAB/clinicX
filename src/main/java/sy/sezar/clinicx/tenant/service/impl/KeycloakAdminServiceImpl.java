@@ -911,6 +911,26 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     @Override
+    public UserRepresentation getUserByUserId(String realmName, String userId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            UserRepresentation user = realmResource.users().get(userId).toRepresentation();
+
+            if (user != null) {
+                return user;
+            } else {
+                throw new BusinessRuleException("User not found with ID: " + userId);
+            }
+        } catch (NotFoundException e) {
+            log.error("User not found with ID: {}", userId);
+            throw new BusinessRuleException("User not found with ID: " + userId);
+        } catch (Exception e) {
+            log.error("Failed to get user by ID", e);
+            throw new BusinessRuleException("Failed to get user: " + e.getMessage());
+        }
+    }
+
+    @Override
     public void copyClientsFromRealm(String sourceRealmName, String targetRealmName) {
         try {
             Keycloak keycloak = getKeycloakInstance();
@@ -998,10 +1018,23 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     @Override
-    public void grantAdditionalTenantAccess(String realmName, String username, String newTenantId,
+    public void grantAdditionalTenantAccessByUserName(String realmName, String username, String newTenantId,
                                            String newClinicName, String newClinicType, List<String> roles) {
-        try {
             UserRepresentation user = getUserByUsername(realmName, username);
+        grantAdditionalTenantAccess(realmName, newTenantId, newClinicName, newClinicType, roles, user);
+    }
+
+
+    @Override
+    public void grantAdditionalTenantAccessByUserId(String realmName, String userId, String newTenantId,
+        String newClinicName, String newClinicType, List<String> roles) {
+        UserRepresentation user = getUserByUserId(realmName, userId);
+        grantAdditionalTenantAccess(realmName, newTenantId, newClinicName, newClinicType, roles, user);
+    }
+
+    private void grantAdditionalTenantAccess(String realmName, String newTenantId,
+        String newClinicName, String newClinicType, List<String> roles, UserRepresentation user) {
+        try {
             Map<String, List<String>> attributes = user.getAttributes();
             if (attributes == null) {
                 attributes = new HashMap<>();
@@ -1037,7 +1070,8 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             user.setAttributes(attributes);
             getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
 
-            log.info("Granted access to tenant {} for user {} in realm {}", newTenantId, username, realmName);
+            log.info("Granted access to tenant {} for user {} in realm {}", newTenantId, user.getUsername(),
+                realmName);
 
         } catch (Exception e) {
             log.error("Failed to grant additional tenant access", e);
@@ -1130,7 +1164,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             // If JSON parsing fails, try pipe-delimited format (legacy)
             log.warn("Failed to parse as JSON, trying pipe-delimited format: {}", json);
-            
+
             List<Map<String, Object>> result = new ArrayList<>();
             if (json != null && !json.isEmpty() && !json.equals("[]")) {
                 // Format: tenant_id|clinic_name|role1,role2

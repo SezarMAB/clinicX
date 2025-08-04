@@ -211,7 +211,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
 
             try {
                 org.keycloak.representations.idm.UserRepresentation keycloakUser =
-                    keycloakAdminService.getUserByUsername(realmName, userId);
+                    keycloakAdminService.getUserByUserId(realmName, userId);
 
                 // Set user details from Keycloak
                 String fullName = keycloakUser.getFirstName() + " " + keycloakUser.getLastName();
@@ -254,7 +254,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                 String realmName = extractRealmFromIssuer(issuer);
 
                 // Grant additional tenant access in Keycloak
-                keycloakAdminService.grantAdditionalTenantAccess(
+                keycloakAdminService.grantAdditionalTenantAccessByUserId(
                     realmName,
                     userId, // This should be the username, not user ID
                     tenantId,

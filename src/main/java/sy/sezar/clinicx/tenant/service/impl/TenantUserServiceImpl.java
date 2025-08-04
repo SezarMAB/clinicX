@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -413,7 +412,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         }
         
         // Grant additional tenant access in Keycloak
-        keycloakAdminService.grantAdditionalTenantAccess(
+        keycloakAdminService.grantAdditionalTenantAccessByUserName(
             user.getAttributes().get("primary_realm").get(0), // User's primary realm
             username,
             tenantId,

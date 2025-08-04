@@ -27,14 +27,14 @@ import java.util.List;
 @Slf4j
 @Tag(name = "User Tenant Access", description = "Manage user access to multiple tenants")
 public class UserTenantAccessController {
-    
+
     private final TenantSwitchingService tenantSwitchingService;
-    
+
     /**
      * Grant a user access to an additional tenant.
      */
     @PostMapping("/{userId}/tenant-access")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "Grant tenant access",
                description = "Grant a user access to an additional tenant with specified role")
     @ApiResponses({
@@ -48,26 +48,26 @@ public class UserTenantAccessController {
             @PathVariable String userId,
             @Parameter(description = "Grant access request", required = true)
             @Valid @RequestBody GrantTenantAccessRequest request) {
-        
-        log.info("Granting user {} access to tenant {} with role {}", 
+
+        log.info("Granting user {} access to tenant {} with role {}",
                 userId, request.tenantId(), request.role());
-        
+
         tenantSwitchingService.grantUserTenantAccess(
-            userId, 
-            request.tenantId(), 
-            request.role(), 
+            userId,
+            request.tenantId(),
+            request.role(),
             request.isPrimary()
         );
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    
+
     /**
      * Revoke a user's access to a specific tenant.
      */
     @DeleteMapping("/{userId}/tenant-access/{tenantId}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @Operation(summary = "Revoke tenant access", 
+    @Operation(summary = "Revoke tenant access",
                description = "Revoke a user's access to a specific tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Access revoked successfully"),
@@ -80,20 +80,20 @@ public class UserTenantAccessController {
             @PathVariable String userId,
             @Parameter(description = "Tenant ID", required = true)
             @PathVariable String tenantId) {
-        
+
         log.info("Revoking user {} access to tenant {}", userId, tenantId);
-        
-        tenantSwitchingService.revokeUserTenantAccess(userId, tenantId);
-        
+
+        tenantSwitchingService.revokeUserTenantAccess(tenantId, userId);
+
         return ResponseEntity.noContent().build();
     }
-    
+
     /**
      * Get all tenants a user has access to.
      */
     @GetMapping("/{userId}/tenant-access")
     @PreAuthorize("hasRole('SUPER_ADMIN') or #userId == authentication.name")
-    @Operation(summary = "List user's tenant access", 
+    @Operation(summary = "List user's tenant access",
                description = "Get all tenants a user has access to")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Tenant access list retrieved"),
@@ -103,24 +103,24 @@ public class UserTenantAccessController {
     public ResponseEntity<List<TenantAccessDto>> getUserTenantAccess(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId) {
-        
+
         log.info("Getting tenant access for user {}", userId);
-        
+
         List<TenantAccessDto> tenantAccess = tenantSwitchingService.getUserTenants(userId);
-        
+
         return ResponseEntity.ok(tenantAccess);
     }
-    
+
     /**
      * Request object for granting tenant access.
      */
     public record GrantTenantAccessRequest(
         @Parameter(description = "Tenant ID to grant access to", required = true)
         String tenantId,
-        
+
         @Parameter(description = "Role to assign in the tenant", required = true)
         String role,
-        
+
         @Parameter(description = "Whether this should be the primary tenant", required = false)
         boolean isPrimary
     ) {}

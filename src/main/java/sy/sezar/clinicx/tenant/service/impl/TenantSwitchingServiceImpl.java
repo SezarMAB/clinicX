@@ -23,6 +23,7 @@ import sy.sezar.clinicx.tenant.service.TenantSwitchingService;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import sy.sezar.clinicx.tenant.service.TenantUserService;
 
 /**
  * Implementation of tenant switching service.
@@ -35,6 +36,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
 
     private final StaffRepository staffRepository;
     private final TenantRepository tenantRepository;
+    private final TenantUserService tenantUserService;
     private final KeycloakAdminService keycloakAdminService;
 
     @Override
@@ -272,33 +274,9 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
     }
 
     @Override
-    public void revokeUserTenantAccess(String userId, String tenantId) {
-        log.info("Revoking user {} access to tenant {}", userId, tenantId);
+    public void revokeUserTenantAccess(String tenantId, String userId) {
 
-        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
-            .orElseThrow(() -> new NotFoundException("User tenant access not found"));
-
-        if (staff.isPrimary()) {
-            throw new BusinessRuleException("Cannot revoke access to primary tenant");
-        }
-
-        staffRepository.delete(staff);
-
-        // Update Keycloak attributes using the dedicated method
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-                String issuer = jwt.getIssuer().toString();
-                String realmName = extractRealmFromIssuer(issuer);
-
-                // Revoke tenant access in Keycloak
-                // TODO: Implement revokeAdditionalTenantAccess in KeycloakAdminService
-                log.warn("Keycloak tenant access revocation not implemented yet");
-            }
-        } catch (Exception e) {
-            log.error("Failed to update Keycloak attributes", e);
-            // Don't fail the operation, but log the error
-        }
+        tenantUserService.revokeExternalUserAccess(tenantId, userId);
 
         log.info("Successfully revoked access to tenant {}", tenantId);
     }

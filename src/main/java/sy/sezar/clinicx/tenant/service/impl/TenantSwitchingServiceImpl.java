@@ -190,7 +190,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         if (staffRepository.existsByUserIdAndTenantId(userId, tenantId)) {
             throw new BusinessRuleException("User already has access to this tenant");
         }
-
+        //TODO set Staff phone number from existing staff record if available
 
         // Create new staff entry
         Staff staff = new Staff();

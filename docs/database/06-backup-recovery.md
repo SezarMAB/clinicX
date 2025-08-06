@@ -7,31 +7,31 @@ This document outlines comprehensive backup and disaster recovery procedures for
 ## Backup Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Backup Strategy                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Continuous Backups          Scheduled Backups              │
-│  ┌─────────────────┐        ┌──────────────────┐           │
-│  │   WAL Archive   │        │  Daily Full      │           │
-│  │   (Real-time)   │        │  (Off-hours)     │           │
-│  └────────┬────────┘        └────────┬─────────┘           │
-│           │                          │                       │
-│           ▼                          ▼                       │
-│  ┌─────────────────────────────────────────────┐           │
-│  │         Backup Storage (S3/GCS)              │           │
-│  │  ├── wal-archive/                            │           │
-│  │  ├── daily/                                  │           │
-│  │  ├── weekly/                                 │           │
-│  │  └── monthly/                                │           │
-│  └─────────────────────────────────────────────┘           │
-│                                                              │
-│  Per-Tenant Backups         System Backups                  │
-│  ┌─────────────────┐        ┌──────────────────┐           │
-│  │  Schema-level   │        │  Public Schema   │           │
-│  │   (On-demand)   │        │  (Continuous)    │           │
-│  └─────────────────┘        └──────────────────┘           │
-└──────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│                     Backup Strategy               │
+├───────────────────────────────────────────────────┤
+│                                                   │
+│  Continuous Backups          Scheduled Backups    │
+│  ┌─────────────────┐        ┌──────────────────┐  │
+│  │   WAL Archive   │        │  Daily Full      │  │
+│  │   (Real-time)   │        │  (Off-hours)     │  │
+│  └────────┬────────┘        └────────┬─────────┘  │
+│           │                          │            │
+│           ▼                          ▼            │
+│  ┌─────────────────────────────────────────────┐  │
+│  │         Backup Storage (S3/GCS)             │  │
+│  │  ├── wal-archive/                           │  │
+│  │  ├── daily/                                 │  │
+│  │  ├── weekly/                                │  │
+│  │  └── monthly/                               │  │
+│  └─────────────────────────────────────────────┘  │
+│                                                   │
+│  Per-Tenant Backups         System Backups        │
+│  ┌─────────────────┐        ┌──────────────────┐  │
+│  │  Schema-level   │        │  Public Schema   │  │
+│  │   (On-demand)   │        │  (Continuous)    │  │
+│  └─────────────────┘        └──────────────────┘  │
+└───────────────────────────────────────────────────┘
 ```
 
 ## Backup Strategies

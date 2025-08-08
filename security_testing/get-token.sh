@@ -28,10 +28,10 @@ if [[ $? -ne 0 || -z "$RESPONSE" ]]; then
 fi
 
 # Parse access_token from response
-token=$(echo "$RESPONSE" | jq -r '.access_token')
+TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
 
 # Check if token is extracted
-if [[ "$token" == "null" || -z "$token" ]]; then
+if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
   echo "❌ Failed to extract access_token."
   echo "Response: $RESPONSE"
   exit 1
@@ -39,6 +39,11 @@ fi
 
 # Output token
 echo "✅ Access token:"
-echo "$token"
+echo "$TOKEN"
 
-echo "$token" | pbcopy
+
+echo "$TOKEN" | pbcopy
+
+#curl -X GET "http://localhost:8080/api/patients" \
+#  -H "API-Version: 1" \
+#  -H "Authorization: Bearer $TOKEN"

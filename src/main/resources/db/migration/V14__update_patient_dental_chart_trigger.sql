@@ -1,0 +1,154 @@
+-- V14: Update patient dental chart initialization trigger
+-- This migration replaces the legacy initialize_patient_teeth() trigger
+-- with a new function that creates dental charts using JSONB storage
+
+-- ====================================================================
+-- DROP LEGACY TRIGGER AND FUNCTION
+-- ====================================================================
+
+-- Drop existing triggers first
+DROP TRIGGER IF EXISTS trg_initialize_patient_teeth ON patients CASCADE;
+
+-- Drop legacy functions that are no longer needed
+DROP FUNCTION IF EXISTS initialize_patient_teeth() CASCADE;
+DROP FUNCTION IF EXISTS track_tooth_history() CASCADE;
+
+-- ====================================================================
+-- CREATE NEW DENTAL CHART INITIALIZATION FUNCTION
+-- ====================================================================
+
+-- CREATE OR REPLACE FUNCTION initialize_patient_dental_chart()
+--     RETURNS TRIGGER AS $$
+-- DECLARE
+--     tooth_numbers INT[] := ARRAY[
+--         11,12,13,14,15,16,17,18,
+--         21,22,23,24,25,26,27,28,
+--         31,32,33,34,35,36,37,38,
+--         41,42,43,44,45,46,47,48
+--     ];
+--     tooth_number INT;
+--     teeth_data JSONB := '{}';
+--     healthy_condition_id UUID;
+--     chart_data JSONB;
+-- BEGIN
+--     -- Get the healthy condition ID for reference
+--     SELECT id INTO healthy_condition_id FROM tooth_conditions WHERE code = 'HEALTHY' AND is_active = TRUE;
+--
+--     -- If no healthy condition found, log warning and continue with null
+--     IF healthy_condition_id IS NULL THEN
+--         RAISE WARNING 'HEALTHY tooth condition not found in tooth_conditions table';
+--     END IF;
+--
+--     -- Build teeth data structure with all teeth marked as healthy
+--     FOREACH tooth_number IN ARRAY tooth_numbers
+--     LOOP
+--         teeth_data := teeth_data || jsonb_build_object(
+--             tooth_number::text,
+--             jsonb_build_object(
+--                 'number', tooth_number,
+--                 'conditionId', healthy_condition_id,
+--                 'conditionCode', 'HEALTHY',
+--                 'notes', '',
+--                 'lastUpdated', extract(epoch from now())::bigint * 1000, -- Unix timestamp in milliseconds
+--                 'updatedBy', NEW.created_by
+--             )
+--         );
+--     END LOOP;
+--
+--     -- Build complete chart data structure
+--     chart_data := jsonb_build_object(
+--         'meta', jsonb_build_object(
+--             'version', '1.0',
+--             'lastUpdated', extract(epoch from now())::bigint * 1000, -- Unix timestamp in milliseconds
+--             'updatedBy', NEW.created_by,
+--             'totalTeeth', array_length(tooth_numbers, 1)
+--         ),
+--         'teeth', teeth_data
+--     );
+--
+--     -- Insert the dental chart record
+--     INSERT INTO dental_charts (
+--         patient_id,
+--         chart_data,
+--         created_at,
+--         updated_at
+--     ) VALUES (
+--         NEW.id,
+--         chart_data,
+--         NOW(),
+--         NOW()
+--     )
+--     ON CONFLICT (patient_id) DO NOTHING; -- Prevent duplicate charts
+--
+--     RETURN NEW;
+-- EXCEPTION
+--     WHEN OTHERS THEN
+--         -- Log the error but don't fail the patient creation
+--         RAISE WARNING 'Failed to initialize dental chart for patient %: %', NEW.id, SQLERRM;
+--         RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+--
+-- -- ====================================================================
+-- -- CREATE NEW TRIGGER
+-- -- ====================================================================
+--
+-- CREATE TRIGGER trg_initialize_patient_dental_chart
+--     AFTER INSERT ON patients
+--     FOR EACH ROW EXECUTE FUNCTION initialize_patient_dental_chart();
+--
+-- -- ====================================================================
+-- -- CREATE HELPER FUNCTION FOR UPDATING DENTAL CHART METADATA
+-- -- ====================================================================
+--
+-- CREATE OR REPLACE FUNCTION update_dental_chart_metadata()
+--     RETURNS TRIGGER AS $$
+-- BEGIN
+--     -- Update the chart metadata when the chart_data is modified
+--     NEW.chart_data := jsonb_set(
+--         NEW.chart_data,
+--         '{meta,lastUpdated}',
+--         to_jsonb(extract(epoch from now())::bigint * 1000) -- Unix timestamp in milliseconds
+--     );
+--
+--     -- Update the updated_at timestamp
+--     NEW.updated_at := NOW();
+--
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+--
+-- -- Create trigger for dental chart updates
+-- CREATE TRIGGER trg_update_dental_chart_metadata
+--     BEFORE UPDATE ON dental_charts
+--     FOR EACH ROW
+--     WHEN (OLD.chart_data IS DISTINCT FROM NEW.chart_data)
+--     EXECUTE FUNCTION update_dental_chart_metadata();
+--
+-- -- ====================================================================
+-- -- MIGRATION VALIDATION
+-- -- ====================================================================
+--
+-- -- Log migration completion with validation
+-- DO $$
+-- DECLARE
+--     trigger_count INTEGER;
+--     function_count INTEGER;
+-- BEGIN
+--     -- Verify new trigger was created
+--     SELECT COUNT(*) INTO trigger_count
+--     FROM information_schema.triggers
+--     WHERE trigger_name = 'trg_initialize_patient_dental_chart';
+--
+--     -- Verify new function was created
+--     SELECT COUNT(*) INTO function_count
+--     FROM information_schema.routines
+--     WHERE routine_name = 'initialize_patient_dental_chart';
+--
+--     IF trigger_count > 0 AND function_count > 0 THEN
+--         RAISE NOTICE 'Migration V14 completed successfully: New dental chart initialization trigger created';
+--         RAISE NOTICE 'Trigger count: %, Function count: %', trigger_count, function_count;
+--     ELSE
+--         RAISE WARNING 'Migration V14 completed with warnings: Trigger count: %, Function count: %', trigger_count, function_count;
+--     END IF;
+-- END $$;

@@ -1,7 +1,7 @@
 package sy.sezar.clinicx.patient.service;
 
-import sy.sezar.clinicx.patient.dto.DentalChartDto;
-import sy.sezar.clinicx.patient.dto.ToothDto;
+import sy.sezar.clinicx.patient.dto.ChartDataDto;
+import sy.sezar.clinicx.patient.dto.ChartToothDto;
 
 import java.util.UUID;
 
@@ -11,17 +11,29 @@ import java.util.UUID;
 public interface DentalChartService {
 
     /**
-     * Gets the complete dental chart for a patient.
+     * Get the complete dental chart for a patient.
+     * Returns the full JSONB chart data.
      */
-    DentalChartDto getPatientDentalChart(UUID patientId);
-
+    ChartDataDto getPatientDentalChart(UUID patientId);
+    
     /**
-     * Updates a specific tooth condition.
+     * Update a specific tooth's condition and data.
      */
-    ToothDto updateToothCondition(UUID patientId, Integer toothNumber, UUID conditionId, String notes);
-
+    ChartToothDto updateToothCondition(UUID patientId, String toothId, ChartToothDto toothData);
+    
     /**
-     * Gets details for a specific tooth.
+     * Get details for a specific tooth.
      */
-    ToothDto getToothDetails(UUID patientId, Integer toothNumber);
+    ChartToothDto getToothDetails(UUID patientId, String toothId);
+    
+    /**
+     * Update a specific surface condition for a tooth.
+     */
+    void updateSurfaceCondition(UUID patientId, String toothId, String surfaceName, 
+                                String condition, String notes);
+    
+    /**
+     * Initialize a new dental chart for a patient.
+     */
+    ChartDataDto initializeDentalChart(UUID patientId);
 }

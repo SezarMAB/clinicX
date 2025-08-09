@@ -40,7 +40,7 @@ public interface PatientCentralMapper {
     @Mapping(target = "invoices", ignore = true)
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
-    @Mapping(target = "patientTeeth", ignore = true)
+    @Mapping(target = "dentalChart", ignore = true)
     @Mapping(target = "treatments", ignore = true)
     Patient toPatient(PatientCreateRequest request);
 
@@ -58,7 +58,7 @@ public interface PatientCentralMapper {
     @Mapping(target = "invoices", ignore = true)
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
-    @Mapping(target = "patientTeeth", ignore = true)
+    @Mapping(target = "dentalChart", ignore = true)
     @Mapping(target = "treatments", ignore = true)
     void updatePatientFromRequest(PatientUpdateRequest request, @MappingTarget Patient patient);
 

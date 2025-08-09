@@ -17,10 +17,10 @@ import sy.sezar.clinicx.patient.spec.PatientSpecifications;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import sy.sezar.clinicx.patient.view.DentalChartView;
 
 /**
  * Implementation of PatientService with business logic and transaction management.
@@ -38,16 +38,14 @@ public class PatientServiceImpl implements PatientService {
     private final NoteRepository noteRepository;
     private final LabRequestRepository labRequestRepository;
     private final InvoiceRepository invoiceRepository;
-    private final PatientToothRepository patientToothRepository;
+    private final DentalChartRepository dentalChartRepository;
     private final ToothConditionRepository toothConditionRepository;
     private final UpcomingAppointmentsViewRepository upcomingAppointmentsViewRepository;
-    private final DentalChartViewRepository dentalChartViewRepository;
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
     private final PatientCentralMapper patientMapper;
     private final DocumentMapper documentMapper;
     private final TreatmentMapper treatmentMapper;
     private final AppointmentMapper appointmentMapper;
-    private final DentalChartMapper dentalChartMapper;
     private final NoteSummaryMapper noteSummaryMapper;
     private final LabRequestMapper labRequestMapper;
 
@@ -138,13 +136,61 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public DentalChartDto getPatientDentalChart(UUID patientId) {
+    public ChartDataDto getPatientDentalChart(UUID patientId) {
         log.info("Getting dental chart for patient ID: {}", patientId);
 
-        List<DentalChartView> teeth = dentalChartViewRepository.findByPatientIdOrderByToothNumber(patientId);
-        log.debug("Retrieved dental chart with {} teeth for patient: {}", teeth.size(), patientId);
+        DentalChart dentalChart = dentalChartRepository.findByPatientId(patientId)
+                .orElseGet(() -> {
+                    log.info("Creating new dental chart for patient: {}", patientId);
+                    Patient patient = findPatientEntityById(patientId);
+                    DentalChart newChart = new DentalChart();
+                    newChart.setPatient(patient);
+                    newChart.setChartData(ChartPayload.createDefault());
+                    return dentalChartRepository.save(newChart);
+                });
 
-        return dentalChartMapper.toDentalChartDtoFromView(teeth);
+        log.debug("Retrieved dental chart for patient: {}", patientId);
+        return convertChartPayloadToChartDataDto(dentalChart.getChartData());
+    }
+
+    private ChartDataDto convertChartPayloadToChartDataDto(ChartPayload chartPayload) {
+        ChartDataDto.MetaDto meta = new ChartDataDto.MetaDto(
+            chartPayload.getMeta().getVersion(),
+            chartPayload.getMeta().getLastUpdated(),
+            chartPayload.getMeta().getUpdatedBy()
+        );
+
+        Map<String, ChartToothDto> teeth = new HashMap<>();
+        chartPayload.getTeeth().forEach((toothId, tooth) -> {
+            teeth.put(toothId, convertToothToChartToothDto(toothId, tooth));
+        });
+
+        return new ChartDataDto(meta, teeth);
+    }
+
+    private ChartToothDto convertToothToChartToothDto(String toothId, ChartPayload.Tooth tooth) {
+        Map<String, ChartToothDto.SurfaceDto> surfaces = new HashMap<>();
+        tooth.getSurfaces().forEach((name, surface) -> {
+            surfaces.put(name, new ChartToothDto.SurfaceDto(
+                surface.getCondition(),
+                null // Surface notes not supported in current model
+            ));
+        });
+
+        ChartToothDto.FlagsDto flags = new ChartToothDto.FlagsDto(
+            tooth.getFlags().isImpacted(),
+            tooth.getFlags().isMobile(),
+            tooth.getFlags().isPeriapical(),
+            tooth.getFlags().isAbscess()
+        );
+
+        return new ChartToothDto(
+            toothId,
+            tooth.getCondition(),
+            surfaces,
+            flags,
+            tooth.getNotes()
+        );
     }
 
     @Override
@@ -237,28 +283,15 @@ public class PatientServiceImpl implements PatientService {
     }
 
     private void initializePatientTeeth(Patient patient) {
-        log.debug("Initializing 32 teeth for patient ID: {}", patient.getId());
+        log.debug("Initializing dental chart for patient ID: {}", patient.getId());
 
-        // Get default healthy tooth condition, or create a fallback
-        ToothCondition defaultCondition = toothConditionRepository.findDefaultHealthyCondition()
-                .orElseGet(() -> {
-                    log.warn("No default healthy tooth condition found, creating fallback");
-                    // Return null for now - in production this should create a default condition
-                    return null;
-                });
+        // Create a new dental chart with default healthy teeth
+        DentalChart dentalChart = new DentalChart();
+        dentalChart.setPatient(patient);
+        dentalChart.setChartData(ChartPayload.createDefault());
 
-        List<PatientTooth> teethToSave = new ArrayList<>();
-        for (int toothNumber = 1; toothNumber <= 32; toothNumber++) {
-            PatientTooth tooth = new PatientTooth();
-            tooth.setPatient(patient);
-            tooth.setToothNumber(toothNumber);
-            tooth.setCurrentCondition(defaultCondition);
-            teethToSave.add(tooth);
-        }
-
-        patientToothRepository.saveAll(teethToSave);
-        log.debug("Patient teeth initialization completed for patient ID: {}, saved {} teeth",
-                  patient.getId(), teethToSave.size());
+        dentalChartRepository.save(dentalChart);
+        log.debug("Dental chart initialization completed for patient ID: {}", patient.getId());
     }
 
     private FinancialRecordDto mapToFinancialRecordDto(Invoice invoice) {

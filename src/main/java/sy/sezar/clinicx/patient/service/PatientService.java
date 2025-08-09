@@ -3,7 +3,6 @@ package sy.sezar.clinicx.patient.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sy.sezar.clinicx.patient.dto.*;
-import sy.sezar.clinicx.patient.view.DentalChartView;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +45,7 @@ public interface PatientService {
     /**
      * Gets the patient's dental chart.
      */
-    DentalChartDto getPatientDentalChart(UUID patientId);
+    ChartDataDto getPatientDentalChart(UUID patientId);
 
     /**
      * Gets upcoming appointments for a patient.

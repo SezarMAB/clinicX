@@ -17,5 +17,6 @@ public record TenantSummaryDto(
     Instant subscriptionEndDate,
     Integer currentUsers,
     Integer currentPatients,
+    Instant createdAt,
     boolean hasAlert
 ) {}

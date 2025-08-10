@@ -9,7 +9,7 @@ import sy.sezar.clinicx.tenant.model.Tenant;
  */
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface TenantMapper {
-    
+
     /**
      * Converts a Tenant entity to a summary DTO.
      *
@@ -21,7 +21,7 @@ public interface TenantMapper {
     @Mapping(target = "hasAlert", expression = "java(checkHasAlert(tenant))")
     @Mapping(source = "active", target = "isActive")
     TenantSummaryDto toSummaryDto(Tenant tenant);
-    
+
     /**
      * Converts a Tenant entity to a detailed DTO.
      *
@@ -34,7 +34,7 @@ public interface TenantMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     TenantDetailDto toDetailDto(Tenant tenant);
-    
+
     /**
      * Converts the old TenantDto to the new TenantDetailDto.
      *
@@ -44,7 +44,7 @@ public interface TenantMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     TenantDetailDto toDetailDto(TenantDto dto);
-    
+
     /**
      * Updates a Tenant entity from an update request.
      *
@@ -61,7 +61,7 @@ public interface TenantMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "subscriptionStartDate", ignore = true)
     void updateTenantFromRequest(TenantUpdateRequest request, @MappingTarget Tenant tenant);
-    
+
     /**
      * Creates a new Tenant entity from a create request.
      *
@@ -77,7 +77,7 @@ public interface TenantMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Tenant toEntity(TenantCreateRequest request);
-    
+
     /**
      * Creates a summary DTO with usage stats.
      *
@@ -99,10 +99,11 @@ public interface TenantMapper {
             dto.subscriptionEndDate(),
             currentUsers,
             currentPatients,
+            dto.createdAt(),
             dto.hasAlert()
         );
     }
-    
+
     /**
      * Checks if the tenant has any alerts (e.g., expiring subscription).
      *
@@ -113,14 +114,14 @@ public interface TenantMapper {
         if (!tenant.isActive()) {
             return true;
         }
-        
+
         if (tenant.getSubscriptionEndDate() != null) {
             // Alert if subscription expires within 30 days
             return tenant.getSubscriptionEndDate().isBefore(
                 java.time.Instant.now().plus(30, java.time.temporal.ChronoUnit.DAYS)
             );
         }
-        
+
         return false;
     }
 }

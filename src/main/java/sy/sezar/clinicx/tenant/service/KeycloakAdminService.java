@@ -126,4 +126,37 @@ public interface KeycloakAdminService {
      * @param newActiveTenantId the new active tenant ID
      */
     void updateUserActiveTenant(String realmName, String username, String newActiveTenantId);
+
+    /**
+     * Reset user password.
+     *
+     * @param realmName the realm name
+     * @param username the username
+     * @param newPassword the new password
+     */
+    void resetUserPassword(String realmName, String username, String newPassword);
+
+    /**
+     * Delete all users from a realm (except service accounts).
+     *
+     * @param realmName the realm name
+     */
+    void deleteAllUsersFromRealm(String realmName);
+
+    /**
+     * Get all users from a specific tenant (based on tenant_id attribute).
+     *
+     * @param realmName the realm name
+     * @param tenantId the tenant ID
+     * @return list of users belonging to the tenant
+     */
+    List<UserRepresentation> getUsersByTenantId(String realmName, String tenantId);
+
+    /**
+     * Delete a user from realm by user ID.
+     *
+     * @param realmName the realm name
+     * @param userId the user ID
+     */
+    void deleteUserById(String realmName, String userId);
 }

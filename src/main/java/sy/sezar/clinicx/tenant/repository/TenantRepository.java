@@ -80,4 +80,13 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID>, JpaSpecif
      * @return Page of tenants with expiring subscriptions.
      */
     Page<Tenant> findByIsActiveTrueAndSubscriptionEndDateLessThanEqual(java.time.Instant expiryDate, Pageable pageable);
+    
+    /**
+     * Counts the number of tenants using the same realm name.
+     * Used to determine if a realm can be safely deleted from Keycloak.
+     *
+     * @param realmName The realm name to count tenants for.
+     * @return The count of tenants using this realm.
+     */
+    long countByRealmName(String realmName);
 }

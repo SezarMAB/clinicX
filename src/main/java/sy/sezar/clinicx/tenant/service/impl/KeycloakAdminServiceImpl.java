@@ -7,6 +7,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RolesResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.*;
@@ -1204,6 +1205,100 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         } catch (Exception e) {
             log.error("Failed to convert to JSON", e);
             return obj.toString();
+        }
+    }
+
+    @Override
+    public void resetUserPassword(String realmName, String username, String newPassword) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            
+            // Find the user by username
+            List<UserRepresentation> users = realmResource.users().searchByUsername(username, true);
+            if (users.isEmpty()) {
+                throw new sy.sezar.clinicx.core.exception.NotFoundException("User not found: " + username);
+            }
+            
+            UserRepresentation user = users.get(0);
+            UserResource userResource = realmResource.users().get(user.getId());
+            
+            // Reset the password
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(newPassword);
+            credential.setTemporary(false);
+            
+            userResource.resetPassword(credential);
+            
+            log.info("Successfully reset password for user '{}' in realm '{}'", username, realmName);
+        } catch (Exception e) {
+            log.error("Failed to reset password for user '{}' in realm '{}'", username, realmName, e);
+            throw new BusinessRuleException("Failed to reset user password: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteAllUsersFromRealm(String realmName) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<UserRepresentation> users = realmResource.users().list();
+            
+            int deletedCount = 0;
+            for (UserRepresentation user : users) {
+                // Skip service accounts (they have a special username pattern)
+                if (user.getUsername() != null && user.getUsername().startsWith("service-account-")) {
+                    log.debug("Skipping service account: {}", user.getUsername());
+                    continue;
+                }
+                
+                try {
+                    realmResource.users().delete(user.getId());
+                    deletedCount++;
+                    log.debug("Deleted user: {} ({})", user.getUsername(), user.getId());
+                } catch (Exception e) {
+                    log.error("Failed to delete user: {} ({})", user.getUsername(), user.getId(), e);
+                }
+            }
+            
+            log.info("Deleted {} users from realm '{}'", deletedCount, realmName);
+        } catch (Exception e) {
+            log.error("Failed to delete all users from realm '{}'", realmName, e);
+            throw new BusinessRuleException("Failed to delete users from realm: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<UserRepresentation> getUsersByTenantId(String realmName, String tenantId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            List<UserRepresentation> allUsers = realmResource.users().list();
+            
+            // Filter users by tenant_id attribute
+            return allUsers.stream()
+                .filter(user -> {
+                    Map<String, List<String>> attributes = user.getAttributes();
+                    if (attributes != null && attributes.containsKey("tenant_id")) {
+                        List<String> tenantIds = attributes.get("tenant_id");
+                        return tenantIds != null && tenantIds.contains(tenantId);
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get users for tenant '{}' from realm '{}'", tenantId, realmName, e);
+            throw new BusinessRuleException("Failed to get users by tenant ID: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteUserById(String realmName, String userId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            realmResource.users().delete(userId);
+            log.info("Successfully deleted user '{}' from realm '{}'", userId, realmName);
+        } catch (Exception e) {
+            log.error("Failed to delete user '{}' from realm '{}'", userId, realmName, e);
+            throw new BusinessRuleException("Failed to delete user: " + e.getMessage());
         }
     }
 }

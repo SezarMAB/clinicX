@@ -129,4 +129,16 @@ public interface TenantControllerApi {
                 content = @Content(schema = @Schema(implementation = SubdomainAvailabilityDto.class)))
     ResponseEntity<SubdomainAvailabilityDto> checkSubdomainAvailability(
             @Parameter(description = "Subdomain to check") @PathVariable String subdomain);
+
+    @PostMapping("/{id}/reset-admin-password")
+    @Operation(
+        summary = "Reset tenant admin password",
+        description = "Resets the password for a tenant's admin user. Only accessible by SUPER_ADMIN."
+    )
+    @ApiResponse(responseCode = "204", description = "Password reset successfully")
+    @ApiResponse(responseCode = "404", description = "Tenant or user not found")
+    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    ResponseEntity<Void> resetTenantAdminPassword(
+            @Parameter(description = "Tenant ID") @PathVariable UUID id,
+            @Valid @RequestBody PasswordResetRequest request);
 }

@@ -92,4 +92,12 @@ public class TenantControllerImpl implements TenantControllerApi {
         SubdomainAvailabilityDto availability = tenantService.checkSubdomainAvailability(subdomain);
         return ResponseEntity.ok(availability);
     }
+
+    @Override
+    public ResponseEntity<Void> resetTenantAdminPassword(UUID id, PasswordResetRequest request) {
+        log.warn("SUPER_ADMIN resetting admin password for tenant ID: {} and username: {}", id, request.adminUsername());
+        tenantService.resetTenantAdminPassword(id, request.adminUsername(), request.newPassword());
+        log.info("Successfully reset admin password for tenant ID: {}", id);
+        return ResponseEntity.noContent().build();
+    }
 }

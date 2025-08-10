@@ -267,4 +267,9 @@ public class EnhancedTenantServiceImpl implements TenantService {
     private String generateTenantId(String subdomain) {
         return subdomain + "-" + UUID.randomUUID().toString().substring(0, 8);
     }
+
+    @Override
+    public void resetTenantAdminPassword(UUID tenantId, String adminUsername, String newPassword) {
+        originalService.resetTenantAdminPassword(tenantId, adminUsername, newPassword);
+    }
 }

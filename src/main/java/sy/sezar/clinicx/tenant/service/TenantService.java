@@ -116,4 +116,14 @@ public interface TenantService {
      * @param tenantId The tenant ID.
      */
     void updateTenantUsageStats(String tenantId);
+    
+    /**
+     * Resets the password for a tenant's admin user.
+     * Only accessible by SUPER_ADMIN.
+     *
+     * @param tenantId The tenant ID.
+     * @param adminUsername The admin username to reset password for.
+     * @param newPassword The new password.
+     */
+    void resetTenantAdminPassword(UUID tenantId, String adminUsername, String newPassword);
 }

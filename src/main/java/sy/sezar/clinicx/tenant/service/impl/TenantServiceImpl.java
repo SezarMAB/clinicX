@@ -335,4 +335,21 @@ public class TenantServiceImpl implements TenantService {
         // For now, returning 0 as placeholder
         return 0;
     }
+
+    @Override
+    public void resetTenantAdminPassword(UUID tenantId, String adminUsername, String newPassword) {
+        log.info("Resetting admin password for tenant ID: {} and username: {}", tenantId, adminUsername);
+
+        Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new NotFoundException("Tenant not found with id: " + tenantId));
+
+        try {
+            // Reset the password in Keycloak
+            keycloakAdminService.resetUserPassword(tenant.getRealmName(), adminUsername, newPassword);
+            log.info("Successfully reset password for admin user '{}' in tenant '{}'", adminUsername, tenant.getName());
+        } catch (Exception e) {
+            log.error("Failed to reset password for admin user '{}' in realm '{}'", adminUsername, tenant.getRealmName(), e);
+            throw new BusinessRuleException("Failed to reset admin password: " + e.getMessage());
+        }
+    }
 }

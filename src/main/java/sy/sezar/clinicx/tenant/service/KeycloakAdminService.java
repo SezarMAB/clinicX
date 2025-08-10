@@ -159,4 +159,20 @@ public interface KeycloakAdminService {
      * @param userId the user ID
      */
     void deleteUserById(String realmName, String userId);
+
+    /**
+     * Disable a user in Keycloak (set enabled = false).
+     *
+     * @param realmName the realm name
+     * @param userId the user ID
+     */
+    void disableUser(String realmName, String userId);
+
+    /**
+     * Enable a user in Keycloak (set enabled = true).
+     *
+     * @param realmName the realm name
+     * @param userId the user ID
+     */
+    void enableUser(String realmName, String userId);
 }

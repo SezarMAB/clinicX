@@ -1301,4 +1301,40 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw new BusinessRuleException("Failed to delete user: " + e.getMessage());
         }
     }
+
+    @Override
+    public void disableUser(String realmName, String userId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            UserResource userResource = realmResource.users().get(userId);
+            UserRepresentation user = userResource.toRepresentation();
+            
+            // Set enabled to false
+            user.setEnabled(false);
+            userResource.update(user);
+            
+            log.info("Successfully disabled user '{}' in realm '{}'", user.getUsername(), realmName);
+        } catch (Exception e) {
+            log.error("Failed to disable user '{}' in realm '{}'", userId, realmName, e);
+            throw new BusinessRuleException("Failed to disable user: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void enableUser(String realmName, String userId) {
+        try {
+            RealmResource realmResource = getKeycloakInstance().realm(realmName);
+            UserResource userResource = realmResource.users().get(userId);
+            UserRepresentation user = userResource.toRepresentation();
+            
+            // Set enabled to true
+            user.setEnabled(true);
+            userResource.update(user);
+            
+            log.info("Successfully enabled user '{}' in realm '{}'", user.getUsername(), realmName);
+        } catch (Exception e) {
+            log.error("Failed to enable user '{}' in realm '{}'", userId, realmName, e);
+            throw new BusinessRuleException("Failed to enable user: " + e.getMessage());
+        }
+    }
 }

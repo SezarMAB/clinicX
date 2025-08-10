@@ -16,7 +16,10 @@ import sy.sezar.clinicx.tenant.repository.TenantRepository;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantService;
 import sy.sezar.clinicx.tenant.spec.TenantSpecifications;
+import sy.sezar.clinicx.clinic.repository.StaffRepository;
+import sy.sezar.clinicx.clinic.model.Staff;
 import org.springframework.beans.factory.annotation.Value;
+import org.keycloak.representations.idm.UserRepresentation;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -36,6 +39,7 @@ public class TenantServiceImpl implements TenantService {
     private final TenantRepository tenantRepository;
     private final TenantMapper tenantMapper;
     private final KeycloakAdminService keycloakAdminService;
+    private final StaffRepository staffRepository;
     
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerUrl;
@@ -222,10 +226,51 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant not found with id: " + id));
 
+        String tenantId = tenant.getTenantId();
+        String realmName = tenant.getRealmName();
+        
+        // Activate the tenant
         tenant.setActive(true);
+        
+        // Always only enable users belonging to this specific tenant
+        log.info("Enabling users belonging to tenant '{}' in realm '{}'", tenantId, realmName);
+        try {
+            // Get all users belonging to this tenant based on tenant_id attribute
+            List<UserRepresentation> tenantUsers = keycloakAdminService.getUsersByTenantId(realmName, tenantId);
+            log.info("Found {} users belonging to tenant '{}' in realm '{}'", tenantUsers.size(), tenantId, realmName);
+            
+            // Enable each user in Keycloak
+            for (UserRepresentation user : tenantUsers) {
+                try {
+                    keycloakAdminService.enableUser(realmName, user.getId());
+                    log.debug("Enabled user '{}' ({}) in Keycloak", user.getUsername(), user.getId());
+                } catch (Exception e) {
+                    log.error("Failed to enable user '{}' in Keycloak: {}", user.getUsername(), e.getMessage());
+                }
+            }
+            log.info("Enabled {} users in Keycloak for tenant '{}'", tenantUsers.size(), tenantId);
+        } catch (Exception e) {
+            log.error("Failed to enable tenant users in Keycloak: {}", e.getMessage());
+            // Continue with tenant activation even if Keycloak operation fails
+        }
+        
+        // Activate all staff records for this tenant in database
+        try {
+            List<Staff> staffList = staffRepository.findByTenantId(tenantId);
+            for (Staff staff : staffList) {
+                staff.setActive(true);
+            }
+            staffRepository.saveAll(staffList);
+            log.info("Activated {} staff records for tenant '{}' in database", staffList.size(), tenantId);
+        } catch (Exception e) {
+            log.error("Failed to activate staff records for tenant '{}': {}", tenantId, e.getMessage());
+            // Continue with tenant activation even if staff activation fails
+        }
+        
+        // Save the activated tenant
         tenantRepository.save(tenant);
 
-        log.info("Successfully activated tenant with ID: {}", id);
+        log.info("Successfully activated tenant with ID: {} (tenantId: {})", id, tenantId);
     }
 
     @Override
@@ -243,22 +288,56 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public void deleteTenant(UUID id) {
-        log.warn("Deleting tenant with ID: {}", id);
+        log.warn("Soft deleting (deactivating) tenant with ID: {}", id);
 
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tenant not found with id: " + id));
 
-        // Delete realm from Keycloak
+        String tenantId = tenant.getTenantId();
+        String realmName = tenant.getRealmName();
+        
+        // Deactivate the tenant
+        tenant.setActive(false);
+        
+        // Always only disable users belonging to this specific tenant
+        log.info("Disabling users belonging to tenant '{}' in realm '{}'", tenantId, realmName);
         try {
-            keycloakAdminService.deleteRealm(tenant.getRealmName());
+            // Get all users belonging to this tenant based on tenant_id attribute
+            List<UserRepresentation> tenantUsers = keycloakAdminService.getUsersByTenantId(realmName, tenantId);
+            log.info("Found {} users belonging to tenant '{}' in realm '{}'", tenantUsers.size(), tenantId, realmName);
+            
+            // Disable each user in Keycloak
+            for (UserRepresentation user : tenantUsers) {
+                try {
+                    keycloakAdminService.disableUser(realmName, user.getId());
+                    log.debug("Disabled user '{}' ({}) in Keycloak", user.getUsername(), user.getId());
+                } catch (Exception e) {
+                    log.error("Failed to disable user '{}' in Keycloak: {}", user.getUsername(), e.getMessage());
+                }
+            }
+            log.info("Disabled {} users in Keycloak for tenant '{}'", tenantUsers.size(), tenantId);
         } catch (Exception e) {
-            throw new BusinessRuleException("Failed to delete realm from Keycloak: " + e.getMessage());
+            log.error("Failed to disable tenant users in Keycloak: {}", e.getMessage());
+            // Continue with tenant deactivation even if Keycloak operation fails
         }
 
-        // Delete tenant
-        tenantRepository.delete(tenant);
+        // Deactivate all staff records for this tenant in database
+        try {
+            List<Staff> staffList = staffRepository.findByTenantId(tenantId);
+            for (Staff staff : staffList) {
+                staff.setActive(false);
+            }
+            staffRepository.saveAll(staffList);
+            log.info("Deactivated {} staff records for tenant '{}' in database", staffList.size(), tenantId);
+        } catch (Exception e) {
+            log.error("Failed to deactivate staff records for tenant '{}': {}", tenantId, e.getMessage());
+            // Continue with tenant deactivation even if staff deactivation fails
+        }
 
-        log.warn("Successfully deleted tenant with ID: {} and realm: {}", id, tenant.getRealmName());
+        // Save the deactivated tenant
+        tenantRepository.save(tenant);
+
+        log.warn("Successfully soft deleted (deactivated) tenant with ID: {} (tenantId: {})", id, tenantId);
     }
 
     @Override

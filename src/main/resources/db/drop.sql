@@ -117,7 +117,7 @@ DROP TABLE IF EXISTS tooth_surface_conditions CASCADE;
 DROP TABLE IF EXISTS tooth_surfaces CASCADE;
 DROP TABLE IF EXISTS tooth_measurements CASCADE;
 DROP TABLE IF EXISTS tooth_history CASCADE;
-DROP TABLE IF EXISTS patient_teeth CASCADE;
+DROP TABLE IF EXISTS dental_charts CASCADE;
 DROP TABLE IF EXISTS tooth_conditions CASCADE;
 
 -- Drop medical records tables

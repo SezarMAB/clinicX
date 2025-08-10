@@ -44,7 +44,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         String userId = getCurrentUserId();
         log.debug("Getting accessible tenants for user: {}", userId);
 
-        List<Staff> staffList = staffRepository.findByUserId(userId);
+        List<Staff> staffList = staffRepository.findByKeycloakUserId(userId);
 
         // If multiple staff records exist, sync them to Keycloak
         if (staffList.size() > 1) {
@@ -74,7 +74,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getName(),
                     tenant.getSubdomain(),
                     staff.getRole().name(),
-                    staff.isPrimary(),
+                    false, // isPrimary now managed in user_tenant_access table,
                     tenant.isActive(),
                     tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
                 );
@@ -88,7 +88,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         log.info("User {} switching to tenant {}", userId, tenantId);
 
         // Verify user has access to the tenant
-        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
+        Staff staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId)
             .orElseThrow(() -> new BusinessRuleException("You don't have access to tenant: " + tenantId));
 
         // Get tenant information
@@ -155,13 +155,17 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
 
         if (currentTenantId == null) {
             // Fall back to primary tenant
-            Staff primaryStaff = staffRepository.findByUserIdAndIsPrimaryTrue(userId)
-                .orElseThrow(() -> new BusinessRuleException("No primary tenant found for user"));
+            // Find any staff record for the user as fallback
+            List<Staff> userStaffList = staffRepository.findByKeycloakUserId(userId);
+            if (userStaffList.isEmpty()) {
+                throw new BusinessRuleException("No tenant access found for user");
+            }
+            Staff primaryStaff = userStaffList.get(0); // Use first available tenant
             currentTenantId = primaryStaff.getTenantId();
         }
 
         final String tenantId = currentTenantId;
-        Staff staff = staffRepository.findByUserIdAndTenantId(userId, tenantId)
+        Staff staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId)
             .orElseThrow(() -> new BusinessRuleException("No access to tenant: " + tenantId));
 
         Tenant tenant = tenantRepository.findByTenantId(tenantId)
@@ -172,7 +176,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             tenant.getName(),
             tenant.getSubdomain(),
             staff.getRole().name(),
-            staff.isPrimary(),
+            false, // isPrimary now managed in user_tenant_access table,
             tenant.isActive(),
             tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
         );
@@ -187,17 +191,16 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             .orElseThrow(() -> new NotFoundException("Tenant not found: " + tenantId));
 
         // Check if access already exists
-        if (staffRepository.existsByUserIdAndTenantId(userId, tenantId)) {
+        if (staffRepository.existsByKeycloakUserIdAndTenantId(userId, tenantId)) {
             throw new BusinessRuleException("User already has access to this tenant");
         }
         //TODO set Staff phone number from existing staff record if available
 
         // Create new staff entry
         Staff staff = new Staff();
-        staff.setUserId(userId);
+        staff.setKeycloakUserId(userId);
         staff.setTenantId(tenantId);
         staff.setRole(StaffRole.valueOf(role));
-        staff.setPrimary(isPrimary);
         staff.setActive(true);
 
         // Fetch user details from Keycloak
@@ -237,12 +240,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
 
         // If setting as primary, unset other primary tenants
         if (isPrimary) {
-            staffRepository.findByUserId(userId).forEach(sf -> {
-                if (sf.isPrimary()) {
-                    sf.setPrimary(false);
-                    staffRepository.save(sf);
-                }
-            });
+            // Primary tenant is now managed in user_tenant_access table
+            // No need to update staff records
         }
 
         staffRepository.save(staff);
@@ -334,7 +333,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         log.info("Getting all tenants for user {}", userId);
 
         // Get all staff records for this user
-        List<Staff> staffRecords = staffRepository.findByUserId(userId);
+        List<Staff> staffRecords = staffRepository.findByKeycloakUserId(userId);
 
         if (staffRecords.isEmpty()) {
             log.warn("No tenant access found for user {}", userId);
@@ -352,7 +351,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getName(),
                     tenant.getSubdomain(),
                     staff.getRole().name(),
-                    staff.isPrimary(),
+                    false, // isPrimary now managed in user_tenant_access table,
                     false, // isActive - would need to check against current context
                     tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
                 );
@@ -366,7 +365,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
 
         try {
             // Get all staff records for this user
-            List<Staff> staffRecords = staffRepository.findByUserId(userId);
+            List<Staff> staffRecords = staffRepository.findByKeycloakUserId(userId);
 
             if (staffRecords.isEmpty()) {
                 log.warn("No staff records found for user {}", userId);
@@ -395,8 +394,9 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             }
 
             // Find primary tenant
+            // Primary tenant is now managed in user_tenant_access table
+            // Use first staff record as fallback for primary
             Staff primaryStaff = staffRecords.stream()
-                .filter(Staff::isPrimary)
                 .findFirst()
                 .orElse(staffRecords.get(0)); // Fallback to first if no primary
 

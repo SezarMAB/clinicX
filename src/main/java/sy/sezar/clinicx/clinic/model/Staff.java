@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import sy.sezar.clinicx.core.model.BaseEntity;
 
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 @Table(name = "staff")
 @Getter
 @Setter
+@Slf4j
 public class Staff extends BaseEntity {
 
     @NotNull
@@ -42,17 +44,15 @@ public class Staff extends BaseEntity {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    // Fields from UserTenantAccess
+    // Link to Keycloak user (loose coupling with user_tenant_access)
     @Size(max = 255)
-    @Column(name = "user_id", length = 255)
-    private String userId; // Keycloak user ID
+    @Column(name = "keycloak_user_id", length = 255)
+    private String keycloakUserId;
 
+    // Tenant context - will be removed in schema-per-tenant
     @Size(max = 255)
     @Column(name = "tenant_id", length = 255)
     private String tenantId;
-
-    @Column(name = "is_primary", nullable = false)
-    private boolean isPrimary = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

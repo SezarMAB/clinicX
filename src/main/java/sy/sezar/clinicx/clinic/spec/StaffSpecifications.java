@@ -47,4 +47,13 @@ public class StaffSpecifications {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+    
+    public static Specification<Staff> byTenantId(String tenantId) {
+        return (root, query, cb) -> {
+            if (tenantId == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("tenantId"), tenantId);
+        };
+    }
 }

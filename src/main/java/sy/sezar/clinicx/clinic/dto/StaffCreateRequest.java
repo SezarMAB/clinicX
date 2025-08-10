@@ -29,4 +29,25 @@ public class StaffCreateRequest {
     private String phoneNumber;
 
     private Set<UUID> specialtyIds;
+    
+    // Keycloak user creation fields
+    private boolean createKeycloakUser = false;
+    
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
+    
+    private String username; // Optional - defaults to email if not provided
+    
+    private String firstName; // Optional - extracted from fullName if not provided
+    
+    private String lastName; // Optional - extracted from fullName if not provided
+    
+    // Keycloak user ID - optional, if provided will link to existing user
+    private String keycloakUserId;
+    
+    // Access role for user_tenant_access - defaults to staff role if not provided
+    private String accessRole;
+    
+    // Whether this should be the primary tenant for the user
+    private boolean isPrimaryTenant = true;
 }

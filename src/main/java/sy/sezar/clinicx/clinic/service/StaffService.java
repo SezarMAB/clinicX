@@ -6,6 +6,7 @@ import sy.sezar.clinicx.clinic.dto.StaffCreateRequest;
 import sy.sezar.clinicx.clinic.dto.StaffDto;
 import sy.sezar.clinicx.clinic.dto.StaffSearchCriteria;
 import sy.sezar.clinicx.clinic.dto.StaffUpdateRequest;
+import sy.sezar.clinicx.clinic.dto.StaffWithAccessDto;
 import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.util.UUID;
@@ -80,4 +81,18 @@ public interface StaffService {
      * @param id Staff ID
      */
     void deactivateStaff(UUID id);
+    
+    /**
+     * Gets staff member with their access information.
+     * @param id Staff ID
+     * @return StaffWithAccessDto containing staff and access information
+     */
+    StaffWithAccessDto getStaffWithAccess(UUID id);
+    
+    /**
+     * Gets all staff members with their access information for the current tenant.
+     * @param pageable Pagination information
+     * @return Page of StaffWithAccessDto
+     */
+    Page<StaffWithAccessDto> getAllStaffWithAccess(Pageable pageable);
 }

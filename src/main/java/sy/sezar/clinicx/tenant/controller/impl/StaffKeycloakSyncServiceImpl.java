@@ -19,6 +19,8 @@ import sy.sezar.clinicx.tenant.TenantContext;
 import sy.sezar.clinicx.tenant.model.Tenant;
 import sy.sezar.clinicx.tenant.repository.TenantRepository;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
+import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
+import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
 
 import java.util.*;
 
@@ -35,6 +37,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
     private final TenantRepository tenantRepository;
     private final KeycloakAdminService keycloakAdminService;
     private final StaffMapper staffMapper;
+    private final UserTenantAccessService userTenantAccessService;
 
     @Override
     @Transactional
@@ -53,7 +56,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
         // Create Staff entity
         Staff staff = staffMapper.toEntity(request);
         staff.setTenantId(currentTenantId);
-        staff.setPrimary(true);
+        // Note: isPrimary is now in user_tenant_access, not in staff
 
         // Set specialties if provided
         if (request.getSpecialtyIds() != null && !request.getSpecialtyIds().isEmpty()) {
@@ -101,7 +104,24 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
 
         // Set Keycloak user ID if created
         if (userId != null) {
-            staff.setUserId(userId);
+            staff.setKeycloakUserId(userId);
+            
+            // Create user_tenant_access record
+            try {
+                CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
+                    .userId(userId)
+                    .tenantId(currentTenantId)
+                    .role(request.getRole().name())
+                    .isPrimary(true)
+                    .isActive(true)
+                    .build();
+                
+                userTenantAccessService.grantAccess(accessRequest);
+                log.info("Created user_tenant_access for user {} in tenant {}", userId, currentTenantId);
+            } catch (Exception e) {
+                log.error("Failed to create user_tenant_access: {}", e.getMessage());
+                // Don't fail the entire operation
+            }
         }
 
         // Save Staff record
@@ -116,9 +136,9 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
     public String syncStaffToKeycloak(Staff staff, String password) {
         log.info("Syncing Staff {} to Keycloak", staff.getEmail());
 
-        if (staff.getUserId() != null) {
-            log.warn("Staff {} already has Keycloak user ID: {}", staff.getEmail(), staff.getUserId());
-            return staff.getUserId();
+        if (staff.getKeycloakUserId() != null) {
+            log.warn("Staff {} already has Keycloak user ID: {}", staff.getEmail(), staff.getKeycloakUserId());
+            return staff.getKeycloakUserId();
         }
 
         String tenantId = staff.getTenantId();
@@ -153,8 +173,24 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
             );
 
             // Update Staff with Keycloak user ID
-            staff.setUserId(user.getId());
+            staff.setKeycloakUserId(user.getId());
             staffRepository.save(staff);
+            
+            // Create user_tenant_access record
+            try {
+                CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
+                    .userId(user.getId())
+                    .tenantId(tenantId)
+                    .role(staff.getRole().name())
+                    .isPrimary(false)
+                    .isActive(true)
+                    .build();
+                
+                userTenantAccessService.grantAccess(accessRequest);
+                log.info("Created user_tenant_access for synced user {} in tenant {}", user.getId(), tenantId);
+            } catch (Exception ex) {
+                log.warn("Failed to create user_tenant_access during sync: {}", ex.getMessage());
+            }
 
             log.info("Successfully synced Staff {} to Keycloak with user ID {}", staff.getEmail(), user.getId());
             return user.getId();
@@ -170,7 +206,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
     public void updateStaffFromKeycloak(String userId, String tenantId) {
         log.info("Updating Staff from Keycloak user {} in tenant {}", userId, tenantId);
 
-        Optional<Staff> staffOpt = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+        Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
         if (staffOpt.isEmpty()) {
             log.warn("No Staff record found for Keycloak user {} in tenant {}", userId, tenantId);
             return;
@@ -202,7 +238,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
     @Override
     public boolean hasKeycloakUser(String staffId) {
         return staffRepository.findById(UUID.fromString(staffId))
-            .map(staff -> staff.getUserId() != null)
+            .map(staff -> staff.getKeycloakUserId() != null)
             .orElse(false);
     }
 }

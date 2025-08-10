@@ -75,7 +75,7 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
         }
         
         // Fall back to database check
-        return staffRepository.existsByUserIdAndTenantId(userId, tenantId);
+        return staffRepository.existsByKeycloakUserIdAndTenantId(userId, tenantId);
     }
     
     @Override
@@ -131,7 +131,7 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
         }
         
         // Fall back to database
-        Optional<Staff> staff = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+        Optional<Staff> staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
         return staff.map(s -> s.getRole().name()).orElse(null);
     }
     

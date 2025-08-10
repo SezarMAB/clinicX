@@ -22,6 +22,7 @@ import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.DynamicRealmService;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantService;
+import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
 
 import java.time.Instant;
 import java.util.*;
@@ -45,6 +46,9 @@ public class EnhancedTenantServiceImpl implements TenantService {
 
     @Autowired
     private StaffRepository staffRepository;
+    
+    @Autowired
+    private UserTenantAccessService userTenantAccessService;
 
     @Value("${app.multi-tenant.realm-per-type:true}")
     private boolean realmPerTypeEnabled;
@@ -151,15 +155,23 @@ public class EnhancedTenantServiceImpl implements TenantService {
             // Create staff record for the admin user
             if (realmPerTypeEnabled) {
                 Staff staff = new Staff();
-                staff.setUserId(keycloakUserId); // Use actual Keycloak user ID
+                staff.setKeycloakUserId(keycloakUserId); // Use actual Keycloak user ID
                 staff.setTenantId(tenantId);
                 staff.setRole(StaffRole.ADMIN);
-                staff.setPrimary(true);
                 staff.setPhoneNumber(request.contactPhone());
                 staff.setActive(true);
                 staff.setFullName(request.adminFirstName() + " " + request.adminLastName());
                 staff.setEmail(request.adminEmail());
                 staffRepository.save(staff);
+                
+                // Create user_tenant_access record for the admin user
+                try {
+                    userTenantAccessService.createAdminAccess(keycloakUserId, tenantId);
+                    log.info("Created user_tenant_access record for admin user {} in tenant {}", keycloakUserId, tenantId);
+                } catch (Exception e) {
+                    log.error("Failed to create user_tenant_access for admin user: {}", e.getMessage());
+                    // Don't fail tenant creation, but log the error
+                }
             }
 
             // Get the backend client secret

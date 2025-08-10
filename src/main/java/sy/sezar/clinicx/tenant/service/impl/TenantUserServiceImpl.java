@@ -55,8 +55,10 @@ public class TenantUserServiceImpl implements TenantUserService {
         
         // Filter based on includeExternal flag
         if (!includeExternal) {
+            // Filter for primary users - now determined by user_tenant_access table
+            // For now, include all active staff in the tenant
             staffList = staffList.stream()
-                .filter(Staff::isPrimary)
+                .filter(Staff::isActive)
                 .collect(Collectors.toList());
         }
         
@@ -66,14 +68,14 @@ public class TenantUserServiceImpl implements TenantUserService {
         
         for (Staff staff : staffList) {
             try {
-                UserRepresentation user = realmResource.users().get(staff.getUserId()).toRepresentation();
+                UserRepresentation user = realmResource.users().get(staff.getKeycloakUserId()).toRepresentation();
                 TenantUserDto dto = mapToDto(user, tenantId);
                 // Enhance with Staff data
                 // Note: For records, we cannot modify after creation. 
                 // The dto already has the userId from the mapToDto method
                 tenantUsers.add(dto);
             } catch (Exception e) {
-                log.warn("Could not find Keycloak user for Staff record: {}", staff.getUserId());
+                log.warn("Could not find Keycloak user for Staff record: {}", staff.getKeycloakUserId());
             }
         }
         
@@ -159,14 +161,13 @@ public class TenantUserServiceImpl implements TenantUserService {
         
         // Create Staff record
         Staff staff = new Staff();
-        staff.setUserId(user.getId());
+        staff.setKeycloakUserId(user.getId());
         staff.setTenantId(tenantId);
         staff.setFullName(request.firstName() + " " + request.lastName());
         staff.setEmail(request.email());
         staff.setPhoneNumber(request.phoneNumber());
         staff.setRole(mapToStaffRole(request.roles()));
         staff.setActive(true);
-        staff.setPrimary(true); // This is the primary tenant for the new user
         
         staffRepository.save(staff);
         log.info("Created Staff record for user {} with ID {}", request.username(), staff.getId());
@@ -255,7 +256,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             realmResource.users().get(userId).update(user);
             
             // Update Staff record
-            Optional<Staff> staffOpt = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+            Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
                 staff.setActive(false);
@@ -293,7 +294,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             realmResource.users().get(userId).update(user);
             
             // Update Staff record
-            Optional<Staff> staffOpt = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+            Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
                 staff.setActive(true);
@@ -329,7 +330,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             }
             
             // Delete Staff records for this user
-            List<Staff> staffRecords = staffRepository.findByUserId(userId);
+            List<Staff> staffRecords = staffRepository.findByKeycloakUserId(userId);
             if (!staffRecords.isEmpty()) {
                 staffRepository.deleteAll(staffRecords);
                 log.info("Deleted {} Staff records for user {}", staffRecords.size(), userId);
@@ -373,7 +374,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             updateRealmRoles(realmResource, userId, newRoles);
             
             // Update Staff record
-            Optional<Staff> staffOpt = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+            Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
                 staff.setRole(mapToStaffRole(newRoles));
@@ -406,7 +407,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         }
         
         // Check if Staff record already exists for this user in this tenant
-        Optional<Staff> existingStaff = staffRepository.findByUserIdAndTenantId(user.getId(), tenantId);
+        Optional<Staff> existingStaff = staffRepository.findByKeycloakUserIdAndTenantId(user.getId(), tenantId);
         if (existingStaff.isPresent()) {
             throw new BusinessRuleException("User already has access to this tenant");
         }
@@ -423,13 +424,12 @@ public class TenantUserServiceImpl implements TenantUserService {
         
         // Create Staff record for external user in this tenant
         Staff staff = new Staff();
-        staff.setUserId(user.getId());
+        staff.setKeycloakUserId(user.getId());
         staff.setTenantId(tenantId);
         staff.setFullName(user.getFirstName() + " " + user.getLastName());
         staff.setEmail(user.getEmail());
         staff.setRole(mapToStaffRole(roles));
         staff.setActive(true);
-        staff.setPrimary(false); // This is NOT the primary tenant for the external user
         
         staffRepository.save(staff);
         log.info("Created Staff record for external user {} in tenant {}", username, tenantId);
@@ -453,11 +453,14 @@ public class TenantUserServiceImpl implements TenantUserService {
         }
         
         // Delete Staff record for this user in this tenant
-        Optional<Staff> staffOpt = staffRepository.findByUserIdAndTenantId(userId, tenantId);
+        Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
         if (staffOpt.isPresent()) {
             Staff staff = staffOpt.get();
-            if (staff.isPrimary()) {
-                throw new BusinessRuleException("Cannot revoke access to primary tenant");
+            // Primary tenant check is now managed in user_tenant_access table
+            // For now, allow revoking access if not the only tenant
+            List<Staff> allUserStaff = staffRepository.findByKeycloakUserId(userId);
+            if (allUserStaff.size() <= 1) {
+                throw new BusinessRuleException("Cannot revoke access to the only tenant");
             }
             staffRepository.delete(staff);
             log.info("Deleted Staff record for external user {} in tenant {}", userId, tenantId);

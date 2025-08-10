@@ -18,6 +18,9 @@ import sy.sezar.clinicx.tenant.service.TenantService;
 import sy.sezar.clinicx.tenant.spec.TenantSpecifications;
 import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.clinic.model.Staff;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
+import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
+import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -40,6 +43,7 @@ public class TenantServiceImpl implements TenantService {
     private final TenantMapper tenantMapper;
     private final KeycloakAdminService keycloakAdminService;
     private final StaffRepository staffRepository;
+    private final UserTenantAccessService userTenantAccessService;
     
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerUrl;
@@ -100,6 +104,38 @@ public class TenantServiceImpl implements TenantService {
             tenant.setSubscriptionEndDate(Instant.now().plusSeconds(365 * 24 * 60 * 60));
 
             tenant = tenantRepository.save(tenant);
+            
+            // Create staff and user_tenant_access records for admin user
+            try {
+                // Get the admin user ID from Keycloak
+                var adminUser = keycloakAdminService.getKeycloakInstance()
+                    .realm(realmName)
+                    .users()
+                    .search(request.adminUsername())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+                
+                if (adminUser != null) {
+                    // Create staff record for the admin user
+                    Staff adminStaff = new Staff();
+                    adminStaff.setKeycloakUserId(adminUser.getId());
+                    adminStaff.setTenantId(tenant.getTenantId());
+                    adminStaff.setFullName(request.adminFirstName() + " " + request.adminLastName());
+                    adminStaff.setEmail(request.adminEmail());
+                    adminStaff.setPhoneNumber(request.contactPhone());
+                    adminStaff.setRole(StaffRole.ADMIN);
+                    adminStaff.setActive(true);
+                    staffRepository.save(adminStaff);
+                    log.info("Created staff record for admin user {} in tenant {}", adminUser.getUsername(), tenant.getTenantId());
+                    
+                    // Create user_tenant_access record
+                    userTenantAccessService.createAdminAccess(adminUser.getId(), tenant.getTenantId());
+                    log.info("Created admin access for user {} in tenant {}", adminUser.getUsername(), tenant.getTenantId());
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to create staff/user_tenant_access for admin: {}", ex.getMessage());
+            }
             
             // Get the backend client secret
             String backendClientSecret = keycloakAdminService.getClientSecret(realmName, "clinicx-backend");
@@ -267,6 +303,20 @@ public class TenantServiceImpl implements TenantService {
             // Continue with tenant activation even if staff activation fails
         }
         
+        // Reactivate all user_tenant_access records for this tenant
+        try {
+            var tenantAccesses = userTenantAccessService.getTenantAccesses(tenantId);
+            for (var access : tenantAccesses) {
+                var updateRequest = sy.sezar.clinicx.tenant.dto.UpdateUserTenantAccessRequest.builder()
+                    .isActive(true)
+                    .build();
+                userTenantAccessService.updateAccess(access.getId(), updateRequest);
+            }
+            log.info("Reactivated {} user_tenant_access records for tenant '{}'", tenantAccesses.size(), tenantId);
+        } catch (Exception e) {
+            log.error("Failed to reactivate user_tenant_access records for tenant '{}': {}", tenantId, e.getMessage());
+        }
+        
         // Save the activated tenant
         tenantRepository.save(tenant);
 
@@ -332,6 +382,17 @@ public class TenantServiceImpl implements TenantService {
         } catch (Exception e) {
             log.error("Failed to deactivate staff records for tenant '{}': {}", tenantId, e.getMessage());
             // Continue with tenant deactivation even if staff deactivation fails
+        }
+        
+        // Deactivate all user_tenant_access records for this tenant
+        try {
+            var tenantAccesses = userTenantAccessService.getTenantAccesses(tenantId);
+            for (var access : tenantAccesses) {
+                userTenantAccessService.revokeAccessById(access.getId());
+            }
+            log.info("Deactivated {} user_tenant_access records for tenant '{}'", tenantAccesses.size(), tenantId);
+        } catch (Exception e) {
+            log.error("Failed to deactivate user_tenant_access records for tenant '{}': {}", tenantId, e.getMessage());
         }
 
         // Save the deactivated tenant

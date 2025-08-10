@@ -111,7 +111,7 @@ public class TenantSecurityServiceImpl implements TenantSecurityService {
         }
         
         // Get all staff records for the user
-        List<Staff> staffList = staffRepository.findByUserId(userId);
+        List<Staff> staffList = staffRepository.findByKeycloakUserId(userId);
         
         return staffList.stream()
             .filter(Staff::isActive)

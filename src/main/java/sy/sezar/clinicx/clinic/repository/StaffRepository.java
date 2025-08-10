@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sy.sezar.clinicx.clinic.model.Staff;
@@ -36,19 +37,17 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
     @Query("SELECT s FROM Staff s JOIN s.specialties sp WHERE sp.id = :specialtyId")
     Page<Staff> findBySpecialtyId(@Param("specialtyId") UUID specialtyId, Pageable pageable);
     
-    // Methods from UserTenantAccessRepository
-    List<Staff> findByUserId(String userId);
+    // Methods updated for new architecture with keycloak_user_id
+    List<Staff> findByKeycloakUserId(String keycloakUserId);
     
     List<Staff> findByTenantId(String tenantId);
     
-    Optional<Staff> findByUserIdAndTenantId(String userId, String tenantId);
+    Optional<Staff> findByKeycloakUserIdAndTenantId(String keycloakUserId, String tenantId);
     
-    boolean existsByUserIdAndTenantId(String userId, String tenantId);
+    boolean existsByKeycloakUserIdAndTenantId(String keycloakUserId, String tenantId);
     
-    Optional<Staff> findByUserIdAndIsPrimaryTrue(String userId);
+    @Query("SELECT s.tenantId FROM Staff s WHERE s.keycloakUserId = :keycloakUserId")
+    List<String> findTenantIdsByKeycloakUserId(@Param("keycloakUserId") String keycloakUserId);
     
-    @Query("SELECT s.tenantId FROM Staff s WHERE s.userId = :userId")
-    List<String> findTenantIdsByUserId(@Param("userId") String userId);
-    
-    void deleteByUserId(String userId);
+    void deleteByKeycloakUserId(String keycloakUserId);
 }

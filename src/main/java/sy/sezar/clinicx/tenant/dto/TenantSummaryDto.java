@@ -18,5 +18,7 @@ public record TenantSummaryDto(
     Integer currentUsers,
     Integer currentPatients,
     Instant createdAt,
-    boolean hasAlert
+    boolean hasAlert,
+    Integer maxUsers,
+    Integer maxPatients
 ) {}

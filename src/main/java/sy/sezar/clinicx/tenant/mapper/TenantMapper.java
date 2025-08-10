@@ -100,7 +100,9 @@ public interface TenantMapper {
             currentUsers,
             currentPatients,
             dto.createdAt(),
-            dto.hasAlert()
+            dto.hasAlert(),
+            dto.maxUsers(),
+            dto.maxPatients()
         );
     }
 

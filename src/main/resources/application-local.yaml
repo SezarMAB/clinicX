@@ -17,7 +17,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    locations: classpath:db/migration,classpath:db/local_demo_data
+    locations:
+      - classpath:db/migration
+#      - classpath:db/local_demo_data
 
   # Allow circular references in dev (for rapid development)
   main:

@@ -39,7 +39,7 @@ public class ClinicInfoServiceImpl implements ClinicInfoService {
     @Transactional
     public ClinicInfoDto updateClinicInfo(ClinicInfoUpdateRequest request) {
         log.info("Updating clinic information");
-        log.debug("Update request: name={}, timezone={}", request.getName(), request.getTimezone());
+        log.debug("Update request: name={}, timezone={}", request.name(), request.timezone());
         
         ClinicInfo clinicInfo = clinicInfoRepository.findById(true)
                 .orElseThrow(() -> {

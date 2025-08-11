@@ -12,6 +12,7 @@ public interface StaffMapper {
     @Mapping(target = "accessRole", ignore = true)
     @Mapping(target = "isPrimary", ignore = true)
     @Mapping(target = "accessActive", ignore = true)
+    @Mapping(target = "isActive", source = "active")
     StaffDto toDto(Staff staff);
 
     @Mapping(target = "id", ignore = true)
@@ -29,5 +30,6 @@ public interface StaffMapper {
     @Mapping(target = "specialties", ignore = true)
     @Mapping(target = "keycloakUserId", ignore = true)
     @Mapping(target = "tenantId", ignore = true)
+    @Mapping(target = "active", source = "isActive")
     void updateFromRequest(StaffUpdateRequest request, @MappingTarget Staff staff);
 }

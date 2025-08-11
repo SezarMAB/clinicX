@@ -112,16 +112,16 @@ public class StaffControllerImpl implements StaffControllerApi {
 
     @Override
     public ResponseEntity<StaffDto> createStaff(StaffCreateRequest request) {
-        log.info("Creating new staff member with name: {} and role: {}", request.getFullName(), request.getRole());
+        log.info("Creating new staff member with name: {} and role: {}", request.fullName(), request.role());
         log.debug("Staff creation request: {}", request);
 
         try {
             StaffDto staff = staffService.createStaff(request);
-            log.info("Successfully created staff member: {} - Status: 201 CREATED", staff.getEmail());
+            log.info("Successfully created staff member: {} - Status: 201 CREATED", staff.email());
             return ResponseEntity.status(HttpStatus.CREATED).body(staff);
         } catch (Exception e) {
             log.error("Failed to create staff member with name: {} - Error: {}",
-                    request.getFullName(), e.getMessage());
+                    request.fullName(), e.getMessage());
             throw e;
         }
     }

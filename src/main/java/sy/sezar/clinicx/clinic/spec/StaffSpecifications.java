@@ -18,8 +18,8 @@ public class StaffSpecifications {
             List<Predicate> predicates = new ArrayList<>();
 
             // Search term (name, email, phone)
-            if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
-                String searchPattern = "%" + criteria.getSearchTerm().toLowerCase() + "%";
+            if (criteria.searchTerm() != null && !criteria.searchTerm().trim().isEmpty()) {
+                String searchPattern = "%" + criteria.searchTerm().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("fullName")), searchPattern),
                         cb.like(cb.lower(root.get("email")), searchPattern),
@@ -28,19 +28,19 @@ public class StaffSpecifications {
             }
 
             // Role filter
-            if (criteria.getRole() != null) {
-                predicates.add(cb.equal(root.get("role"), criteria.getRole()));
+            if (criteria.role() != null) {
+                predicates.add(cb.equal(root.get("role"), criteria.role()));
             }
 
             // Active status filter
-            if (criteria.getIsActive() != null) {
-                predicates.add(cb.equal(root.get("isActive"), criteria.getIsActive()));
+            if (criteria.isActive() != null) {
+                predicates.add(cb.equal(root.get("isActive"), criteria.isActive()));
             }
 
             // Specialty filter
-            if (criteria.getSpecialtyIds() != null && !criteria.getSpecialtyIds().isEmpty()) {
+            if (criteria.specialtyIds() != null && !criteria.specialtyIds().isEmpty()) {
                 Join<Staff, Specialty> specialtyJoin = root.join("specialties", JoinType.INNER);
-                predicates.add(specialtyJoin.get("id").in(criteria.getSpecialtyIds()));
+                predicates.add(specialtyJoin.get("id").in(criteria.specialtyIds()));
                 query.distinct(true); // Avoid duplicates when joining
             }
 

@@ -50,12 +50,12 @@ public class StaffServiceImpl implements StaffService {
     @Override
     @Transactional
     public StaffDto createStaff(StaffCreateRequest request) {
-        log.info("Creating new staff member with name: {} and role: {}", request.getFullName(), request.getRole());
+        log.info("Creating new staff member with name: {} and role: {}", request.fullName(), request.role());
 
         // Check if email already exists
-        if (staffRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            log.error("Staff member with email '{}' already exists", request.getEmail());
-            throw new BusinessRuleException("Staff member with email '" + request.getEmail() + "' already exists");
+        if (staffRepository.existsByEmailIgnoreCase(request.email())) {
+            log.error("Staff member with email '{}' already exists", request.email());
+            throw new BusinessRuleException("Staff member with email '" + request.email() + "' already exists");
         }
 
         Staff staff = staffMapper.toEntity(request);
@@ -69,9 +69,9 @@ public class StaffServiceImpl implements StaffService {
         
         // Handle Keycloak user creation or linking
         String keycloakUserId = null;
-        if (request.isCreateKeycloakUser()) {
+        if (request.createKeycloakUser()) {
             // Create new Keycloak user
-            if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            if (request.password() == null || request.password().isEmpty()) {
                 throw new BusinessRuleException("Password is required when creating a Keycloak user");
             }
             
@@ -80,26 +80,26 @@ public class StaffServiceImpl implements StaffService {
                 .orElseThrow(() -> new BusinessRuleException("Tenant not found: " + currentTenantId));
             
             // Extract first and last name
-            String firstName = request.getFirstName();
-            String lastName = request.getLastName();
+            String firstName = request.firstName();
+            String lastName = request.lastName();
             if (firstName == null || lastName == null) {
-                String[] nameParts = request.getFullName().split(" ", 2);
+                String[] nameParts = request.fullName().split(" ", 2);
                 firstName = firstName != null ? firstName : nameParts[0];
                 lastName = lastName != null ? lastName : (nameParts.length > 1 ? nameParts[1] : "");
             }
             
-            String username = request.getUsername() != null ? request.getUsername() : request.getEmail();
+            String username = request.username() != null ? request.username() : request.email();
             
             try {
                 // Create user in Keycloak with tenant info
                 UserRepresentation createdUser = keycloakAdminService.createUserWithTenantInfo(
                     tenant.getRealmName(),
                     username,
-                    request.getEmail(),
+                    request.email(),
                     firstName,
                     lastName,
-                    request.getPassword(),
-                    java.util.List.of(request.getRole().name()),
+                    request.password(),
+                    java.util.List.of(request.role().name()),
                     currentTenantId,
                     tenant.getName(),
                     tenant.getSpecialty()
@@ -110,9 +110,9 @@ public class StaffServiceImpl implements StaffService {
                 log.error("Failed to create Keycloak user: {}", e.getMessage());
                 throw new BusinessRuleException("Failed to create Keycloak user: " + e.getMessage());
             }
-        } else if (request.getKeycloakUserId() != null) {
+        } else if (request.keycloakUserId() != null) {
             // Use provided Keycloak user ID
-            keycloakUserId = request.getKeycloakUserId();
+            keycloakUserId = request.keycloakUserId();
         }
         
         // Set Keycloak user ID if available
@@ -121,10 +121,10 @@ public class StaffServiceImpl implements StaffService {
         }
 
         // Set specialties if provided
-        if (request.getSpecialtyIds() != null && !request.getSpecialtyIds().isEmpty()) {
-            log.debug("Setting {} specialties for staff member", request.getSpecialtyIds().size());
-            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.getSpecialtyIds()));
-            if (specialties.size() != request.getSpecialtyIds().size()) {
+        if (request.specialtyIds() != null && !request.specialtyIds().isEmpty()) {
+            log.debug("Setting {} specialties for staff member", request.specialtyIds().size());
+            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.specialtyIds()));
+            if (specialties.size() != request.specialtyIds().size()) {
                 log.error("One or more specialty IDs are invalid");
                 throw new BusinessRuleException("One or more specialty IDs are invalid");
             }
@@ -140,7 +140,7 @@ public class StaffServiceImpl implements StaffService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(staff.getKeycloakUserId())
                     .tenantId(currentTenantId)
-                    .role(request.getAccessRole() != null ? request.getAccessRole() : request.getRole().name())
+                    .role(request.accessRole() != null ? request.accessRole() : request.role().name())
                     .isPrimary(request.isPrimaryTenant())
                     .isActive(true)
                     .build();
@@ -151,7 +151,7 @@ public class StaffServiceImpl implements StaffService {
             } catch (Exception e) {
                 log.error("Failed to create user_tenant_access record: {}", e.getMessage());
                 // If we created a Keycloak user but failed to create access, we should rollback
-                if (request.isCreateKeycloakUser()) {
+                if (request.createKeycloakUser()) {
                     throw new BusinessRuleException("Failed to create user access record: " + e.getMessage());
                 }
                 // For existing users, just log the warning
@@ -167,7 +167,7 @@ public class StaffServiceImpl implements StaffService {
     public StaffDto updateStaff(UUID id, StaffUpdateRequest request) {
         log.info("Updating staff member with ID: {}", id);
         log.debug("Update request: name={}, role={}, active={}",
-                request.getFullName(), request.getRole(), request.isActive());
+                request.fullName(), request.role(), request.isActive());
 
         Staff staff = staffRepository.findById(id)
                 .orElseThrow(() -> {
@@ -176,21 +176,21 @@ public class StaffServiceImpl implements StaffService {
                 });
 
         // Check if another staff member with the same email exists
-        staffRepository.findByEmailIgnoreCase(request.getEmail())
+        staffRepository.findByEmailIgnoreCase(request.email())
                 .ifPresent(existing -> {
                     if (!existing.getId().equals(id)) {
-                        log.error("Another staff member with email '{}' already exists", request.getEmail());
-                        throw new BusinessRuleException("Staff member with email '" + request.getEmail() + "' already exists");
+                        log.error("Another staff member with email '{}' already exists", request.email());
+                        throw new BusinessRuleException("Staff member with email '" + request.email() + "' already exists");
                     }
                 });
 
         staffMapper.updateFromRequest(request, staff);
 
         // Update specialties if provided
-        if (request.getSpecialtyIds() != null) {
-            log.debug("Updating specialties for staff member, new count: {}", request.getSpecialtyIds().size());
-            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.getSpecialtyIds()));
-            if (specialties.size() != request.getSpecialtyIds().size()) {
+        if (request.specialtyIds() != null) {
+            log.debug("Updating specialties for staff member, new count: {}", request.specialtyIds().size());
+            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.specialtyIds()));
+            if (specialties.size() != request.specialtyIds().size()) {
                 log.error("One or more specialty IDs are invalid");
                 throw new BusinessRuleException("One or more specialty IDs are invalid");
             }
@@ -316,19 +316,10 @@ public class StaffServiceImpl implements StaffService {
         
         String currentTenantId = TenantContext.getCurrentTenant();
         
-        // Build the response DTO
-        StaffWithAccessDto.StaffWithAccessDtoBuilder builder = StaffWithAccessDto.builder()
-            .id(staff.getId())
-            .fullName(staff.getFullName())
-            .role(staff.getRole())
-            .email(staff.getEmail())
-            .phoneNumber(staff.getPhoneNumber())
-            .isActive(staff.isActive())
-            .specialties(staffMapper.toDto(staff).getSpecialties())
-            .keycloakUserId(staff.getKeycloakUserId())
-            .tenantId(staff.getTenantId())
-            .createdAt(staff.getCreatedAt())
-            .updatedAt(staff.getUpdatedAt());
+        // Prepare access information
+        String accessRole = staff.getRole().name();
+        boolean isPrimary = false;
+        boolean accessActive = staff.isActive();
         
         // Try to get access information if Keycloak user ID exists
         if (staff.getKeycloakUserId() != null && currentTenantId != null) {
@@ -337,19 +328,32 @@ public class StaffServiceImpl implements StaffService {
                     staff.getKeycloakUserId(), 
                     currentTenantId
                 );
-                builder.accessRole(access.getRole())
-                       .isPrimary(access.isPrimary())
-                       .accessActive(access.isActive());
+                accessRole = access.getRole();
+                isPrimary = access.isPrimary();
+                accessActive = access.isActive();
             } catch (Exception e) {
                 log.debug("No access information found for staff member: {}", e.getMessage());
-                // Set defaults if no access found
-                builder.accessRole(staff.getRole().name())
-                       .isPrimary(false)
-                       .accessActive(staff.isActive());
+                // Use defaults prepared above
             }
         }
         
-        return builder.build();
+        // Create the response DTO using constructor
+        return new StaffWithAccessDto(
+            staff.getId(),
+            staff.getFullName(),
+            staff.getRole(),
+            staff.getEmail(),
+            staff.getPhoneNumber(),
+            staff.isActive(),
+            staffMapper.toDto(staff).specialties(),
+            staff.getKeycloakUserId(),
+            staff.getTenantId(),
+            accessRole,
+            isPrimary,
+            accessActive,
+            staff.getCreatedAt(),
+            staff.getUpdatedAt()
+        );
     }
     
     @Override
@@ -366,18 +370,10 @@ public class StaffServiceImpl implements StaffService {
         Page<Staff> staffPage = staffRepository.findAll(spec, pageable);
         
         return staffPage.map(staff -> {
-            StaffWithAccessDto.StaffWithAccessDtoBuilder builder = StaffWithAccessDto.builder()
-                .id(staff.getId())
-                .fullName(staff.getFullName())
-                .role(staff.getRole())
-                .email(staff.getEmail())
-                .phoneNumber(staff.getPhoneNumber())
-                .isActive(staff.isActive())
-                .specialties(staffMapper.toDto(staff).getSpecialties())
-                .keycloakUserId(staff.getKeycloakUserId())
-                .tenantId(staff.getTenantId())
-                .createdAt(staff.getCreatedAt())
-                .updatedAt(staff.getUpdatedAt());
+            // Prepare access information
+            String accessRole = staff.getRole().name();
+            boolean isPrimary = false;
+            boolean accessActive = staff.isActive();
             
             // Try to get access information
             if (staff.getKeycloakUserId() != null) {
@@ -386,18 +382,31 @@ public class StaffServiceImpl implements StaffService {
                         staff.getKeycloakUserId(), 
                         currentTenantId
                     );
-                    builder.accessRole(access.getRole())
-                           .isPrimary(access.isPrimary())
-                           .accessActive(access.isActive());
+                    accessRole = access.getRole();
+                    isPrimary = access.isPrimary();
+                    accessActive = access.isActive();
                 } catch (Exception e) {
-                    // Use defaults if no access found
-                    builder.accessRole(staff.getRole().name())
-                           .isPrimary(false)
-                           .accessActive(staff.isActive());
+                    // Use defaults prepared above
                 }
             }
             
-            return builder.build();
+            // Create the response DTO using constructor
+            return new StaffWithAccessDto(
+                staff.getId(),
+                staff.getFullName(),
+                staff.getRole(),
+                staff.getEmail(),
+                staff.getPhoneNumber(),
+                staff.isActive(),
+                staffMapper.toDto(staff).specialties(),
+                staff.getKeycloakUserId(),
+                staff.getTenantId(),
+                accessRole,
+                isPrimary,
+                accessActive,
+                staff.getCreatedAt(),
+                staff.getUpdatedAt()
+            );
         });
     }
 }

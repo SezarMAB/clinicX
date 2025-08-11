@@ -1,27 +1,25 @@
 package sy.sezar.clinicx.clinic.dto;
 
-import lombok.Data;
 import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
-public class StaffDto {
-    private UUID id;
-    private String fullName;
-    private StaffRole role;
-    private String email;
-    private String phoneNumber;
-    private boolean isActive;
-    private Set<SpecialtyDto> specialties;
-    private String keycloakUserId;
-    private String tenantId;
+public record StaffDto(
+    UUID id,
+    String fullName,
+    StaffRole role,
+    String email,
+    String phoneNumber,
+    boolean isActive,
+    Set<SpecialtyDto> specialties,
+    String keycloakUserId,
+    String tenantId,
     // Access control fields from user_tenant_access (will be populated when needed)
-    private String accessRole;
-    private Boolean isPrimary;
-    private Boolean accessActive;
-    private Instant createdAt;
-    private Instant updatedAt;
-}
+    String accessRole,
+    Boolean isPrimary,
+    Boolean accessActive,
+    Instant createdAt,
+    Instant updatedAt
+) {}

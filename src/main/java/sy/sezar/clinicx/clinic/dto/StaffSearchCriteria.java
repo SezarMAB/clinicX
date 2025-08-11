@@ -1,15 +1,13 @@
 package sy.sezar.clinicx.clinic.dto;
 
-import lombok.Data;
 import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.util.Set;
 import java.util.UUID;
 
-@Data
-public class StaffSearchCriteria {
-    private String searchTerm;
-    private StaffRole role;
-    private Set<UUID> specialtyIds;
-    private Boolean isActive;
-}
+public record StaffSearchCriteria(
+    String searchTerm,
+    StaffRole role,
+    Set<UUID> specialtyIds,
+    Boolean isActive
+) {}

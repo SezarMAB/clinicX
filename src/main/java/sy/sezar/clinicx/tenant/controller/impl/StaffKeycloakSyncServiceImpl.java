@@ -42,11 +42,11 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
     @Override
     @Transactional
     public StaffDto createStaffWithKeycloakUser(StaffCreateRequest request, String password, boolean createKeycloakUser) {
-        log.info("Creating staff with Keycloak user: {} (createKeycloakUser: {})", request.getEmail(), createKeycloakUser);
+        log.info("Creating staff with Keycloak user: {} (createKeycloakUser: {})", request.email(), createKeycloakUser);
 
         // Check if email already exists
-        if (staffRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            throw new BusinessRuleException("Staff member with email '" + request.getEmail() + "' already exists");
+        if (staffRepository.existsByEmailIgnoreCase(request.email())) {
+            throw new BusinessRuleException("Staff member with email '" + request.email() + "' already exists");
         }
 
         String currentTenantId = TenantContext.getCurrentTenant();
@@ -59,9 +59,9 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
         // Note: isPrimary is now in user_tenant_access, not in staff
 
         // Set specialties if provided
-        if (request.getSpecialtyIds() != null && !request.getSpecialtyIds().isEmpty()) {
-            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.getSpecialtyIds()));
-            if (specialties.size() != request.getSpecialtyIds().size()) {
+        if (request.specialtyIds() != null && !request.specialtyIds().isEmpty()) {
+            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.specialtyIds()));
+            if (specialties.size() != request.specialtyIds().size()) {
                 throw new BusinessRuleException("One or more specialty IDs are invalid");
             }
             staff.setSpecialties(specialties);
@@ -73,21 +73,21 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
             // Create Keycloak user
             try {
                 // Generate username from email if not provided
-                String username = request.getEmail().split("@")[0];
+                String username = request.email().split("@")[0];
 
                 // Extract first and last name from full name
-                String[] nameParts = request.getFullName().trim().split("\\s+", 2);
+                String[] nameParts = request.fullName().trim().split("\\s+", 2);
                 String firstName = nameParts[0];
                 String lastName = nameParts.length > 1 ? nameParts[1] : "";
 
                 UserRepresentation user = keycloakAdminService.createUserWithTenantInfo(
                     tenant.getRealmName(),
                     username,
-                    request.getEmail(),
+                    request.email(),
                     firstName,
                     lastName,
                     password,
-                    Arrays.asList(request.getRole().name()),
+                    Arrays.asList(request.role().name()),
                     currentTenantId,
                     tenant.getName(),
                     tenant.getSpecialty()
@@ -111,7 +111,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(currentTenantId)
-                    .role(request.getRole().name())
+                    .role(request.role().name())
                     .isPrimary(true)
                     .isActive(true)
                     .build();

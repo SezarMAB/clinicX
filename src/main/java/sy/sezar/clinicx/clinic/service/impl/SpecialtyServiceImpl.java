@@ -29,12 +29,12 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     @Override
     @Transactional
     public SpecialtyDto createSpecialty(SpecialtyCreateRequest request) {
-        log.info("Creating new specialty with name: {}", request.getName());
+        log.info("Creating new specialty with name: {}", request.name());
         
         // Check if specialty name already exists
-        if (specialtyRepository.existsByNameIgnoreCase(request.getName())) {
-            log.error("Specialty with name '{}' already exists", request.getName());
-            throw new BusinessRuleException("Specialty with name '" + request.getName() + "' already exists");
+        if (specialtyRepository.existsByNameIgnoreCase(request.name())) {
+            log.error("Specialty with name '{}' already exists", request.name());
+            throw new BusinessRuleException("Specialty with name '" + request.name() + "' already exists");
         }
         
         Specialty specialty = specialtyMapper.toEntity(request);
@@ -49,7 +49,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     @Transactional
     public SpecialtyDto updateSpecialty(UUID id, SpecialtyUpdateRequest request) {
         log.info("Updating specialty with ID: {}", id);
-        log.debug("Update request: name={}, active={}", request.getName(), request.isActive());
+        log.debug("Update request: name={}, active={}", request.name(), request.isActive());
         
         Specialty specialty = specialtyRepository.findById(id)
                 .orElseThrow(() -> {
@@ -58,11 +58,11 @@ public class SpecialtyServiceImpl implements SpecialtyService {
                 });
         
         // Check if another specialty with the same name exists
-        specialtyRepository.findByNameIgnoreCase(request.getName())
+        specialtyRepository.findByNameIgnoreCase(request.name())
                 .ifPresent(existing -> {
                     if (!existing.getId().equals(id)) {
-                        log.error("Another specialty with name '{}' already exists", request.getName());
-                        throw new BusinessRuleException("Specialty with name '" + request.getName() + "' already exists");
+                        log.error("Another specialty with name '{}' already exists", request.name());
+                        throw new BusinessRuleException("Specialty with name '" + request.name() + "' already exists");
                     }
                 });
         

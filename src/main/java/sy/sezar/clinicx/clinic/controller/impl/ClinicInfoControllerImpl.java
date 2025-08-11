@@ -34,7 +34,7 @@ public class ClinicInfoControllerImpl implements ClinicInfoControllerApi {
     public ResponseEntity<ClinicInfoDto> updateClinicInfo(ClinicInfoUpdateRequest request) {
         log.info("Updating clinic information");
         log.debug("Update request: name={}, email={}, phone={}", 
-                request.getName(), request.getEmail(), request.getPhoneNumber());
+                request.name(), request.email(), request.phoneNumber());
         
         try {
             ClinicInfoDto clinicInfo = clinicInfoService.updateClinicInfo(request);

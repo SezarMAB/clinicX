@@ -11,6 +11,7 @@ import sy.sezar.clinicx.clinic.model.Specialty;
 @Mapper(componentModel = "spring")
 public interface SpecialtyMapper {
     
+    @Mapping(target = "isActive", source = "active")
     SpecialtyDto toDto(Specialty specialty);
     
     @Mapping(target = "id", ignore = true)
@@ -22,5 +23,6 @@ public interface SpecialtyMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", source = "isActive")
     void updateFromRequest(SpecialtyUpdateRequest request, @MappingTarget Specialty specialty);
 }

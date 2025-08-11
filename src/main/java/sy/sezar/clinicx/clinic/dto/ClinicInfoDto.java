@@ -1,17 +1,14 @@
 package sy.sezar.clinicx.clinic.dto;
 
-import lombok.Data;
-
 import java.time.Instant;
 
-@Data
-public class ClinicInfoDto {
-    private Boolean id;
-    private String name;
-    private String address;
-    private String phoneNumber;
-    private String email;
-    private String timezone;
-    private Instant createdAt;
-    private Instant updatedAt;
-}
+public record ClinicInfoDto(
+    Boolean id,
+    String name,
+    String address,
+    String phoneNumber,
+    String email,
+    String timezone,
+    Instant createdAt,
+    Instant updatedAt
+) {}

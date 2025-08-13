@@ -7,5 +7,7 @@ public enum StaffRole {
     RECEPTIONIST,
     ACCOUNTANT,
     ADMIN,
-    SUPER_ADMIN
+    SUPER_ADMIN,
+    EXTERNAL,
+    INTERNAL
 }

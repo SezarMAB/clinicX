@@ -129,6 +129,8 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 case RECEPTIONIST -> "Receptionist role with appointment management";
                 case ACCOUNTANT -> "Accountant role with financial access";
                 case ASSISTANT -> "Assistant role with basic clinic access";
+                case EXTERNAL ->  "External role with basic clinic access";
+                case INTERNAL ->  "Internal role with basic clinic access";
             };
             createRealmRole(realmName, role.name(), description);
         }
@@ -1212,24 +1214,24 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     public void resetUserPassword(String realmName, String username, String newPassword) {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
-            
+
             // Find the user by username
             List<UserRepresentation> users = realmResource.users().searchByUsername(username, true);
             if (users.isEmpty()) {
                 throw new sy.sezar.clinicx.core.exception.NotFoundException("User not found: " + username);
             }
-            
+
             UserRepresentation user = users.get(0);
             UserResource userResource = realmResource.users().get(user.getId());
-            
+
             // Reset the password
             CredentialRepresentation credential = new CredentialRepresentation();
             credential.setType(CredentialRepresentation.PASSWORD);
             credential.setValue(newPassword);
             credential.setTemporary(false);
-            
+
             userResource.resetPassword(credential);
-            
+
             log.info("Successfully reset password for user '{}' in realm '{}'", username, realmName);
         } catch (Exception e) {
             log.error("Failed to reset password for user '{}' in realm '{}'", username, realmName, e);
@@ -1242,7 +1244,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<UserRepresentation> users = realmResource.users().list();
-            
+
             int deletedCount = 0;
             for (UserRepresentation user : users) {
                 // Skip service accounts (they have a special username pattern)
@@ -1250,7 +1252,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     log.debug("Skipping service account: {}", user.getUsername());
                     continue;
                 }
-                
+
                 try {
                     realmResource.users().delete(user.getId());
                     deletedCount++;
@@ -1259,7 +1261,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     log.error("Failed to delete user: {} ({})", user.getUsername(), user.getId(), e);
                 }
             }
-            
+
             log.info("Deleted {} users from realm '{}'", deletedCount, realmName);
         } catch (Exception e) {
             log.error("Failed to delete all users from realm '{}'", realmName, e);
@@ -1272,7 +1274,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         try {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             List<UserRepresentation> allUsers = realmResource.users().list();
-            
+
             // Filter users by tenant_id attribute
             return allUsers.stream()
                 .filter(user -> {
@@ -1308,11 +1310,11 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             UserResource userResource = realmResource.users().get(userId);
             UserRepresentation user = userResource.toRepresentation();
-            
+
             // Set enabled to false
             user.setEnabled(false);
             userResource.update(user);
-            
+
             log.info("Successfully disabled user '{}' in realm '{}'", user.getUsername(), realmName);
         } catch (Exception e) {
             log.error("Failed to disable user '{}' in realm '{}'", userId, realmName, e);
@@ -1326,11 +1328,11 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             UserResource userResource = realmResource.users().get(userId);
             UserRepresentation user = userResource.toRepresentation();
-            
+
             // Set enabled to true
             user.setEnabled(true);
             userResource.update(user);
-            
+
             log.info("Successfully enabled user '{}' in realm '{}'", user.getUsername(), realmName);
         } catch (Exception e) {
             log.error("Failed to enable user '{}' in realm '{}'", userId, realmName, e);

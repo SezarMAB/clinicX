@@ -285,4 +285,58 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
         userTenantAccessRepository.deleteByTenantId(tenantId);
         log.info("All accesses removed for tenant {}", tenantId);
     }
+
+    @Override
+    @Transactional
+    public void reactivateAccess(String userId, String tenantId) {
+        log.info("Reactivating access for user {} to tenant {}", userId, tenantId);
+        
+        var access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Access not found for user " + userId + " in tenant " + tenantId));
+        
+        if (access.isActive()) {
+            log.debug("Access is already active for user {} in tenant {}", userId, tenantId);
+            return;
+        }
+        
+        access.setActive(true);
+        userTenantAccessRepository.save(access);
+        log.info("Reactivated access for user {} in tenant {}", userId, tenantId);
+    }
+
+    @Override
+    @Transactional
+    public void updateAccessRole(String userId, String tenantId, String role) {
+        log.info("Updating role for user {} in tenant {} to {}", userId, tenantId, role);
+        
+        var access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Access not found for user " + userId + " in tenant " + tenantId));
+        
+        access.setRole(role);
+        userTenantAccessRepository.save(access);
+        log.info("Updated role for user {} in tenant {} to {}", userId, tenantId, role);
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllAccess(String userId) {
+        log.info("Revoking all tenant accesses for user {}", userId);
+        
+        var accesses = userTenantAccessRepository.findByUserId(userId);
+        
+        if (accesses.isEmpty()) {
+            log.debug("No accesses found for user {}", userId);
+            return;
+        }
+        
+        // Deactivate all accesses
+        accesses.forEach(access -> {
+            access.setActive(false);
+            userTenantAccessRepository.save(access);
+        });
+        
+        log.info("Revoked {} accesses for user {}", accesses.size(), userId);
+    }
 }

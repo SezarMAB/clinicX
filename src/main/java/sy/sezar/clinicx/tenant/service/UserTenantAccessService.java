@@ -40,4 +40,10 @@ public interface UserTenantAccessService {
     void syncWithKeycloak(String tenantId);
 
     void removeAllTenantAccesses(String tenantId);
+
+    void reactivateAccess(String userId, String tenantId);
+
+    void updateAccessRole(String userId, String tenantId, String role);
+
+    void revokeAllAccess(String userId);
 }

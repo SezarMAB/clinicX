@@ -10,6 +10,14 @@
 - After you finish the work, MUST update the .claude/tasks/context_session_x.md file to make
   sure others can get full context of what you did
 
+### Sub agents
+You have access to n sub agents:
+- 
+  Sub agents will do research about the implementation, but you will do the actual implementation;
+  When passing task to sub agent, make sure you pass the context file, e.g. '. claude/tasks/
+  session_context_x-mal' ,
+  After each sub agent finish the work, make sure you read the related documentation they created
+  to get full context of the plan before you start executing
 
 ## Project Overview
 

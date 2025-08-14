@@ -1,10 +1,12 @@
 package sy.sezar.clinicx.tenant.service;
 
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import sy.sezar.clinicx.tenant.dto.UserTenantAccessDto;
 import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
 import sy.sezar.clinicx.tenant.dto.UpdateUserTenantAccessRequest;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface UserTenantAccessService {
@@ -43,7 +45,7 @@ public interface UserTenantAccessService {
 
     void reactivateAccess(String userId, String tenantId);
 
-    void updateAccessRole(String userId, String tenantId, String role);
+    void updateAccessRoles(String userId, String tenantId, Set<StaffRole> roles);
 
     void revokeAllAccess(String userId);
 }

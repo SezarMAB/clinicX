@@ -17,7 +17,7 @@ public record StaffDto(
     String keycloakUserId,
     String tenantId,
     // Access control fields from user_tenant_access (will be populated when needed)
-    String accessRole,
+    Set<StaffRole> accessRoles,
     Boolean isPrimary,
     Boolean accessActive,
     Instant createdAt,

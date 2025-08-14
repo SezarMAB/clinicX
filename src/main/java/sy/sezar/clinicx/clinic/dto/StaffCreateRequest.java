@@ -43,8 +43,8 @@ public record StaffCreateRequest(
     // Keycloak user ID - optional, if provided will link to existing user
     String keycloakUserId,
     
-    // Access role for user_tenant_access - defaults to staff role if not provided
-    String accessRole,
+    // Access roles for user_tenant_access - defaults to staff roles if not provided
+    Set<StaffRole> accessRoles,
     
     // Whether this should be the primary tenant for the user
     boolean isPrimaryTenant

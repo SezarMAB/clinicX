@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sy.sezar.clinicx.tenant.model.UserTenantAccess;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +32,14 @@ public interface UserTenantAccessRepository extends JpaRepository<UserTenantAcce
     @Query("SELECT COUNT(uta) FROM UserTenantAccess uta WHERE uta.tenantId = :tenantId AND uta.isActive = true")
     long countActiveUsersByTenant(@Param("tenantId") String tenantId);
 
-    @Query("SELECT uta FROM UserTenantAccess uta WHERE uta.tenantId = :tenantId AND uta.role = :role AND uta.isActive = true")
-    List<UserTenantAccess> findByTenantIdAndRole(@Param("tenantId") String tenantId, @Param("role") String role);
+    @Query("SELECT DISTINCT uta FROM UserTenantAccess uta JOIN uta.roles r WHERE uta.tenantId = :tenantId AND r = :role AND uta.isActive = true")
+    List<UserTenantAccess> findByTenantIdAndRole(@Param("tenantId") String tenantId, @Param("role") StaffRole role);
+    
+    @Query("SELECT DISTINCT uta FROM UserTenantAccess uta JOIN uta.roles r WHERE uta.tenantId = :tenantId AND r IN :roles AND uta.isActive = true")
+    List<UserTenantAccess> findByTenantIdAndRolesIn(@Param("tenantId") String tenantId, @Param("roles") List<StaffRole> roles);
+    
+    @Query("SELECT DISTINCT uta FROM UserTenantAccess uta WHERE uta.userId = :userId AND SIZE(uta.roles) > 0 AND uta.isActive = true")
+    List<UserTenantAccess> findByUserIdWithRoles(@Param("userId") String userId);
 
     boolean existsByUserIdAndTenantIdAndIsActiveTrue(String userId, String tenantId);
 

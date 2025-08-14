@@ -112,7 +112,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(currentTenantId)
-                    .role(getPrimaryRole(request.roles()))
+                    .roles(request.roles())
                     .isPrimary(true)
                     .isActive(true)
                     .build();
@@ -182,7 +182,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(user.getId())
                     .tenantId(tenantId)
-                    .role(getPrimaryRole(staff.getRoles()))
+                    .roles(staff.getRoles())
                     .isPrimary(false)
                     .isActive(true)
                     .build();

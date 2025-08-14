@@ -21,7 +21,7 @@ public interface StaffMapper {
      * Maps Staff entity to StaffDto
      * Handles roles collection mapping with null safety
      */
-    @Mapping(target = "accessRole", ignore = true)
+    @Mapping(target = "accessRoles", ignore = true)
     @Mapping(target = "isPrimary", ignore = true)
     @Mapping(target = "accessActive", ignore = true)
     @Mapping(target = "isActive", source = "active")
@@ -34,7 +34,7 @@ public interface StaffMapper {
      */
     @Mapping(target = "isActive", source = "active")
     @Mapping(target = "roles", source = "roles", qualifiedByName = "copyRolesSet")
-    @Mapping(target = "accessRole", ignore = true)
+    @Mapping(target = "accessRoles", ignore = true)
     @Mapping(target = "isPrimary", ignore = true)
     @Mapping(target = "accessActive", ignore = true)
     StaffWithAccessDto toWithAccessDto(Staff staff);

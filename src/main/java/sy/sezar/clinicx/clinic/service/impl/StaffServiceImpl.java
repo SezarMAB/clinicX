@@ -140,14 +140,14 @@ public class StaffServiceImpl implements StaffService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(staff.getKeycloakUserId())
                     .tenantId(currentTenantId)
-                    .role(request.accessRole() != null ? request.accessRole() : getPrimaryRoleName(request.roles()))
+                    .roles(request.accessRoles() != null ? request.accessRoles() : request.roles())
                     .isPrimary(request.isPrimaryTenant())
                     .isActive(true)
                     .build();
                 
                 UserTenantAccessDto accessDto = userTenantAccessService.grantAccess(accessRequest);
                 log.info("Created user_tenant_access with ID {} for user {} in tenant {}", 
-                    accessDto.getId(), staff.getKeycloakUserId(), currentTenantId);
+                    accessDto.id(), staff.getKeycloakUserId(), currentTenantId);
             } catch (Exception e) {
                 log.error("Failed to create user_tenant_access record: {}", e.getMessage());
                 // If we created a Keycloak user but failed to create access, we should rollback
@@ -317,7 +317,7 @@ public class StaffServiceImpl implements StaffService {
         String currentTenantId = TenantContext.getCurrentTenant();
         
         // Prepare access information
-        String accessRole = getPrimaryRoleName(staff.getRoles());
+        Set<StaffRole> accessRoles = staff.getRoles();
         boolean isPrimary = false;
         boolean accessActive = staff.isActive();
         
@@ -328,7 +328,7 @@ public class StaffServiceImpl implements StaffService {
                     staff.getKeycloakUserId(), 
                     currentTenantId
                 );
-                accessRole = access.getRole();
+                accessRoles = access.roles();
                 isPrimary = access.isPrimary();
                 accessActive = access.isActive();
             } catch (Exception e) {
@@ -348,7 +348,7 @@ public class StaffServiceImpl implements StaffService {
             staffMapper.toDto(staff).specialties(),
             staff.getKeycloakUserId(),
             staff.getTenantId(),
-            accessRole,
+            accessRoles,
             isPrimary,
             accessActive,
             staff.getCreatedAt(),
@@ -371,7 +371,7 @@ public class StaffServiceImpl implements StaffService {
         
         return staffPage.map(staff -> {
             // Prepare access information
-            String accessRole = getPrimaryRoleName(staff.getRoles());
+            Set<StaffRole> accessRoles = staff.getRoles();
             boolean isPrimary = false;
             boolean accessActive = staff.isActive();
             
@@ -382,7 +382,7 @@ public class StaffServiceImpl implements StaffService {
                         staff.getKeycloakUserId(), 
                         currentTenantId
                     );
-                    accessRole = access.getRole();
+                    accessRoles = access.roles();
                     isPrimary = access.isPrimary();
                     accessActive = access.isActive();
                 } catch (Exception e) {
@@ -401,7 +401,7 @@ public class StaffServiceImpl implements StaffService {
                 staffMapper.toDto(staff).specialties(),
                 staff.getKeycloakUserId(),
                 staff.getTenantId(),
-                accessRole,
+                accessRoles,
                 isPrimary,
                 accessActive,
                 staff.getCreatedAt(),

@@ -1,22 +1,21 @@
 package sy.sezar.clinicx.tenant.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
+
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
-@Data
-@Builder
-public class UserTenantAccessDto {
-    private UUID id;
-    private String userId;
-    private String tenantId;
-    private String tenantName;
-    private String role;
-    private boolean isPrimary;
-    private boolean isActive;
-    private Instant createdAt;
-    private Instant updatedAt;
-    private String createdBy;
-    private String updatedBy;
-}
+public record UserTenantAccessDto(
+    UUID id,
+    String userId,
+    String tenantId,
+    String tenantName,
+    Set<StaffRole> roles,
+    boolean isPrimary,
+    boolean isActive,
+    Instant createdAt,
+    Instant updatedAt,
+    String createdBy,
+    String updatedBy
+) {}

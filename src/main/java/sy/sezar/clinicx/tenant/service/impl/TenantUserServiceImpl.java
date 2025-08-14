@@ -194,14 +194,14 @@ public class TenantUserServiceImpl implements TenantUserService {
             CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                 .userId(user.getId())
                 .tenantId(tenantId)
-                .role(getPrimaryRoleName(mapToStaffRoles(request.roles())))
+                .roles(mapToStaffRoles(request.roles()))
                 .isPrimary(true) // New users are primary by default
                 .isActive(true)
                 .build();
 
             UserTenantAccessDto accessDto = userTenantAccessService.grantAccess(accessRequest);
             log.info("Created user_tenant_access with ID {} for user {} in tenant {}",
-                accessDto.getId(), user.getId(), tenantId);
+                accessDto.id(), user.getId(), tenantId);
         } catch (Exception e) {
             log.error("Failed to create user_tenant_access record: {}", e.getMessage());
             throw new BusinessRuleException("Failed to create user access record: " + e.getMessage());
@@ -356,7 +356,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(tenantId)
-                    .role(staffOpt.map(s -> getPrimaryRoleName(s.getRoles())).orElse("ASSISTANT"))
+                    .roles(staffOpt.map(Staff::getRoles).orElse(Set.of(StaffRole.ASSISTANT)))
                     .isPrimary(false)
                     .isActive(true)
                     .build();
@@ -464,13 +464,13 @@ public class TenantUserServiceImpl implements TenantUserService {
                 log.info("Updated Staff role for user {}", userId);
             }
 
-            // Update user_tenant_access role
+            // Update user_tenant_access roles
             try {
                 UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
-                userTenantAccessService.updateAccessRole(userId, tenantId, getPrimaryRoleName(mapToStaffRoles(newRoles)));
-                log.info("Updated user_tenant_access role for user {} in tenant {}", userId, tenantId);
+                userTenantAccessService.updateAccessRoles(userId, tenantId, mapToStaffRoles(newRoles));
+                log.info("Updated user_tenant_access roles for user {} in tenant {}", userId, tenantId);
             } catch (Exception e) {
-                log.warn("Could not update user_tenant_access role: {}", e.getMessage());
+                log.warn("Could not update user_tenant_access roles: {}", e.getMessage());
             }
 
             // Log the role update
@@ -515,7 +515,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                     CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                         .userId(user.getId())
                         .tenantId(tenantId)
-                        .role(getPrimaryRoleName(mapToStaffRoles(roles)))
+                        .roles(mapToStaffRoles(roles))
                         .isPrimary(false)
                         .isActive(true)
                         .build();
@@ -555,7 +555,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                 .userId(user.getId())
                 .tenantId(tenantId)
-                .role(getPrimaryRoleName(mapToStaffRoles(roles)))
+                .roles(mapToStaffRoles(roles))
                 .isPrimary(false) // External users are never primary
                 .isActive(true)
                 .build();
@@ -755,9 +755,9 @@ public class TenantUserServiceImpl implements TenantUserService {
             try {
                 UserTenantAccessDto access = userTenantAccessService.getAccess(user.getId(), tenantId);
                 isExternal = !access.isPrimary();
-                // Use role from user_tenant_access if available
-                if (access.getRole() != null) {
-                    roles = Arrays.asList(access.getRole());
+                // Use roles from user_tenant_access if available
+                if (access.roles() != null && !access.roles().isEmpty()) {
+                    roles = access.roles().stream().map(StaffRole::name).collect(Collectors.toList());
                 } else {
                     roles = getRolesForTenant(user, tenantId);
                 }

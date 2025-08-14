@@ -22,7 +22,7 @@ public record StaffWithAccessDto(
     String tenantId,
     
     // UserTenantAccess fields
-    String accessRole,
+    Set<StaffRole> accessRoles,
     boolean isPrimary,
     boolean accessActive,
     

@@ -311,7 +311,7 @@ public class TenantServiceImpl implements TenantService {
                 var updateRequest = sy.sezar.clinicx.tenant.dto.UpdateUserTenantAccessRequest.builder()
                     .isActive(true)
                     .build();
-                userTenantAccessService.updateAccess(access.getId(), updateRequest);
+                userTenantAccessService.updateAccess(access.id(), updateRequest);
             }
             log.info("Reactivated {} user_tenant_access records for tenant '{}'", tenantAccesses.size(), tenantId);
         } catch (Exception e) {
@@ -389,7 +389,7 @@ public class TenantServiceImpl implements TenantService {
         try {
             var tenantAccesses = userTenantAccessService.getTenantAccesses(tenantId);
             for (var access : tenantAccesses) {
-                userTenantAccessService.revokeAccessById(access.getId());
+                userTenantAccessService.revokeAccessById(access.id());
             }
             log.info("Deactivated {} user_tenant_access records for tenant '{}'", tenantAccesses.size(), tenantId);
         } catch (Exception e) {

@@ -5,10 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import sy.sezar.clinicx.core.model.BaseEntity;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "user_tenant_access", 
@@ -18,7 +21,6 @@ import sy.sezar.clinicx.core.model.BaseEntity;
        })
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserTenantAccess extends BaseEntity {
@@ -33,17 +35,16 @@ public class UserTenantAccess extends BaseEntity {
     @Column(name = "tenant_id", nullable = false, length = 255)
     private String tenantId;
 
-    @NotNull
-    @Size(max = 50)
+    @ElementCollection(targetClass = StaffRole.class, fetch = FetchType.LAZY)
+    @CollectionTable(name = "user_tenant_access_roles", joinColumns = @JoinColumn(name = "user_tenant_access_id"))
     @Column(name = "role", nullable = false, length = 50)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Set<StaffRole> roles = new HashSet<>();
 
     @Column(name = "is_primary", nullable = false)
-    @Builder.Default
     private boolean isPrimary = false;
 
     @Column(name = "is_active", nullable = false)
-    @Builder.Default
     private boolean isActive = true;
 
     @ManyToOne(fetch = FetchType.LAZY)

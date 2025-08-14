@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import sy.sezar.clinicx.core.exception.ResourceNotFoundException;
 import sy.sezar.clinicx.core.exception.ConflictException;
 import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
@@ -17,6 +18,7 @@ import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,13 +59,7 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
                 });
         }
         
-        UserTenantAccess access = UserTenantAccess.builder()
-            .userId(request.getUserId())
-            .tenantId(request.getTenantId())
-            .role(request.getRole())
-            .isPrimary(request.isPrimary())
-            .isActive(request.isActive())
-            .build();
+        UserTenantAccess access = mapper.toEntity(request);
         
         access = userTenantAccessRepository.save(access);
         log.info("Access granted successfully with ID: {}", access.getId());
@@ -79,8 +75,9 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
         UserTenantAccess access = userTenantAccessRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Access not found: " + id));
         
-        if (request.getRole() != null) {
-            access.setRole(request.getRole());
+        // Update roles if provided
+        if (request.getRoles() != null) {
+            access.setRoles(Set.copyOf(request.getRoles()));
         }
         
         if (request.getIsPrimary() != null) {
@@ -233,7 +230,7 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
         CreateUserTenantAccessRequest request = CreateUserTenantAccessRequest.builder()
             .userId(userId)
             .tenantId(tenantId)
-            .role("ADMIN")
+            .roles(Set.of(StaffRole.ADMIN))
             .isPrimary(true)
             .isActive(true)
             .build();
@@ -262,7 +259,7 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
                 CreateUserTenantAccessRequest request = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(tenantId)
-                    .role("USER") // Default role
+                    .roles(Set.of(StaffRole.ASSISTANT)) // Default role
                     .isPrimary(false)
                     .isActive(true)
                     .build();
@@ -307,16 +304,16 @@ public class UserTenantAccessServiceImpl implements UserTenantAccessService {
 
     @Override
     @Transactional
-    public void updateAccessRole(String userId, String tenantId, String role) {
-        log.info("Updating role for user {} in tenant {} to {}", userId, tenantId, role);
+    public void updateAccessRoles(String userId, String tenantId, Set<StaffRole> roles) {
+        log.info("Updating roles for user {} in tenant {} to {}", userId, tenantId, roles);
         
         var access = userTenantAccessRepository.findByUserIdAndTenantId(userId, tenantId)
             .orElseThrow(() -> new ResourceNotFoundException(
                 "Access not found for user " + userId + " in tenant " + tenantId));
         
-        access.setRole(role);
+        access.setRoles(roles != null ? Set.copyOf(roles) : Set.of());
         userTenantAccessRepository.save(access);
-        log.info("Updated role for user {} in tenant {} to {}", userId, tenantId, role);
+        log.info("Updated roles for user {} in tenant {} to {}", userId, tenantId, roles);
     }
 
     @Override

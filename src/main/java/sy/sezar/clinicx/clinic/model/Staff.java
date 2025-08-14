@@ -25,10 +25,11 @@ public class Staff extends BaseEntity {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @NotNull
+    @ElementCollection(targetClass = StaffRole.class, fetch = FetchType.LAZY)
+    @CollectionTable(name = "staff_roles", joinColumns = @JoinColumn(name = "staff_id"))
     @Column(name = "role", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private StaffRole role;
+    private Set<StaffRole> roles = new HashSet<>();
 
     @Email
     @NotNull

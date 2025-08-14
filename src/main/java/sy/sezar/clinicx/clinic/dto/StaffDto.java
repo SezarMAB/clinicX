@@ -9,7 +9,7 @@ import java.util.UUID;
 public record StaffDto(
     UUID id,
     String fullName,
-    StaffRole role,
+    Set<StaffRole> roles,
     String email,
     String phoneNumber,
     boolean isActive,

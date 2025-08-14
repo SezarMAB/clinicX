@@ -27,6 +27,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -124,7 +125,7 @@ public class TenantServiceImpl implements TenantService {
                     adminStaff.setFullName(request.adminFirstName() + " " + request.adminLastName());
                     adminStaff.setEmail(request.adminEmail());
                     adminStaff.setPhoneNumber(request.contactPhone());
-                    adminStaff.setRole(StaffRole.ADMIN);
+                    adminStaff.setRoles(Set.of(StaffRole.ADMIN));
                     adminStaff.setActive(true);
                     staffRepository.save(adminStaff);
                     log.info("Created staff record for admin user {} in tenant {}", adminUser.getUsername(), tenant.getTenantId());

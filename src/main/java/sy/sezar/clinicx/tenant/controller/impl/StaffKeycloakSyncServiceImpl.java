@@ -23,6 +23,7 @@ import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
 import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of StaffKeycloakSyncService.
@@ -87,7 +88,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                     firstName,
                     lastName,
                     password,
-                    Arrays.asList(request.role().name()),
+                    getRoleNames(request.roles()),
                     currentTenantId,
                     tenant.getName(),
                     tenant.getSpecialty()
@@ -111,7 +112,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(currentTenantId)
-                    .role(request.role().name())
+                    .role(getPrimaryRole(request.roles()))
                     .isPrimary(true)
                     .isActive(true)
                     .build();
@@ -166,7 +167,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 firstName,
                 lastName,
                 password,
-                Arrays.asList(staff.getRole().name()),
+                getRoleNames(staff.getRoles()),
                 tenantId,
                 tenant.getName(),
                 tenant.getSpecialty()
@@ -181,7 +182,7 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(user.getId())
                     .tenantId(tenantId)
-                    .role(staff.getRole().name())
+                    .role(getPrimaryRole(staff.getRoles()))
                     .isPrimary(false)
                     .isActive(true)
                     .build();
@@ -240,5 +241,36 @@ public class StaffKeycloakSyncServiceImpl implements StaffKeycloakSyncService {
         return staffRepository.findById(UUID.fromString(staffId))
             .map(staff -> staff.getKeycloakUserId() != null)
             .orElse(false);
+    }
+
+    /**
+     * Converts a set of StaffRole enums to a list of role names
+     */
+    private List<String> getRoleNames(Set<sy.sezar.clinicx.clinic.model.enums.StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return roles.stream()
+            .map(Enum::name)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the primary role name from a set of roles
+     * Priority: ADMIN > DOCTOR > STAFF
+     */
+    private String getPrimaryRole(Set<sy.sezar.clinicx.clinic.model.enums.StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.ASSISTANT.name();
+        }
+        
+        // Priority order: ADMIN > DOCTOR > ASSISTANT
+        if (roles.contains(sy.sezar.clinicx.clinic.model.enums.StaffRole.ADMIN)) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.ADMIN.name();
+        }
+        if (roles.contains(sy.sezar.clinicx.clinic.model.enums.StaffRole.DOCTOR)) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.DOCTOR.name();
+        }
+        return sy.sezar.clinicx.clinic.model.enums.StaffRole.ASSISTANT.name();
     }
 }

@@ -14,8 +14,9 @@ public record StaffUpdateRequest(
     @Size(max = 100, message = "Full name must not exceed 100 characters")
     String fullName,
 
-    @NotNull(message = "Role is required")
-    StaffRole role,
+    @NotNull(message = "Roles are required")
+    @Size(min = 1, message = "At least one role is required")
+    Set<StaffRole> roles,
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

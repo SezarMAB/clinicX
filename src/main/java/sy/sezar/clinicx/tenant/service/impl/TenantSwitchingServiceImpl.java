@@ -22,6 +22,7 @@ import sy.sezar.clinicx.tenant.service.TenantSwitchingService;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import sy.sezar.clinicx.tenant.service.TenantUserService;
 
@@ -73,7 +74,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getTenantId(),
                     tenant.getName(),
                     tenant.getSubdomain(),
-                    staff.getRole().name(),
+                    getPrimaryRoleName(staff),
                     false, // isPrimary now managed in user_tenant_access table,
                     tenant.isActive(),
                     tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
@@ -127,7 +128,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                 "current-refresh-token", // This should be the new refresh token
                 tenant.getTenantId(),
                 tenant.getName(),
-                staff.getRole().name(),
+                getPrimaryRoleName(staff),
                 "Successfully switched to tenant: " + tenant.getName()
             );
 
@@ -175,7 +176,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             tenant.getTenantId(),
             tenant.getName(),
             tenant.getSubdomain(),
-            staff.getRole().name(),
+            getPrimaryRoleName(staff),
             false, // isPrimary now managed in user_tenant_access table,
             tenant.isActive(),
             tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
@@ -200,7 +201,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         Staff staff = new Staff();
         staff.setKeycloakUserId(userId);
         staff.setTenantId(tenantId);
-        staff.setRole(StaffRole.valueOf(role));
+        staff.setRoles(Set.of(StaffRole.valueOf(role)));
         staff.setActive(true);
 
         // Fetch user details from Keycloak
@@ -350,7 +351,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                     tenant.getTenantId(),
                     tenant.getName(),
                     tenant.getSubdomain(),
-                    staff.getRole().name(),
+                    getPrimaryRoleName(staff),
                     false, // isPrimary now managed in user_tenant_access table,
                     false, // isActive - would need to check against current context
                     tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC"
@@ -386,11 +387,11 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                 tenantAccess.put("clinic_name", tenant.getName());
                 tenantAccess.put("clinic_type", tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC");
                 tenantAccess.put("specialty", tenant.getSpecialty() != null ? tenant.getSpecialty() : "CLINIC");
-                tenantAccess.put("roles", Arrays.asList(staff.getRole().name()));
+                tenantAccess.put("roles", getRoleNames(staff.getRoles()));
                 accessibleTenants.add(tenantAccess);
 
                 // Add to user tenant roles
-                userTenantRoles.put(tenant.getTenantId(), Arrays.asList(staff.getRole().name()));
+                userTenantRoles.put(tenant.getTenantId(), getRoleNames(staff.getRoles()));
             }
 
             // Find primary tenant
@@ -427,5 +428,41 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             log.error("Failed to convert to JSON", e);
             return obj.toString();
         }
+    }
+
+    /**
+     * Gets the primary role name from a staff member's roles collection
+     * Priority: ADMIN > DOCTOR > STAFF
+     */
+    private String getPrimaryRoleName(Staff staff) {
+        if (staff.getRoles() == null || staff.getRoles().isEmpty()) {
+            return StaffRole.ASSISTANT.name();
+        }
+        
+        // Priority order: ADMIN > DOCTOR > ASSISTANT
+        if (staff.getRoles().contains(StaffRole.ADMIN)) {
+            return StaffRole.ADMIN.name();
+        }
+        if (staff.getRoles().contains(StaffRole.DOCTOR)) {
+            return StaffRole.DOCTOR.name();
+        }
+        if (staff.getRoles().contains(StaffRole.ASSISTANT)) {
+            return StaffRole.ASSISTANT.name();
+        }
+        
+        // Return the first role if none of the standard ones are found
+        return staff.getRoles().iterator().next().name();
+    }
+
+    /**
+     * Converts a set of StaffRole enums to a list of role names
+     */
+    private List<String> getRoleNames(Set<StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Arrays.asList(StaffRole.ASSISTANT.name());
+        }
+        return roles.stream()
+            .map(Enum::name)
+            .collect(Collectors.toList());
     }
 }

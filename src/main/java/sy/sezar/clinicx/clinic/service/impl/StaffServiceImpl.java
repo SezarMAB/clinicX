@@ -50,7 +50,7 @@ public class StaffServiceImpl implements StaffService {
     @Override
     @Transactional
     public StaffDto createStaff(StaffCreateRequest request) {
-        log.info("Creating new staff member with name: {} and role: {}", request.fullName(), request.role());
+        log.info("Creating new staff member with name: {} and roles: {}", request.fullName(), request.roles());
 
         // Check if email already exists
         if (staffRepository.existsByEmailIgnoreCase(request.email())) {
@@ -99,7 +99,7 @@ public class StaffServiceImpl implements StaffService {
                     firstName,
                     lastName,
                     request.password(),
-                    java.util.List.of(request.role().name()),
+                    getRoleNames(request.roles()),
                     currentTenantId,
                     tenant.getName(),
                     tenant.getSpecialty()
@@ -140,7 +140,7 @@ public class StaffServiceImpl implements StaffService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(staff.getKeycloakUserId())
                     .tenantId(currentTenantId)
-                    .role(request.accessRole() != null ? request.accessRole() : request.role().name())
+                    .role(request.accessRole() != null ? request.accessRole() : getPrimaryRoleName(request.roles()))
                     .isPrimary(request.isPrimaryTenant())
                     .isActive(true)
                     .build();
@@ -166,8 +166,8 @@ public class StaffServiceImpl implements StaffService {
     @Transactional
     public StaffDto updateStaff(UUID id, StaffUpdateRequest request) {
         log.info("Updating staff member with ID: {}", id);
-        log.debug("Update request: name={}, role={}, active={}",
-                request.fullName(), request.role(), request.isActive());
+        log.debug("Update request: name={}, roles={}, active={}",
+                request.fullName(), request.roles(), request.isActive());
 
         Staff staff = staffRepository.findById(id)
                 .orElseThrow(() -> {
@@ -212,7 +212,7 @@ public class StaffServiceImpl implements StaffService {
                     return new NotFoundException("Staff member not found with id: " + id);
                 });
 
-        log.debug("Found staff member: {} with role: {}", staff.getFullName(), staff.getRole());
+        log.debug("Found staff member: {} with roles: {}", staff.getFullName(), staff.getRoles());
         return staffMapper.toDto(staff);
     }
 
@@ -317,7 +317,7 @@ public class StaffServiceImpl implements StaffService {
         String currentTenantId = TenantContext.getCurrentTenant();
         
         // Prepare access information
-        String accessRole = staff.getRole().name();
+        String accessRole = getPrimaryRoleName(staff.getRoles());
         boolean isPrimary = false;
         boolean accessActive = staff.isActive();
         
@@ -341,7 +341,7 @@ public class StaffServiceImpl implements StaffService {
         return new StaffWithAccessDto(
             staff.getId(),
             staff.getFullName(),
-            staff.getRole(),
+            staff.getRoles(),
             staff.getEmail(),
             staff.getPhoneNumber(),
             staff.isActive(),
@@ -371,7 +371,7 @@ public class StaffServiceImpl implements StaffService {
         
         return staffPage.map(staff -> {
             // Prepare access information
-            String accessRole = staff.getRole().name();
+            String accessRole = getPrimaryRoleName(staff.getRoles());
             boolean isPrimary = false;
             boolean accessActive = staff.isActive();
             
@@ -394,7 +394,7 @@ public class StaffServiceImpl implements StaffService {
             return new StaffWithAccessDto(
                 staff.getId(),
                 staff.getFullName(),
-                staff.getRole(),
+                staff.getRoles(),
                 staff.getEmail(),
                 staff.getPhoneNumber(),
                 staff.isActive(),
@@ -408,5 +408,41 @@ public class StaffServiceImpl implements StaffService {
                 staff.getUpdatedAt()
             );
         });
+    }
+
+    /**
+     * Gets the primary role name from a staff member's roles collection
+     * Priority: ADMIN > DOCTOR > STAFF
+     */
+    private String getPrimaryRoleName(Set<StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return StaffRole.ASSISTANT.name();
+        }
+        
+        // Priority order: ADMIN > DOCTOR > ASSISTANT
+        if (roles.contains(StaffRole.ADMIN)) {
+            return StaffRole.ADMIN.name();
+        }
+        if (roles.contains(StaffRole.DOCTOR)) {
+            return StaffRole.DOCTOR.name();
+        }
+        if (roles.contains(StaffRole.ASSISTANT)) {
+            return StaffRole.ASSISTANT.name();
+        }
+        
+        // Return the first role if none of the standard ones are found
+        return roles.iterator().next().name();
+    }
+
+    /**
+     * Converts a set of StaffRole enums to a list of role names
+     */
+    private java.util.List<String> getRoleNames(Set<StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return java.util.List.of(StaffRole.ASSISTANT.name());
+        }
+        return roles.stream()
+            .map(Enum::name)
+            .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -132,7 +132,7 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
         
         // Fall back to database
         Optional<Staff> staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
-        return staff.map(s -> s.getRole().name()).orElse(null);
+        return staff.map(this::getPrimaryRoleName).orElse(null);
     }
     
     private String getCurrentUserId() {
@@ -149,5 +149,29 @@ public class TenantAccessValidatorImpl implements TenantAccessValidator {
             return userId;
         }
         return null;
+    }
+    
+    /**
+     * Gets the primary role name from a staff member's roles collection
+     * Priority: ADMIN > DOCTOR > STAFF
+     */
+    private String getPrimaryRoleName(Staff staff) {
+        if (staff.getRoles() == null || staff.getRoles().isEmpty()) {
+            return null;
+        }
+        
+        // Priority order: ADMIN > DOCTOR > STAFF
+        if (staff.getRoles().contains(sy.sezar.clinicx.clinic.model.enums.StaffRole.ADMIN)) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.ADMIN.name();
+        }
+        if (staff.getRoles().contains(sy.sezar.clinicx.clinic.model.enums.StaffRole.DOCTOR)) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.DOCTOR.name();
+        }
+        if (staff.getRoles().contains(sy.sezar.clinicx.clinic.model.enums.StaffRole.ASSISTANT)) {
+            return sy.sezar.clinicx.clinic.model.enums.StaffRole.ASSISTANT.name();
+        }
+        
+        // Return the first role if none of the standard ones are found
+        return staff.getRoles().iterator().next().name();
     }
 }

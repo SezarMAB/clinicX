@@ -112,7 +112,7 @@ public class StaffControllerImpl implements StaffControllerApi {
 
     @Override
     public ResponseEntity<StaffDto> createStaff(StaffCreateRequest request) {
-        log.info("Creating new staff member with name: {} and role: {}", request.fullName(), request.role());
+        log.info("Creating new staff member with name: {} and roles: {}", request.fullName(), request.roles());
         log.debug("Staff creation request: {}", request);
 
         try {

@@ -25,8 +25,14 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
     @Query("SELECT s FROM Staff s WHERE s.isActive = true")
     Page<Staff> findAllActive(Pageable pageable);
 
-    @Query("SELECT s FROM Staff s WHERE s.role = :role")
+    @Query("SELECT DISTINCT s FROM Staff s JOIN s.roles r WHERE r = :role")
     Page<Staff> findByRole(@Param("role") StaffRole role, Pageable pageable);
+    
+    @Query("SELECT DISTINCT s FROM Staff s JOIN s.roles r WHERE r IN :roles")
+    Page<Staff> findByRolesIn(@Param("roles") List<StaffRole> roles, Pageable pageable);
+    
+    @Query("SELECT DISTINCT s FROM Staff s WHERE SIZE(s.roles) > 0")
+    Page<Staff> findAllWithRoles(Pageable pageable);
 
     @Query("SELECT s FROM Staff s WHERE " +
            "LOWER(s.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +

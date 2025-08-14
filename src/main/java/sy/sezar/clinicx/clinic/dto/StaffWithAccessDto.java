@@ -13,7 +13,7 @@ public record StaffWithAccessDto(
     // Staff fields
     UUID id,
     String fullName,
-    StaffRole role,
+    Set<StaffRole> roles,
     String email,
     String phoneNumber,
     boolean isActive,

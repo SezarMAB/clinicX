@@ -183,7 +183,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         staff.setFullName(request.firstName() + " " + request.lastName());
         staff.setEmail(request.email());
         staff.setPhoneNumber(request.phoneNumber());
-        staff.setRole(mapToStaffRole(request.roles()));
+        staff.setRoles(mapToStaffRoles(request.roles()));
         staff.setActive(true);
 
         staffRepository.save(staff);
@@ -194,7 +194,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                 .userId(user.getId())
                 .tenantId(tenantId)
-                .role(mapToStaffRole(request.roles()).name())
+                .role(getPrimaryRoleName(mapToStaffRoles(request.roles())))
                 .isPrimary(true) // New users are primary by default
                 .isActive(true)
                 .build();
@@ -356,7 +356,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                 CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                     .userId(userId)
                     .tenantId(tenantId)
-                    .role(staffOpt.map(s -> s.getRole().name()).orElse("ASSISTANT"))
+                    .role(staffOpt.map(s -> getPrimaryRoleName(s.getRoles())).orElse("ASSISTANT"))
                     .isPrimary(false)
                     .isActive(true)
                     .build();
@@ -459,7 +459,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
-                staff.setRole(mapToStaffRole(newRoles));
+                staff.setRoles(mapToStaffRoles(newRoles));
                 staffRepository.save(staff);
                 log.info("Updated Staff role for user {}", userId);
             }
@@ -467,7 +467,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             // Update user_tenant_access role
             try {
                 UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
-                userTenantAccessService.updateAccessRole(userId, tenantId, mapToStaffRole(newRoles).name());
+                userTenantAccessService.updateAccessRole(userId, tenantId, getPrimaryRoleName(mapToStaffRoles(newRoles)));
                 log.info("Updated user_tenant_access role for user {} in tenant {}", userId, tenantId);
             } catch (Exception e) {
                 log.warn("Could not update user_tenant_access role: {}", e.getMessage());
@@ -504,7 +504,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             Staff staff = existingStaff.get();
             if (!staff.isActive()) {
                 staff.setActive(true);
-                staff.setRole(mapToStaffRole(roles));
+                staff.setRoles(mapToStaffRoles(roles));
                 staffRepository.save(staff);
                 
                 // Reactivate or create user_tenant_access
@@ -515,7 +515,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                     CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                         .userId(user.getId())
                         .tenantId(tenantId)
-                        .role(mapToStaffRole(roles).name())
+                        .role(getPrimaryRoleName(mapToStaffRoles(roles)))
                         .isPrimary(false)
                         .isActive(true)
                         .build();
@@ -544,7 +544,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         staff.setTenantId(tenantId);
         staff.setFullName(user.getFirstName() + " " + user.getLastName());
         staff.setEmail(user.getEmail());
-        staff.setRole(mapToStaffRole(roles));
+        staff.setRoles(mapToStaffRoles(roles));
         staff.setActive(true);
 
         staffRepository.save(staff);
@@ -555,7 +555,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
                 .userId(user.getId())
                 .tenantId(tenantId)
-                .role(mapToStaffRole(roles).name())
+                .role(getPrimaryRoleName(mapToStaffRoles(roles)))
                 .isPrimary(false) // External users are never primary
                 .isActive(true)
                 .build();
@@ -973,25 +973,45 @@ public class TenantUserServiceImpl implements TenantUserService {
         return null;
     }
 
-    private StaffRole mapToStaffRole(List<String> roles) {
-        // Map the highest role to StaffRole enum
-        if (roles.contains("SUPER_ADMIN")) {
-            return StaffRole.SUPER_ADMIN;
-        } else if (roles.contains("ADMIN")) {
-            return StaffRole.ADMIN;
-        } else if (roles.contains("DOCTOR")) {
-            return StaffRole.DOCTOR;
-        } else if (roles.contains("NURSE")) {
-            return StaffRole.NURSE;
-        } else if (roles.contains("RECEPTIONIST")) {
-            return StaffRole.RECEPTIONIST;
-        } else if (roles.contains("ACCOUNTANT")) {
-            return StaffRole.ACCOUNTANT;
-        } else if (roles.contains("ASSISTANT")) {
-            return StaffRole.ASSISTANT;
-        } else {
-            // Default to ASSISTANT if no matching role
-            return StaffRole.ASSISTANT;
+    /**
+     * Maps a list of role strings to a Set of StaffRole enums
+     */
+    private Set<StaffRole> mapToStaffRoles(List<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Set.of(StaffRole.ASSISTANT);
         }
+        
+        return roles.stream()
+            .map(roleName -> {
+                try {
+                    return StaffRole.valueOf(roleName);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Unknown role: {}, defaulting to ASSISTANT", roleName);
+                    return StaffRole.ASSISTANT;
+                }
+            })
+            .collect(Collectors.toSet());
+    }
+    
+    /**
+     * Gets the primary role name from a set of roles
+     * Priority: SUPER_ADMIN > ADMIN > DOCTOR > NURSE > RECEPTIONIST > ACCOUNTANT > ASSISTANT > STAFF
+     */
+    private String getPrimaryRoleName(Set<StaffRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return StaffRole.ASSISTANT.name();
+        }
+        
+        // Priority order based on hierarchy
+        if (roles.contains(StaffRole.SUPER_ADMIN)) return StaffRole.SUPER_ADMIN.name();
+        if (roles.contains(StaffRole.ADMIN)) return StaffRole.ADMIN.name();
+        if (roles.contains(StaffRole.DOCTOR)) return StaffRole.DOCTOR.name();
+        if (roles.contains(StaffRole.NURSE)) return StaffRole.NURSE.name();
+        if (roles.contains(StaffRole.RECEPTIONIST)) return StaffRole.RECEPTIONIST.name();
+        if (roles.contains(StaffRole.ACCOUNTANT)) return StaffRole.ACCOUNTANT.name();
+        if (roles.contains(StaffRole.ASSISTANT)) return StaffRole.ASSISTANT.name();
+        
+        // Return the first role if none of the standard ones are found
+        return roles.iterator().next().name();
     }
 }

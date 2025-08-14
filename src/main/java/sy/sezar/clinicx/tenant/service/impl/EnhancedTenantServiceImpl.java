@@ -26,6 +26,7 @@ import sy.sezar.clinicx.tenant.service.UserTenantAccessService;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.Set;
 
 /**
  * Enhanced tenant service that supports realm-per-type architecture.
@@ -157,7 +158,7 @@ public class EnhancedTenantServiceImpl implements TenantService {
                 Staff staff = new Staff();
                 staff.setKeycloakUserId(keycloakUserId); // Use actual Keycloak user ID
                 staff.setTenantId(tenantId);
-                staff.setRole(StaffRole.ADMIN);
+                staff.setRoles(Set.of(StaffRole.ADMIN));
                 staff.setPhoneNumber(request.contactPhone());
                 staff.setActive(true);
                 staff.setFullName(request.adminFirstName() + " " + request.adminLastName());

@@ -1,5 +1,16 @@
 # ClinicX - Claude Code Assistant Documentation
 
+
+## Rules
+- Before you do any work, MUST view files in • claude/tasks/context_session_.md file to get the
+  full context (x being the id of the session we are operate, if file doesnt exist, then create
+  one)
+- context_session_x.md should contain most of context of what we did, overall plan, and sub
+  agents will continusly add context to the file
+- After you finish the work, MUST update the .claude/tasks/context_session_x.md file to make
+  sure others can get full context of what you did
+
+
 ## Project Overview
 
 ClinicX is a sophisticated multi-tenant clinic management system built with Spring Boot 3.5.3 and Java 21. The application features comprehensive patient management, appointment scheduling, financial tracking, and dental chart management with enterprise-grade security and multi-tenant architecture.

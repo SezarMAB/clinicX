@@ -19,57 +19,32 @@ SET name = 'عيادة الأسنان المتقدمة',
     timezone = 'Asia/Riyadh'
 WHERE id = TRUE;
 
--- Insert staff record without role column (role is now in staff_roles table)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'doctor1@clinic.sa', '+966 571183769', TRUE);
-
--- Insert roles for د. علي الإبراهيم (DOCTOR role)
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'DOCTOR');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'DOCTOR', 'doctor1@clinic.sa', '+966 571183769', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
--- Insert staff record for د. حسن المصري
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'doctor2@clinic.sa', '+966 534077971', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'DOCTOR');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'DOCTOR', 'doctor2@clinic.sa', '+966 534077971', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
--- Insert staff record for د. عمر الحسن
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'doctor3@clinic.sa', '+966 560019543', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'DOCTOR');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'DOCTOR', 'doctor3@clinic.sa', '+966 560019543', TRUE);
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
--- Insert staff record for أمل الخالد (Nurse)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'nurse1@clinic.sa', '+966 575896163', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'NURSE', 'nurse1@clinic.sa', '+966 575896163', TRUE);
 
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'NURSE');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'NURSE', 'nurse2@clinic.sa', '+966 595905431', TRUE);
 
--- Insert staff record for رانيا الأحمد (Nurse)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'nurse2@clinic.sa', '+966 595905431', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'NURSE');
-
--- Insert staff record for أمل السعيد (Receptionist)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'reception@clinic.sa', '+966 548333325', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'RECEPTIONIST');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'RECEPTIONIST', 'reception@clinic.sa', '+966 548333325', TRUE);
 
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),
@@ -1413,116 +1388,35 @@ VALUES ('30638235-d344-420d-9bc9-afded597259f', 'ed000d0a-4263-4295-9a1e-50df1f5
 
 -- ====== ADDITIONAL DATA STARTS HERE ======
 
--- Additional Staff Members with new collection-based roles structure
-
--- د. محمد الجهني (Doctor)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', 'د. محمد الجهني', 'doctor4@clinic.sa', '+966 554184209', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', 'DOCTOR');
-
+-- Additional Staff Members
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', 'د. محمد الجهني', 'DOCTOR', 'doctor4@clinic.sa', '+966 554184209', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('7e77e993-1599-497c-9a23-e5ea870a5d70', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
-
--- د. ناصر الشامي (Doctor)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', 'د. ناصر الشامي', 'doctor5@clinic.sa', '+966 535681234', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', 'DOCTOR');
-
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', 'د. ناصر الشامي', 'DOCTOR', 'doctor5@clinic.sa', '+966 535681234', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('cfb9217c-ca9d-4983-b4f0-66d4520641d8', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
-
--- د. عمر الأحمد (Doctor + Admin - Multi-role example)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'د. عمر الأحمد', 'doctor6@clinic.sa', '+966 510750284', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'DOCTOR'),
-       ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'ADMIN');
-
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', 'د. عمر الأحمد', 'DOCTOR', 'doctor6@clinic.sa', '+966 510750284', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('3674d376-fca0-4d74-9aa4-bb2cc13b9021', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
-
--- د. راشد العنزي (Doctor)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', 'د. راشد العنزي', 'doctor7@clinic.sa', '+966 526360818', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', 'DOCTOR');
-
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', 'د. راشد العنزي', 'DOCTOR', 'doctor7@clinic.sa', '+966 526360818', TRUE);
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('a740d31b-41cc-4677-beac-f6bd82db089a', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
-
--- منى العمر (Nurse)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('089fece7-70fe-4058-8e9e-1f33b3d845dd', 'منى العمر', 'nurse5@clinic.sa', '+966 553546445', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('089fece7-70fe-4058-8e9e-1f33b3d845dd', 'NURSE');
-
--- زينب الخالد (Nurse + Assistant - Multi-role example)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'زينب الخالد', 'nurse6@clinic.sa', '+966 533194371', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'NURSE'),
-       ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'ASSISTANT');
-
--- سلمى العلي (Nurse)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('f9d0146d-56b1-496a-bd0f-870170858d82', 'سلمى العلي', 'nurse7@clinic.sa', '+966 576463868', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('f9d0146d-56b1-496a-bd0f-870170858d82', 'NURSE');
-
--- فاطمة الجهني (Assistant)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('6f554213-30e0-4b77-adfa-99a9f7a7c01f', 'فاطمة الجهني', 'hygienist1@clinic.sa', '+966 521911022', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('6f554213-30e0-4b77-adfa-99a9f7a7c01f', 'ASSISTANT');
-
--- سلمى الشامي (Assistant + Receptionist - Multi-role example)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'سلمى الشامي', 'hygienist2@clinic.sa', '+966 543013406', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'ASSISTANT'),
-       ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'RECEPTIONIST');
-
--- ليلى الجهني (Admin)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('42ca1b05-54de-419e-81f9-0bef64406c92', 'ليلى الجهني', 'admin@clinic.sa', '+966 568017836', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('42ca1b05-54de-419e-81f9-0bef64406c92', 'ADMIN');
-
--- Examples with new EXTERNAL and INTERNAL roles
-
--- خالد الناصر (External Consultant)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('11223344-5566-7788-9900-aabbccddeeff', 'خالد الناصر', 'consultant@external.com', '+966 501234567', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('11223344-5566-7788-9900-aabbccddeeff', 'EXTERNAL');
-
--- نوره الشمري (Internal Staff + Accountant)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('22334455-6677-8899-0011-bbccddeeffaa', 'نوره الشمري', 'internal.accounting@clinic.sa', '+966 502345678', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('22334455-6677-8899-0011-bbccddeeffaa', 'INTERNAL'),
-       ('22334455-6677-8899-0011-bbccddeeffaa', 'ACCOUNTANT');
-
--- محمد العبدالله (Accountant only)
-INSERT INTO staff (id, full_name, email, phone_number, is_active)
-VALUES ('33445566-7788-9900-1122-ccddeeffaabb', 'محمد العبدالله', 'accounting@clinic.sa', '+966 503456789', TRUE);
-
-INSERT INTO staff_roles (staff_id, role)
-VALUES ('33445566-7788-9900-1122-ccddeeffaabb', 'ACCOUNTANT');
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('089fece7-70fe-4058-8e9e-1f33b3d845dd', 'منى العمر', 'NURSE', 'nurse5@clinic.sa', '+966 553546445', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('89d4aa01-4780-4211-9dff-0f2d77bf60b3', 'زينب الخالد', 'NURSE', 'nurse6@clinic.sa', '+966 533194371', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('f9d0146d-56b1-496a-bd0f-870170858d82', 'سلمى العلي', 'NURSE', 'nurse7@clinic.sa', '+966 576463868', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('6f554213-30e0-4b77-adfa-99a9f7a7c01f', 'فاطمة الجهني', 'ASSISTANT', 'hygienist1@clinic.sa', '+966 521911022', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('015d9f83-7100-49dc-8a45-dfaf8357ff3b', 'سلمى الشامي', 'ASSISTANT', 'hygienist2@clinic.sa', '+966 543013406', TRUE);
+INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
+VALUES ('42ca1b05-54de-419e-81f9-0bef64406c92', 'ليلى الجهني', 'ADMIN', 'admin@clinic.sa', '+966 568017836', TRUE);
 -- Additional Procedures
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
 VALUES ((SELECT id FROM specialties WHERE name = 'General Dentistry'),

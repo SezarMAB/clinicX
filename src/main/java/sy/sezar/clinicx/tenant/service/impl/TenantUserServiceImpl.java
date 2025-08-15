@@ -432,11 +432,16 @@ public class TenantUserServiceImpl implements TenantUserService {
 
     @Override
     @Transactional
-    public TenantUserDto updateUserRoles(String tenantId, String userId, List<String> newRoles) {
+    public TenantUserDto updateUserRoles(String tenantId, String userId, Set<StaffRole> newRoles) {
         log.info("Updating roles for user {} in tenant {}: {}", userId, tenantId, newRoles);
 
         Tenant tenant = getTenant(tenantId);
         RealmResource realmResource = keycloakAdminService.getKeycloakInstance().realm(tenant.getRealmName());
+
+        // Convert Set<StaffRole> to List<String> for helper methods
+        List<String> newRoleStrings = newRoles.stream()
+                .map(StaffRole::getRole)
+                .toList();
 
         try {
             UserRepresentation user = realmResource.users().get(userId).toRepresentation();
@@ -447,19 +452,19 @@ public class TenantUserServiceImpl implements TenantUserService {
             }
 
             // Update user_tenant_roles attribute
-            updateUserTenantRoles(user, tenantId, newRoles);
+            updateUserTenantRoles(user, tenantId, newRoleStrings);
 
             // Update in Keycloak
             realmResource.users().get(userId).update(user);
 
             // Update realm roles
-            updateRealmRoles(realmResource, userId, newRoles);
+            updateRealmRoles(realmResource, userId, newRoleStrings);
 
             // Update Staff record
             Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
-                staff.setRoles(mapToStaffRoles(newRoles));
+                staff.setRoles(newRoles);
                 staffRepository.save(staff);
                 log.info("Updated Staff role for user {}", userId);
             }
@@ -467,7 +472,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             // Update user_tenant_access roles
             try {
                 UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
-                userTenantAccessService.updateAccessRoles(userId, tenantId, mapToStaffRoles(newRoles));
+                userTenantAccessService.updateAccessRoles(userId, tenantId, newRoles);
                 log.info("Updated user_tenant_access roles for user {} in tenant {}", userId, tenantId);
             } catch (Exception e) {
                 log.warn("Could not update user_tenant_access roles: {}", e.getMessage());

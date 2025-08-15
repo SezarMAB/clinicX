@@ -2,9 +2,11 @@ package sy.sezar.clinicx.tenant.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import sy.sezar.clinicx.tenant.dto.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service interface for managing users within a tenant.
@@ -91,7 +93,7 @@ public interface TenantUserService {
      * @param roles new roles
      * @return updated user
      */
-    TenantUserDto updateUserRoles(String tenantId, String userId, List<String> roles);
+    TenantUserDto updateUserRoles(String tenantId, String userId, Set<StaffRole> roles);
     
     /**
      * Grant an external user access to the tenant.

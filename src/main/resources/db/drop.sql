@@ -142,7 +142,8 @@ DROP TABLE IF EXISTS specialty_types CASCADE;
 DROP TABLE IF EXISTS user_tenant_access CASCADE;
 
 
-
+DROP TABLE IF EXISTS staff_roles CASCADE;
+DROP TABLE IF EXISTS user_tenant_access_roles;
 
 -- Drop financial functions
 DROP FUNCTION IF EXISTS update_updated_at_column();

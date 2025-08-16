@@ -88,9 +88,10 @@ public class TenantUserController implements TenantUserApi {
     @Override
     public ResponseEntity<Void> deleteUser(String userId) {
         String currentTenant = TenantContext.getCurrentTenant();
-        log.info("Permanently deleting user {} from tenant {}", userId, currentTenant);
+        log.info("Deactivating user {} in tenant {} (soft delete)", userId, currentTenant);
         
-        tenantUserService.deleteUser(currentTenant, userId);
+        // Soft delete - deactivate user instead of permanently deleting
+        tenantUserService.deactivateUser(currentTenant, userId);
         return ResponseEntity.noContent().build();
     }
     

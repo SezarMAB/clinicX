@@ -77,7 +77,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                     }
                     return staff.isActive();
                 })
-                .collect(Collectors.toList());
+                .toList();
         }
 
         // Get Keycloak users for each Staff record
@@ -614,12 +614,13 @@ public class TenantUserServiceImpl implements TenantUserService {
             }
         }
 
-        // Delete Staff record for this user in this tenant
+        // Deactivate Staff record for this user in this tenant (soft delete)
         Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
         if (staffOpt.isPresent()) {
             Staff staff = staffOpt.get();
-            staffRepository.delete(staff);
-            log.info("Deleted Staff record for external user {} in tenant {}", userId, tenantId);
+            staff.setActive(false);
+            staffRepository.save(staff);
+            log.info("Deactivated Staff record for external user {} in tenant {}", userId, tenantId);
         }
 
         // Revoke user_tenant_access

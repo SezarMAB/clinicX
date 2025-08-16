@@ -27,10 +27,10 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
 
     @Query("SELECT DISTINCT s FROM Staff s JOIN s.roles r WHERE r = :role")
     Page<Staff> findByRole(@Param("role") StaffRole role, Pageable pageable);
-    
+
     @Query("SELECT DISTINCT s FROM Staff s JOIN s.roles r WHERE r IN :roles")
     Page<Staff> findByRolesIn(@Param("roles") List<StaffRole> roles, Pageable pageable);
-    
+
     @Query("SELECT DISTINCT s FROM Staff s WHERE SIZE(s.roles) > 0")
     Page<Staff> findAllWithRoles(Pageable pageable);
 
@@ -42,18 +42,26 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
 
     @Query("SELECT s FROM Staff s JOIN s.specialties sp WHERE sp.id = :specialtyId")
     Page<Staff> findBySpecialtyId(@Param("specialtyId") UUID specialtyId, Pageable pageable);
-    
+
     // Methods updated for new architecture with keycloak_user_id
     List<Staff> findByKeycloakUserId(String keycloakUserId);
-    
+
     List<Staff> findByTenantId(String tenantId);
-    
+
     Optional<Staff> findByKeycloakUserIdAndTenantId(String keycloakUserId, String tenantId);
-    
+
     boolean existsByKeycloakUserIdAndTenantId(String keycloakUserId, String tenantId);
-    
+
     @Query("SELECT s.tenantId FROM Staff s WHERE s.keycloakUserId = :keycloakUserId")
     List<String> findTenantIdsByKeycloakUserId(@Param("keycloakUserId") String keycloakUserId);
-    
+
     void deleteByKeycloakUserId(String keycloakUserId);
+
+    @Modifying
+    @Query("UPDATE Staff s SET s.phoneNumber = :phoneNumber " +
+        "WHERE s.keycloakUserId = :keycloakUserId AND s.tenantId = :tenantId")
+    int updatePhoneNumberByKeycloakUserIdAndTenantId(
+            @Param("keycloakUserId") String keycloakUserId,
+            @Param("tenantId") String tenantId,
+            @Param("phoneNumber") String phoneNumber);
 }

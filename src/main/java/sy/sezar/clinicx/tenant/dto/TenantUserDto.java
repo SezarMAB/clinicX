@@ -1,7 +1,6 @@
 package sy.sezar.clinicx.tenant.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
 import java.util.List;
@@ -60,7 +59,13 @@ public record TenantUserDto(
     Instant lastLogin,
 
     @Schema(description = "User type in the context of this tenant")
-    StaffRole userType
+    StaffRole userType,
+
+    @Schema(description = "Whether the user (Staff) is currently active", example = "true")
+    boolean isUserActive,
+
+    @Schema(description = "Phone number", example = "+1234567890")
+    String phoneNumber
 ) {
 
     /**

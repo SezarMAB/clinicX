@@ -87,7 +87,8 @@ public class TenantUserServiceImpl implements TenantUserService {
         for (Staff staff : staffList) {
             try {
                 UserRepresentation user = realmResource.users().get(staff.getKeycloakUserId()).toRepresentation();
-                TenantUserDto dto = mapToDto(user, tenantId);
+                TenantUserDto dto = mapToDto(user, tenantId, staff);
+
                 // Enhance with Staff data
                 // Note: For records, we cannot modify after creation.
                 // The dto already has the userId from the mapToDto method
@@ -108,7 +109,7 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Override
     public Page<TenantUserDto> searchUsers(String tenantId, String searchTerm, Pageable pageable) {
         log.info("Searching users in tenant {} with term: {}", tenantId, searchTerm);
-
+        List<Staff> staffList = staffRepository.findByTenantId(tenantId);
         Tenant tenant = getTenant(tenantId);
         RealmResource realmResource = keycloakAdminService.getKeycloakInstance().realm(tenant.getRealmName());
         UsersResource usersResource = realmResource.users();
@@ -119,7 +120,12 @@ public class TenantUserServiceImpl implements TenantUserService {
         // Filter by tenant access
         List<TenantUserDto> tenantUsers = searchResults.stream()
             .filter(user -> hasAccessToTenant(user, tenantId))
-            .map(user -> mapToDto(user, tenantId))
+            .map(user -> mapToDto(user, tenantId,
+                staffList.stream()
+                    .filter(staff -> staff.getKeycloakUserId().equals(user.getId()))
+                    .findFirst()
+                    .orElse(null) // If no Staff record, use null
+            ))
             .collect(Collectors.toList());
 
         // Apply pagination
@@ -139,13 +145,14 @@ public class TenantUserServiceImpl implements TenantUserService {
 
         try {
             UserRepresentation user = realmResource.users().get(userId).toRepresentation();
-
+            Staff staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId)
+                .orElse(null); // If no Staff record, use null
             // Verify user has access to this tenant
             if (!hasAccessToTenant(user, tenantId)) {
                 throw new NotFoundException("User not found in this tenant");
             }
 
-            return mapToDto(user, tenantId);
+            return mapToDto(user, tenantId,staff);
         } catch (Exception e) {
             throw new NotFoundException("User not found: " + userId);
         }
@@ -212,13 +219,21 @@ public class TenantUserServiceImpl implements TenantUserService {
         // TODO: Implement audit logging
         // auditService.logUserCreation(tenantId, user.getId(), request.username());
 
-        return mapToDto(user, tenantId);
+        return mapToDto(user, tenantId,staff);
     }
 
     @Override
     @Transactional
     public TenantUserDto updateUser(String tenantId, String userId, TenantUserUpdateRequest request) {
         log.info("Updating user {} in tenant {}", userId, tenantId);
+
+        int updatedRows = staffRepository
+            .updatePhoneNumberByKeycloakUserIdAndTenantId(userId, tenantId, request.phoneNumber());
+
+        Staff staff = null;
+        if (updatedRows > 0) {
+            staff =  staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId).get();
+        }
 
         Tenant tenant = getTenant(tenantId);
         RealmResource realmResource = keycloakAdminService.getKeycloakInstance().realm(tenant.getRealmName());
@@ -264,7 +279,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             // TODO: Implement audit logging
             // auditService.logUserUpdate(tenantId, userId, user.getUsername());
 
-            return mapToDto(user, tenantId);
+            return mapToDto(user, tenantId, staff);
 
         } catch (Exception e) {
             throw new BusinessRuleException("Failed to update user: " + e.getMessage());
@@ -275,6 +290,13 @@ public class TenantUserServiceImpl implements TenantUserService {
     @Transactional
     public void deactivateUser(String tenantId, String userId) {
         log.info("Deactivating user {} in tenant {}", userId, tenantId);
+
+        UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
+
+        if( access.roles().contains(StaffRole.ADMIN)) {
+            log.info("Cannot deactivate primary tenant user {} in tenant {}", userId, tenantId);
+            throw new BusinessRuleException("Cannot deactivate primary tenant user");
+        }
 
         Tenant tenant = getTenant(tenantId);
         RealmResource realmResource = keycloakAdminService.getKeycloakInstance().realm(tenant.getRealmName());
@@ -287,9 +309,11 @@ public class TenantUserServiceImpl implements TenantUserService {
                 throw new NotFoundException("User not found in this tenant");
             }
 
-            // Disable the user in Keycloak
-            user.setEnabled(false);
-            realmResource.users().get(userId).update(user);
+            if(access.isPrimary()) {
+                // Disable the user in Keycloak
+                user.setEnabled(false);
+                realmResource.users().get(userId).update(user);
+            }
 
             // Update Staff record
             Optional<Staff> staffOpt = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId);
@@ -302,14 +326,12 @@ public class TenantUserServiceImpl implements TenantUserService {
 
             // Update user_tenant_access record
             try {
-                UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
                 userTenantAccessService.revokeAccess(userId, tenantId);
                 log.info("Deactivated user_tenant_access for user {} in tenant {}", userId, tenantId);
             } catch (Exception e) {
                 log.warn("Could not update user_tenant_access for deactivation: {}", e.getMessage());
             }
 
-            // Log the deactivation
             // TODO: Implement audit logging
             // auditService.logUserDeactivation(tenantId, userId, user.getUsername());
 
@@ -492,7 +514,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             // TODO: Implement audit logging
             // auditService.logRoleUpdate(tenantId, userId, user.getUsername(), newRoles);
 
-            return mapToDto(user, tenantId);
+            return mapToDto(user, tenantId, staffOpt.get());
 
         } catch (Exception e) {
             throw new BusinessRuleException("Failed to update user roles: " + e.getMessage());
@@ -521,7 +543,7 @@ public class TenantUserServiceImpl implements TenantUserService {
                 staff.setActive(true);
                 staff.setRoles(mapToStaffRoles(roles));
                 staffRepository.save(staff);
-                
+
                 // Reactivate or create user_tenant_access
                 try {
                     userTenantAccessService.reactivateAccess(user.getId(), tenantId);
@@ -536,9 +558,9 @@ public class TenantUserServiceImpl implements TenantUserService {
                         .build();
                     userTenantAccessService.grantAccess(accessRequest);
                 }
-                
+
                 log.info("Reactivated existing access for user {} in tenant {}", username, tenantId);
-                return mapToDto(user, tenantId);
+                return mapToDto(user, tenantId , staff);
             }
             throw new BusinessRuleException("User already has active access to this tenant");
         }
@@ -559,10 +581,11 @@ public class TenantUserServiceImpl implements TenantUserService {
         staff.setTenantId(tenantId);
         staff.setFullName(user.getFirstName() + " " + user.getLastName());
         staff.setEmail(user.getEmail());
+        //TODO set the phone number if available
         staff.setRoles(mapToStaffRoles(roles));
         staff.setActive(true);
 
-        staffRepository.save(staff);
+        Staff savedStaff = staffRepository.save(staff);
         log.info("Created Staff record for external user {} in tenant {}", username, tenantId);
 
         // Create user_tenant_access record for external user
@@ -586,7 +609,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         // TODO: Implement audit logging
         // auditService.logAccessGrant(tenantId, user.getId(), username, roles);
 
-        return mapToDto(user, tenantId);
+        return mapToDto(user, tenantId, savedStaff);
     }
 
     @Override
@@ -754,7 +777,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         }
     }
 
-    private TenantUserDto mapToDto(UserRepresentation user, String tenantId) {
+    private TenantUserDto mapToDto(UserRepresentation user, String tenantId, Staff staff) {
         Map<String, List<String>> attributes = user.getAttributes();
 
         String primaryTenantId = null;
@@ -812,7 +835,9 @@ public class TenantUserServiceImpl implements TenantUserService {
             attributes,
             user.getCreatedTimestamp() != null ? Instant.ofEpochMilli(user.getCreatedTimestamp()) : null,
             null, // lastLogin
-            userType
+            userType,
+            staff.isActive(),
+            staff.getPhoneNumber()
         );
     }
 
@@ -996,7 +1021,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         if (roles == null || roles.isEmpty()) {
             return Set.of(StaffRole.ASSISTANT);
         }
-        
+
         return roles.stream()
             .map(roleName -> {
                 try {
@@ -1008,7 +1033,7 @@ public class TenantUserServiceImpl implements TenantUserService {
             })
             .collect(Collectors.toSet());
     }
-    
+
     /**
      * Gets the primary role name from a set of roles
      * Priority: SUPER_ADMIN > ADMIN > DOCTOR > NURSE > RECEPTIONIST > ACCOUNTANT > ASSISTANT > STAFF
@@ -1017,7 +1042,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         if (roles == null || roles.isEmpty()) {
             return StaffRole.ASSISTANT.name();
         }
-        
+
         // Priority order based on hierarchy
         if (roles.contains(StaffRole.SUPER_ADMIN)) return StaffRole.SUPER_ADMIN.name();
         if (roles.contains(StaffRole.ADMIN)) return StaffRole.ADMIN.name();
@@ -1026,7 +1051,7 @@ public class TenantUserServiceImpl implements TenantUserService {
         if (roles.contains(StaffRole.RECEPTIONIST)) return StaffRole.RECEPTIONIST.name();
         if (roles.contains(StaffRole.ACCOUNTANT)) return StaffRole.ACCOUNTANT.name();
         if (roles.contains(StaffRole.ASSISTANT)) return StaffRole.ASSISTANT.name();
-        
+
         // Return the first role if none of the standard ones are found
         return roles.iterator().next().name();
     }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.core.exception.NotFoundException;
+import sy.sezar.clinicx.core.exception.ResourceNotFoundException;
 import sy.sezar.clinicx.tenant.dto.*;
 import sy.sezar.clinicx.tenant.dto.CreateUserTenantAccessRequest;
 import sy.sezar.clinicx.tenant.dto.UserTenantAccessDto;
@@ -471,11 +472,20 @@ public class TenantUserServiceImpl implements TenantUserService {
 
             // Update user_tenant_access roles
             try {
-                UserTenantAccessDto access = userTenantAccessService.getAccess(userId, tenantId);
                 userTenantAccessService.updateAccessRoles(userId, tenantId, newRoles);
                 log.info("Updated user_tenant_access roles for user {} in tenant {}", userId, tenantId);
-            } catch (Exception e) {
-                log.warn("Could not update user_tenant_access roles: {}", e.getMessage());
+            } catch (ResourceNotFoundException e) {
+                // If no user_tenant_access record exists, create one
+                log.info("Creating new user_tenant_access record for user {} in tenant {}", userId, tenantId);
+                CreateUserTenantAccessRequest accessRequest = CreateUserTenantAccessRequest.builder()
+                    .userId(userId)
+                    .tenantId(tenantId)
+                    .roles(newRoles)
+                    .isPrimary(false)
+                    .isActive(true)
+                    .build();
+                userTenantAccessService.grantAccess(accessRequest);
+                log.info("Created user_tenant_access record for user {} in tenant {}", userId, tenantId);
             }
 
             // Log the role update

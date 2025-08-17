@@ -44,6 +44,7 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
     private final TenantAuditService auditService;
     private final KeycloakAdminService keycloakAdminService;
     private final UserTenantAccessService userTenantAccessService;
+    private final TenantAccessValidatorImpl tenantAccessValidator;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,6 +53,18 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
 
         Tenant tenant = getTenant(tenantId);
         List<Staff> staffList = staffManagementService.findByTenantId(tenantId);
+
+        // CRITICAL: Filter out inactive staff records (revoked users)
+        staffList = staffList.stream()
+            .filter(staff -> {
+                if (!staff.isActive()) {
+                    log.debug("Filtering out inactive staff record for user {} in tenant {}", 
+                             staff.getKeycloakUserId(), tenantId);
+                    return false;
+                }
+                return true;
+            })
+            .collect(Collectors.toList());
 
         // Filter based on includeExternal flag
         if (!includeExternal) {
@@ -198,6 +211,10 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
             keycloakUserService.setUserEnabled(tenant.getRealmName(), userId, false);
             log.info(TenantConstants.LOG_DEACTIVATED_IN_KEYCLOAK, userId);
         }
+        
+        // Evict cache to ensure immediate access revocation
+        tenantAccessValidator.evictAccessCache(userId, tenantId);
+        tenantAccessValidator.evictRoleCache(userId, tenantId);
 
         // Audit user deactivation
         auditService.auditTenantModified("system", tenantId, "Deactivated user: " + userId);
@@ -372,6 +389,11 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
 
         // Deactivate access
         userAccessManagementService.deactivateAccess(userId, tenantId);
+        
+        // CRITICAL: Evict cache to ensure immediate access revocation
+        tenantAccessValidator.evictAccessCache(userId, tenantId);
+        tenantAccessValidator.evictRoleCache(userId, tenantId);
+        log.info("Evicted access cache for user {} and tenant {} - access revoked immediately", userId, tenantId);
 
         // Remove tenant from user's Keycloak attributes
         String userRealm = keycloakUserService.findUserRealm(userId);

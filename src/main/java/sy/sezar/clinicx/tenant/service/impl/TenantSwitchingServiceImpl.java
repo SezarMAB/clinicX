@@ -19,6 +19,7 @@ import sy.sezar.clinicx.tenant.repository.TenantRepository;
 import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.TenantSwitchingService;
+import sy.sezar.clinicx.tenant.service.TenantAccessValidator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
     private final TenantRepository tenantRepository;
     private final TenantUserService tenantUserService;
     private final KeycloakAdminService keycloakAdminService;
+    private final TenantAccessValidator tenantAccessValidator;
 
     @Override
     public List<TenantAccessDto> getCurrentUserTenants() {
@@ -66,6 +68,16 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         }
 
         return staffList.stream()
+            .filter(staff -> {
+                // Filter out staff records where access has been revoked
+                // This uses the cache-aware validator
+                boolean hasAccess = tenantAccessValidator.validateUserAccess(userId, staff.getTenantId());
+                if (!hasAccess) {
+                    log.debug("Filtering out tenant {} - user {} no longer has valid access", 
+                             staff.getTenantId(), userId);
+                }
+                return hasAccess;
+            })
             .map(staff -> {
                 Tenant tenant = tenantRepository.findByTenantId(staff.getTenantId())
                     .orElseThrow(() -> new NotFoundException("Tenant not found: " + staff.getTenantId()));
@@ -88,9 +100,16 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         String userId = getCurrentUserId();
         log.info("User {} switching to tenant {}", userId, tenantId);
 
-        // Verify user has access to the tenant
+        // CRITICAL: Use TenantAccessValidator to check database with cache support
+        // This ensures revoked access is immediately denied
+        if (!tenantAccessValidator.validateUserAccess(userId, tenantId)) {
+            log.warn("User {} denied access to tenant {} - validation failed", userId, tenantId);
+            throw new BusinessRuleException("You don't have access to tenant: " + tenantId);
+        }
+
+        // Get staff record for role information
         Staff staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId)
-            .orElseThrow(() -> new BusinessRuleException("You don't have access to tenant: " + tenantId));
+            .orElseThrow(() -> new BusinessRuleException("Staff record not found for tenant: " + tenantId));
 
         // Get tenant information
         Tenant tenant = tenantRepository.findByTenantId(tenantId)

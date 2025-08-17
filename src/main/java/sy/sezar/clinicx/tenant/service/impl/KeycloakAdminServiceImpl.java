@@ -687,6 +687,16 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                                                        String firstName, String lastName, String password,
                                                        List<String> roles, String tenantId, String clinicName, String clinicType) {
         try {
+            // For master realm, ensure user profile is configured first
+            if ("master".equals(realmName)) {
+                log.info("Ensuring user profile is configured for master realm");
+                try {
+                    configureUserProfile(realmName);
+                } catch (Exception e) {
+                    log.warn("Could not configure user profile for master realm, this might cause issues with custom attributes: {}", e.getMessage());
+                }
+            }
+            
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             UsersResource usersResource = realmResource.users();
 
@@ -701,14 +711,14 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             // Set multi-tenant attributes
             Map<String, List<String>> attributes = new HashMap<>();
             attributes.put("tenant_id", Arrays.asList(tenantId));
-            attributes.put("clinic_name", Arrays.asList(clinicName));
-            attributes.put("clinic_type", Arrays.asList(clinicType));
+            attributes.put("clinic_name", Arrays.asList(clinicName != null ? clinicName : ""));
+            attributes.put("clinic_type", Arrays.asList(clinicType != null ? clinicType : ""));
             attributes.put("active_tenant_id", Arrays.asList(tenantId)); // Set active tenant same as primary tenant initially
 
             // Initialize accessible_tenants with the primary tenant
             String accessibleTenants = String.format(
                 "[{\"tenant_id\":\"%s\",\"clinic_name\":\"%s\",\"clinic_type\":\"%s\",\"specialty\":\"%s\",\"roles\":%s}]",
-                tenantId, clinicName, clinicType, clinicType,
+                tenantId, clinicName != null ? clinicName : "", clinicType != null ? clinicType : "", clinicType != null ? clinicType : "",
                 convertRolesToJson(roles)
             );
             attributes.put("accessible_tenants", Arrays.asList(accessibleTenants));

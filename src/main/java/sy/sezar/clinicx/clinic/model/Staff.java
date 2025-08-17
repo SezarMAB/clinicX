@@ -55,6 +55,13 @@ public class Staff extends BaseEntity {
     @Column(name = "tenant_id", length = 255)
     private String tenantId;
 
+    // Source realm - tracks the Keycloak realm where the user originally exists
+    // This is crucial for cross-realm access scenarios where users from one realm
+    // can access tenants in another realm
+    @Size(max = 255)
+    @Column(name = "source_realm", length = 255)
+    private String sourceRealm;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "staff_specialties",

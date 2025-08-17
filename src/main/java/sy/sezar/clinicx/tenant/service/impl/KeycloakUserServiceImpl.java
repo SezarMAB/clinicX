@@ -9,6 +9,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import sy.sezar.clinicx.core.exception.BusinessRuleException;
 import sy.sezar.clinicx.core.exception.NotFoundException;
+import sy.sezar.clinicx.core.exception.ResourceNotFoundException;
 import sy.sezar.clinicx.tenant.constants.TenantConstants;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.tenant.service.KeycloakUserService;
@@ -24,13 +25,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class KeycloakUserServiceImpl implements KeycloakUserService {
-    
+
     private final KeycloakAdminService keycloakAdminService;
-    
+
     @Override
     public UserRepresentation getUser(String realmName, String userId) {
         try {
-            return getRealmResource(realmName)
+             return getRealmResource(realmName)
                 .users()
                 .get(userId)
                 .toRepresentation();
@@ -39,7 +40,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new NotFoundException(String.format(TenantConstants.ERROR_USER_NOT_FOUND, userId));
         }
     }
-    
+
     @Override
     public void updateUser(String realmName, String userId, UserRepresentation user) {
         try {
@@ -52,7 +53,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new BusinessRuleException(String.format(TenantConstants.ERROR_FAILED_TO_UPDATE_USER, e.getMessage()));
         }
     }
-    
+
     @Override
     public void setUserEnabled(String realmName, String userId, boolean enabled) {
         try {
@@ -65,7 +66,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new BusinessRuleException("Failed to update user status: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void deleteUser(String realmName, String userId) {
         try {
@@ -78,7 +79,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new BusinessRuleException(String.format(TenantConstants.ERROR_FAILED_TO_DELETE, e.getMessage()));
         }
     }
-    
+
     @Override
     public List<UserRepresentation> searchUsers(String realmName, String searchTerm) {
         try {
@@ -90,11 +91,11 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             return new ArrayList<>();
         }
     }
-    
+
     @Override
     public UserRepresentation findUserByUsername(String username) {
         List<String> realmNames = getAllRealmNames();
-        
+
         for (String realmName : realmNames) {
             try {
                 List<UserRepresentation> users = searchUsers(realmName, username);
@@ -109,14 +110,14 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
                 log.debug("Error searching in realm {}: {}", realmName, e.getMessage());
             }
         }
-        
+
         return null;
     }
-    
+
     @Override
     public UserRepresentation findUserById(String userId) {
         List<String> realmNames = getAllRealmNames();
-        
+
         for (String realmName : realmNames) {
             try {
                 UserRepresentation user = getUser(realmName, userId);
@@ -129,20 +130,20 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
                 log.debug("User not found in realm {}", realmName);
             }
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void updateUserAttributes(UserRepresentation user, Map<String, String> attributes) {
         ensureAttributes(user);
         Map<String, List<String>> userAttributes = user.getAttributes();
-        
-        attributes.forEach((key, value) -> 
+
+        attributes.forEach((key, value) ->
             userAttributes.put(key, Arrays.asList(value))
         );
     }
-    
+
     @Override
     public void resetPassword(String realmName, String userId, String newPassword, boolean temporary) {
         try {
@@ -157,27 +158,27 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new BusinessRuleException(String.format(TenantConstants.ERROR_FAILED_TO_RESET_PASSWORD, e.getMessage()));
         }
     }
-    
+
     @Override
     public void updateRealmRoles(String realmName, String userId, List<String> newRoles) {
         try {
             RealmResource realmResource = getRealmResource(realmName);
-            
+
             // Get all realm roles
             List<RoleRepresentation> allRoles = realmResource.roles().list();
-            
+
             // Get current user roles
             List<RoleRepresentation> currentRoles = realmResource.users().get(userId)
                 .roles().realmLevel().listEffective();
-            
+
             // Remove all current roles
             realmResource.users().get(userId).roles().realmLevel().remove(currentRoles);
-            
+
             // Add new roles
             List<RoleRepresentation> rolesToAdd = allRoles.stream()
                 .filter(role -> newRoles.contains(role.getName()))
                 .collect(Collectors.toList());
-            
+
             realmResource.users().get(userId).roles().realmLevel().add(rolesToAdd);
             log.info("Updated realm roles for user {} in realm {}", userId, realmName);
         } catch (Exception e) {
@@ -185,12 +186,12 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             throw new BusinessRuleException(String.format(TenantConstants.ERROR_FAILED_TO_UPDATE_ROLES, e.getMessage()));
         }
     }
-    
+
     @Override
     public RealmResource getRealmResource(String realmName) {
         return keycloakAdminService.getKeycloakInstance().realm(realmName);
     }
-    
+
     @Override
     public CredentialRepresentation createPasswordCredential(String password, boolean temporary) {
         CredentialRepresentation credential = new CredentialRepresentation();
@@ -199,7 +200,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
         credential.setTemporary(temporary);
         return credential;
     }
-    
+
     @Override
     public List<RoleRepresentation> getUserRealmRoles(String realmName, String userId) {
         try {
@@ -214,7 +215,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             return new ArrayList<>();
         }
     }
-    
+
     @Override
     public boolean userExists(String realmName, String userId) {
         try {
@@ -224,7 +225,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             return false;
         }
     }
-    
+
     @Override
     public List<String> getAllRealmNames() {
         try {
@@ -239,7 +240,49 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             return new ArrayList<>();
         }
     }
-    
+
+    @Override
+    public String findUserRealm(String userId) {
+        List<String> realmNames = getAllRealmNames();
+        for (String realmName : realmNames) {
+            try {
+                UserRepresentation user = getUser(realmName, userId);
+                if (user != null) {
+                    log.debug("Found user {} in realm {}", userId, realmName);
+                    return realmName;
+                }
+            } catch (NotFoundException e) {
+                // User not in this realm, continue searching
+                continue;
+            } catch (Exception e) {
+                log.debug("Error checking realm {} for user {}: {}", realmName, userId, e.getMessage());
+            }
+        }
+        log.warn("User {} not found in any realm", userId);
+        return null;
+    }
+
+    @Override
+    public UserRepresentation getUserFromAnyRealm(String userId) {
+        String userRealm = findUserRealm(userId);
+        if (userRealm != null) {
+            try {
+                return getUser(userRealm, userId);
+            } catch (Exception e) {
+                log.error("Failed to get user {} from realm {} despite finding them there", userId, userRealm, e);
+            }
+        }
+
+        // Fallback: try findUserById if direct lookup fails
+        UserRepresentation user = findUserById(userId);
+        if (user != null) {
+            log.debug("Found user {} using findUserById fallback", userId);
+            return user;
+        }
+
+        throw new ResourceNotFoundException(String.format("User %s not found in any realm", userId));
+    }
+
     private void ensureAttributes(UserRepresentation user) {
         if (user.getAttributes() == null) {
             user.setAttributes(new HashMap<>());

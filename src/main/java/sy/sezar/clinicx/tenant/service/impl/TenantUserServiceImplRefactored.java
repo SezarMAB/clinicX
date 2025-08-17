@@ -123,14 +123,15 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
             tenant.getSpecialty()
         );
         
-        // Create Staff record
+        // Create Staff record with source realm (same as tenant's realm for local users)
         Staff staff = staffManagementService.createStaff(
             tenantId,
             user.getId(),
             request.firstName() + " " + request.lastName(),
             request.email(),
             request.phoneNumber(),
-            roles
+            roles,
+            tenant.getRealmName() // For local users, source realm is the tenant's realm
         );
         
         // Create access record
@@ -297,16 +298,25 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
             throw new ResourceNotFoundException("User not found: " + username);
         }
         
+        // Find which realm the user belongs to
+        String userRealm = keycloakUserService.findUserRealm(user.getId());
+        if (userRealm == null) {
+            log.warn("Could not determine source realm for user {}, using null", user.getId());
+        } else {
+            log.info("User {} found in realm {}", user.getId(), userRealm);
+        }
+        
         Set<StaffRole> staffRoles = roleManagementService.parseRoles(roles);
         
-        // Create or reactivate Staff record
+        // Create or reactivate Staff record with source realm tracking
         Staff staff = staffManagementService.createOrReactivateExternalStaff(
             tenantId,
             user.getId(),
             user.getFirstName() + " " + user.getLastName(),
             user.getEmail(),
             null, // Phone number not available from external user
-            staffRoles
+            staffRoles,
+            userRealm // Track the source realm
         );
         
         // Create or reactivate access
@@ -398,11 +408,29 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
 
     private TenantUserDto createUserDto(Staff staff, Tenant tenant) {
         try {
-            UserRepresentation user = keycloakUserService.getUser(
-                tenant.getRealmName(), staff.getKeycloakUserId());
+            UserRepresentation user;
+            
+            // If staff has a source realm, fetch user from that realm
+            // This handles cross-realm access scenarios
+            if (staff.getSourceRealm() != null && !staff.getSourceRealm().isEmpty()) {
+                log.debug("Fetching user {} from source realm {}", 
+                         staff.getKeycloakUserId(), staff.getSourceRealm());
+                user = keycloakUserService.getUser(staff.getSourceRealm(), staff.getKeycloakUserId());
+            } else {
+                // Fallback: try tenant's realm first, then search all realms
+                try {
+                    user = keycloakUserService.getUser(tenant.getRealmName(), staff.getKeycloakUserId());
+                } catch (Exception tenantRealmEx) {
+                    log.debug("User not in tenant realm, searching all realms for user {}", 
+                             staff.getKeycloakUserId());
+                    user = keycloakUserService.getUserFromAnyRealm(staff.getKeycloakUserId());
+                }
+            }
+            
             return userMappingService.mapToDto(user, tenant.getTenantId(), staff);
         } catch (Exception e) {
-            log.warn(TenantConstants.LOG_USER_NOT_FOUND_IN_KEYCLOAK, staff.getKeycloakUserId());
+            log.warn(TenantConstants.LOG_USER_NOT_FOUND_IN_KEYCLOAK + " - {}", 
+                    staff.getKeycloakUserId(), e.getMessage());
             return null;
         }
     }

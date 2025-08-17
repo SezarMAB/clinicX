@@ -62,6 +62,14 @@ public class StaffManagementServiceImpl implements StaffManagementService {
     @Transactional
     public Staff createStaff(String tenantId, String keycloakUserId, String fullName, 
                            String email, String phoneNumber, Set<StaffRole> roles) {
+        // Default to tenant's realm if source realm not specified
+        return createStaff(tenantId, keycloakUserId, fullName, email, phoneNumber, roles, null);
+    }
+    
+    @Override
+    @Transactional
+    public Staff createStaff(String tenantId, String keycloakUserId, String fullName, 
+                           String email, String phoneNumber, Set<StaffRole> roles, String sourceRealm) {
         Staff staff = new Staff();
         staff.setTenantId(tenantId);
         staff.setKeycloakUserId(keycloakUserId);
@@ -70,6 +78,7 @@ public class StaffManagementServiceImpl implements StaffManagementService {
         staff.setPhoneNumber(phoneNumber);
         staff.setRoles(roles != null ? new HashSet<>(roles) : new HashSet<>());
         staff.setActive(true);
+        staff.setSourceRealm(sourceRealm);
         
         Staff savedStaff = staffRepository.save(staff);
         log.info(TenantConstants.LOG_CREATED_STAFF, fullName, savedStaff.getId());
@@ -159,6 +168,16 @@ public class StaffManagementServiceImpl implements StaffManagementService {
     public Staff createOrReactivateExternalStaff(String tenantId, String keycloakUserId, 
                                                 String fullName, String email, 
                                                 String phoneNumber, Set<StaffRole> roles) {
+        // Default to finding the user's realm if not specified
+        return createOrReactivateExternalStaff(tenantId, keycloakUserId, fullName, 
+                                              email, phoneNumber, roles, null);
+    }
+    
+    @Override
+    @Transactional
+    public Staff createOrReactivateExternalStaff(String tenantId, String keycloakUserId, 
+                                                String fullName, String email, 
+                                                String phoneNumber, Set<StaffRole> roles, String sourceRealm) {
         Optional<Staff> existingStaff = findByKeycloakUserIdAndTenantId(keycloakUserId, tenantId);
         
         if (existingStaff.isPresent()) {
@@ -166,14 +185,18 @@ public class StaffManagementServiceImpl implements StaffManagementService {
             if (!staff.isActive()) {
                 staff.setActive(true);
                 staff.setRoles(roles != null ? new HashSet<>(roles) : new HashSet<>());
+                // Update source realm if provided
+                if (sourceRealm != null) {
+                    staff.setSourceRealm(sourceRealm);
+                }
                 Staff reactivatedStaff = staffRepository.save(staff);
-                log.info("Reactivated external Staff record for user {} in tenant {}", 
-                        keycloakUserId, tenantId);
+                log.info("Reactivated external Staff record for user {} in tenant {} from realm {}", 
+                        keycloakUserId, tenantId, sourceRealm);
                 return reactivatedStaff;
             }
             throw new BusinessRuleException(TenantConstants.ERROR_USER_ALREADY_HAS_ACCESS);
         }
         
-        return createStaff(tenantId, keycloakUserId, fullName, email, phoneNumber, roles);
+        return createStaff(tenantId, keycloakUserId, fullName, email, phoneNumber, roles, sourceRealm);
     }
 }

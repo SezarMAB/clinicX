@@ -45,6 +45,12 @@ public interface StaffManagementService {
                      String email, String phoneNumber, Set<StaffRole> roles);
     
     /**
+     * Creates a new staff member with source realm tracking.
+     */
+    Staff createStaff(String tenantId, String keycloakUserId, String fullName, 
+                     String email, String phoneNumber, Set<StaffRole> roles, String sourceRealm);
+    
+    /**
      * Updates a staff member's information.
      */
     Staff updateStaff(Staff staff);
@@ -90,4 +96,11 @@ public interface StaffManagementService {
     Staff createOrReactivateExternalStaff(String tenantId, String keycloakUserId, 
                                          String fullName, String email, 
                                          String phoneNumber, Set<StaffRole> roles);
+    
+    /**
+     * Creates or reactivates a staff member for an external user with source realm tracking.
+     */
+    Staff createOrReactivateExternalStaff(String tenantId, String keycloakUserId, 
+                                         String fullName, String email, 
+                                         String phoneNumber, Set<StaffRole> roles, String sourceRealm);
 }

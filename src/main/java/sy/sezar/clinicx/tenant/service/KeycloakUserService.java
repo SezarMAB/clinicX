@@ -87,4 +87,16 @@ public interface KeycloakUserService {
      * Gets all realm names.
      */
     List<String> getAllRealmNames();
+    
+    /**
+     * Finds the realm where a user exists by their user ID.
+     * Returns the realm name or null if user not found.
+     */
+    String findUserRealm(String userId);
+    
+    /**
+     * Gets a user from any realm by their ID.
+     * First tries to find which realm the user belongs to, then fetches the user.
+     */
+    UserRepresentation getUserFromAnyRealm(String userId);
 }

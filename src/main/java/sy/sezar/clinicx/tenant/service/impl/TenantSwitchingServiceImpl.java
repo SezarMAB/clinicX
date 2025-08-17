@@ -45,7 +45,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         String userId = getCurrentUserId();
         log.debug("Getting accessible tenants for user: {}", userId);
 
-        List<Staff> staffList = staffRepository.findByKeycloakUserId(userId);
+        List<Staff> staffList = staffRepository.findByKeycloakUserIdAndIsActiveIsTrue(userId);
 
         // If multiple staff records exist, sync them to Keycloak
         if (staffList.size() > 1) {
@@ -438,7 +438,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         if (staff.getRoles() == null || staff.getRoles().isEmpty()) {
             return StaffRole.ASSISTANT.name();
         }
-        
+
         // Priority order: ADMIN > DOCTOR > ASSISTANT
         if (staff.getRoles().contains(StaffRole.ADMIN)) {
             return StaffRole.ADMIN.name();
@@ -449,7 +449,7 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         if (staff.getRoles().contains(StaffRole.ASSISTANT)) {
             return StaffRole.ASSISTANT.name();
         }
-        
+
         // Return the first role if none of the standard ones are found
         return staff.getRoles().iterator().next().name();
     }

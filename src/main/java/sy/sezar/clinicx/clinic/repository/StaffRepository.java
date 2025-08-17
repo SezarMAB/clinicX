@@ -45,6 +45,7 @@ public interface StaffRepository extends JpaRepository<Staff, UUID>, JpaSpecific
 
     // Methods updated for new architecture with keycloak_user_id
     List<Staff> findByKeycloakUserId(String keycloakUserId);
+    List<Staff> findByKeycloakUserIdAndIsActiveIsTrue(String keycloakUserId);
 
     List<Staff> findByTenantId(String tenantId);
 

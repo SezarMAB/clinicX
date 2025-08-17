@@ -35,7 +35,7 @@ INSERT INTO tenants (
     'master',
     'Master Clinic',
     'master',
-    'master-realm',
+    'master',
     'CLINIC',
     TRUE,
     'admin@master-clinic.com',
@@ -127,7 +127,7 @@ BEGIN
         updated_at = NOW(),
         updated_by = EXCLUDED.updated_by
     RETURNING id INTO access_id;
-    
+
     -- Insert the role into the user_tenant_access_roles table
     INSERT INTO user_tenant_access_roles (user_tenant_access_id, role)
     VALUES (access_id, 'SUPER_ADMIN')
@@ -140,7 +140,7 @@ END $$;
 
 -- Create a view to verify the setup
 CREATE OR REPLACE VIEW v_master_tenant_setup AS
-SELECT 
+SELECT
     t.tenant_id,
     t.name as tenant_name,
     t.subdomain,
@@ -173,7 +173,7 @@ BEGIN
     SELECT COUNT(*) INTO tenant_count FROM tenants WHERE tenant_id = 'master';
     SELECT COUNT(*) INTO staff_count FROM staff WHERE id = 'd4184f81-356a-4d28-82a3-c457fe645d41'::uuid;
     SELECT COUNT(*) INTO access_count FROM user_tenant_access WHERE user_id = 'd4184f81-356a-4d28-82a3-c457fe645d41' AND tenant_id = 'master';
-    
+
     RAISE NOTICE 'Master tenant initialization completed:';
     RAISE NOTICE '- Tenants created: %', tenant_count;
     RAISE NOTICE '- Admin staff created: %', staff_count;

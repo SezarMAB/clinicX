@@ -43,6 +43,10 @@ public interface UserTenantAccessRepository extends JpaRepository<UserTenantAcce
 
     boolean existsByUserIdAndTenantIdAndIsActiveTrue(String userId, String tenantId);
 
+    long countByUserIdAndIsActiveTrue(String userId);
+
+    Optional<UserTenantAccess> findByUserIdAndIsPrimaryTrueAndIsActiveTrue(String userId);
+
     void deleteByTenantId(String tenantId);
 
     void deleteByUserIdAndTenantId(String userId, String tenantId);

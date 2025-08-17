@@ -9,6 +9,7 @@
 //import org.keycloak.representations.idm.CredentialRepresentation;
 //import org.keycloak.representations.idm.RoleRepresentation;
 //import org.keycloak.representations.idm.UserRepresentation;
+//import org.springframework.context.annotation.Primary;
 //import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.PageImpl;
 //import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@
 // */
 //@Slf4j
 //@Service
+////@Primary
 //@RequiredArgsConstructor
 //public class TenantUserServiceImpl implements TenantUserService {
 //
@@ -657,7 +659,7 @@
 //        // Revoke tenant access in Keycloak
 //        keycloakAdminService.revokeTenantAccess(
 //            user.getAttributes().get("primary_realm").get(0),
-//            user.getUsername(),
+//            userId,
 //            tenantId
 //        );
 //

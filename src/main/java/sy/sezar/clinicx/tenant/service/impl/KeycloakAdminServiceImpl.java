@@ -1,6 +1,5 @@
 package sy.sezar.clinicx.tenant.service.impl;
 
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import sy.sezar.clinicx.core.exception.BusinessRuleException;
+import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.tenant.service.KeycloakAdminService;
 import sy.sezar.clinicx.clinic.model.enums.StaffRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -696,7 +696,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                     log.warn("Could not configure user profile for master realm, this might cause issues with custom attributes: {}", e.getMessage());
                 }
             }
-            
+
             RealmResource realmResource = getKeycloakInstance().realm(realmName);
             UsersResource usersResource = realmResource.users();
 
@@ -1093,9 +1093,12 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     @Override
-    public void revokeTenantAccess(String realmName, String username, String tenantId) {
+    public void revokeTenantAccess(String realmName, String userId, String tenantId) {
         try {
-            UserRepresentation user = getUserByUsername(realmName, username);
+            UserRepresentation user = getUserByUserId(realmName, userId);
+            if (user == null) {
+                throw new NotFoundException("User not found with ID: " + userId);
+            }
             Map<String, List<String>> attributes = user.getAttributes();
             if (attributes == null) {
                 return;
@@ -1124,7 +1127,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             user.setAttributes(attributes);
             getKeycloakInstance().realm(realmName).users().get(user.getId()).update(user);
 
-            log.info("Revoked access to tenant {} for user {} in realm {}", tenantId, username, realmName);
+            log.info("Revoked access to tenant {} for userId {} in realm {}", tenantId, userId, realmName);
 
         } catch (Exception e) {
             log.error("Failed to revoke tenant access", e);
@@ -1228,7 +1231,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             // Find the user by username
             List<UserRepresentation> users = realmResource.users().searchByUsername(username, true);
             if (users.isEmpty()) {
-                throw new sy.sezar.clinicx.core.exception.NotFoundException("User not found: " + username);
+                throw new NotFoundException("User not found: " + username);
             }
 
             UserRepresentation user = users.get(0);

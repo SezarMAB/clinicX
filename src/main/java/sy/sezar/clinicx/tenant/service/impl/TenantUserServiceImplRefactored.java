@@ -336,7 +336,7 @@ public class TenantUserServiceImplRefactored implements TenantUserService {
             try {
               keycloakAdminService.grantAdditionalTenantAccessByUserName(
                     userRealm,
-                    user.getId(),
+                    user.getUsername(),
                     tenantId,
                     tenant.getName(),
                     tenant.getSpecialty(),

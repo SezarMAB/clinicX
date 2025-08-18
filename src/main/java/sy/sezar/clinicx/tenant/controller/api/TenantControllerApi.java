@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/tenants")
 @Tag(name = "Tenants", description = "Multi-tenant management APIs")
 @SecurityRequirement(name = "bearer-jwt")
-@PreAuthorize("hasRole('GLOBAL_SUPER_ADMIN')")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 public interface TenantControllerApi {
 
     @PostMapping

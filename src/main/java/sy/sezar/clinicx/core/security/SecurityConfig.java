@@ -10,13 +10,19 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.core.GrantedAuthority;
+import java.util.Collection;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -24,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import sy.sezar.clinicx.tenant.repository.TenantRepository;
 import sy.sezar.clinicx.tenant.security.TenantAccessDecisionVoter;
 import sy.sezar.clinicx.tenant.security.TenantAuthorizationFilter;
+import sy.sezar.clinicx.tenant.filter.TenantContextFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
@@ -56,6 +63,12 @@ public class SecurityConfig {
     
     @Autowired
     private TenantAuthorizationFilter tenantAuthorizationFilter;
+    
+    @Autowired
+    private TenantContextFilter tenantContextFilter;
+    
+    @Autowired
+    private TenantAwareJwtAuthoritiesConverter tenantAwareJwtAuthoritiesConverter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -90,8 +103,11 @@ public class SecurityConfig {
                 )
             );
 
-        // Add tenant authorization filter if multi-tenant is enabled
+        // Add tenant filters if multi-tenant is enabled
         if (multiTenantEnabled) {
+            // Add tenant context filter early to establish tenant context
+            http.addFilterBefore(tenantContextFilter, UsernamePasswordAuthenticationFilter.class);
+            // Add tenant authorization filter for additional checks
             http.addFilterAfter(tenantAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         }
 
@@ -111,12 +127,26 @@ public class SecurityConfig {
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 
+    /**
+     * Custom JWT authentication converter that uses tenant-aware authority conversion.
+     * This method directly returns a JwtAuthenticationToken with only the authorities
+     * from our converter, ensuring no default role extraction occurs.
+     */
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthoritiesConverter());
-        converter.setPrincipalClaimName("preferred_username");
-        return converter;
+    public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        if (multiTenantEnabled) {
+            // Direct conversion to JwtAuthenticationToken with tenant-aware authorities only
+            return jwt -> {
+                Collection<GrantedAuthority> authorities = tenantAwareJwtAuthoritiesConverter.convert(jwt);
+                return new JwtAuthenticationToken(jwt, authorities, jwt.getClaimAsString("preferred_username"));
+            };
+        } else {
+            // Single-tenant mode: use standard converter (backward compatibility)
+            JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+            converter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthoritiesConverter());
+            converter.setPrincipalClaimName("preferred_username");
+            return converter;
+        }
     }
 
     @Bean

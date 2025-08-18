@@ -23,15 +23,16 @@ import sy.sezar.clinicx.tenant.dto.*;
  */
 @Tag(name = "Tenant User Management", description = "Endpoints for tenant admins to manage users")
 @RequestMapping("/api/v1/tenant/users")
+@PreAuthorize("hasAnyRole('ADMIN', 'GLOBAL_SUPER_ADMIN')")
 public interface TenantUserApi {
-    
+
     /**
      * Get all users in the current tenant.
      * This includes both internal users and external users with access.
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "List all users", 
+
+    @Operation(summary = "List all users",
                description = "Get paginated list of all users in the current tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
@@ -41,13 +42,13 @@ public interface TenantUserApi {
             @Parameter(description = "Include external users", required = false)
             @RequestParam(defaultValue = "true") boolean includeExternal,
             @Parameter(hidden = true) @PageableDefault(sort = "username") Pageable pageable);
-    
+
     /**
      * Search users by username, email, or name.
      */
     @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Search users", 
+
+    @Operation(summary = "Search users",
                description = "Search users by username, email, or name")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Search results retrieved"),
@@ -57,13 +58,13 @@ public interface TenantUserApi {
             @Parameter(description = "Search term", required = true)
             @RequestParam String searchTerm,
             @Parameter(hidden = true) @PageableDefault(sort = "username") Pageable pageable);
-    
+
     /**
      * Get a specific user by ID.
      */
     @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get user details", 
+
+    @Operation(summary = "Get user details",
                description = "Get detailed information about a specific user")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "User found",
@@ -74,13 +75,13 @@ public interface TenantUserApi {
     ResponseEntity<TenantUserDto> getUser(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId);
-    
+
     /**
      * Create a new user in the current tenant.
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create new user", 
+
+    @Operation(summary = "Create new user",
                description = "Create a new user in the current tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "User created successfully",
@@ -89,13 +90,13 @@ public interface TenantUserApi {
         @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     ResponseEntity<TenantUserDto> createUser(@Valid @RequestBody TenantUserCreateRequest request);
-    
+
     /**
      * Update an existing user.
      */
     @PutMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update user", 
+
+    @Operation(summary = "Update user",
                description = "Update an existing user's information")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "User updated successfully",
@@ -108,13 +109,13 @@ public interface TenantUserApi {
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId,
             @Valid @RequestBody TenantUserUpdateRequest request);
-    
+
     /**
      * Deactivate a user (soft delete).
      */
     @PostMapping("/{userId}/deactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Deactivate user", 
+
+    @Operation(summary = "Deactivate user",
                description = "Deactivate a user account (can be reactivated later)")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "User deactivated successfully"),
@@ -124,13 +125,13 @@ public interface TenantUserApi {
     ResponseEntity<Void> deactivateUser(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId);
-    
+
     /**
      * Reactivate a deactivated user.
      */
     @PostMapping("/{userId}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Activate user", 
+
+    @Operation(summary = "Activate user",
                description = "Reactivate a previously deactivated user account")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "User activated successfully"),
@@ -140,14 +141,14 @@ public interface TenantUserApi {
     ResponseEntity<Void> activateUser(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId);
-    
+
     /**
      * Delete a user permanently.
      * This should be used with caution as it cannot be undone.
      */
     @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Delete user permanently", 
+
+    @Operation(summary = "Delete user permanently",
                description = "Permanently delete a user (cannot be undone)")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "User deleted successfully"),
@@ -157,13 +158,13 @@ public interface TenantUserApi {
     ResponseEntity<Void> deleteUser(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId);
-    
+
     /**
      * Update user roles within the tenant.
      */
     @PutMapping("/{userId}/roles")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update user roles", 
+
+    @Operation(summary = "Update user roles",
                description = "Update the roles assigned to a user in this tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Roles updated successfully"),
@@ -174,14 +175,14 @@ public interface TenantUserApi {
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId,
             @Valid @RequestBody UpdateUserRolesRequest request);
-    
+
     /**
      * Grant an external user access to this tenant.
      * This allows users from other tenants to access this tenant with specific roles.
      */
     @PostMapping("/grant-access")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Grant external user access", 
+
+    @Operation(summary = "Grant external user access",
                description = "Grant a user from another tenant access to this tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Access granted successfully"),
@@ -190,13 +191,13 @@ public interface TenantUserApi {
         @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     ResponseEntity<TenantUserDto> grantExternalUserAccess(@Valid @RequestBody GrantExternalAccessRequest request);
-    
+
     /**
      * Revoke an external user's access to this tenant.
      */
     @DeleteMapping("/revoke-access/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Revoke external user access", 
+
+    @Operation(summary = "Revoke external user access",
                description = "Revoke an external user's access to this tenant")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Access revoked successfully"),
@@ -206,13 +207,13 @@ public interface TenantUserApi {
     ResponseEntity<Void> revokeExternalUserAccess(
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId);
-    
+
     /**
      * Get user activity logs.
      */
     @GetMapping("/{userId}/activity")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get user activity", 
+
+    @Operation(summary = "Get user activity",
                description = "Get activity logs for a specific user")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Activity logs retrieved"),
@@ -223,13 +224,13 @@ public interface TenantUserApi {
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId,
             @Parameter(hidden = true) @PageableDefault(sort = "timestamp,desc") Pageable pageable);
-    
+
     /**
      * Reset user password.
      */
     @PostMapping("/{userId}/reset-password")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Reset user password", 
+
+    @Operation(summary = "Reset user password",
                description = "Reset a user's password and optionally force them to change it on next login")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Password reset successfully"),

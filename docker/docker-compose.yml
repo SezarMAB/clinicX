@@ -85,14 +85,14 @@ services:
   keycloak-export:
     image: quay.io/keycloak/keycloak:26.3.2
     platform: linux/arm64
-    profiles: ["export"]
-    entrypoint: ["/opt/keycloak/bin/kc.sh"]
+    profiles: [ "export" ]
+    entrypoint: [ "/opt/keycloak/bin/kc.sh" ]
     command:
       - export
       - --dir
+      - /opt/keycloak/data
       - --users
-      - realm_file # ← no --optimized here
-      - /opt/keycloak/data             # where JSON files will appear
+      - realm_file
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://db:5432/keycloak
@@ -106,7 +106,7 @@ services:
       db:
         condition: service_healthy
     restart: "no"
-    networks: [keycloak_net_clinicX]
+    networks: [ keycloak_net_clinicX ]
 
 networks:
   keycloak_net_clinicX:

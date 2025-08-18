@@ -102,7 +102,7 @@ app:
     # Cache TTL for access validation (in seconds)
     # Lower values = more database hits but faster revocation
     # Higher values = fewer database hits but delayed revocation
-    access-cache-ttl: 100
+    access-cache-ttl: 100000
 
 # CORS configuration
 cors:

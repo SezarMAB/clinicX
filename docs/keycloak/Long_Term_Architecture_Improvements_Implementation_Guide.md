@@ -4,6 +4,8 @@
 
 This document provides a detailed implementation guide for the long-term architecture improvements to permanently solve the Keycloak mapper frontend freeze issue in ClinicX. The improvements focus on token optimization, caching strategies, and architectural patterns that ensure scalability and performance.
 
+**Update (Commit 78088eb)**: The complex `TenantAwareJwtAuthoritiesConverter` has been removed, simplifying the architecture. The system now uses standard `KeycloakJwtGrantedAuthoritiesConverter`, eliminating the need for complex JSON claims in tokens.
+
 ## Complexity Assessment Overview
 
 | Solution | Difficulty | Time Required | Risk Level | Business Impact |

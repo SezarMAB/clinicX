@@ -1,8 +1,21 @@
 # Keycloak Mapper Frontend Freeze Issue - Updated Solution Guide for ClinicX
+accessible_tenants
+clinic_type
+specialty
+tenant_id
+user_tenant_roles
+clinic name
+active_tenant_id
+## ⚠️ Important Update (Post-Commit 78088eb)
+
+The `TenantAwareJwtAuthoritiesConverter` class has been removed in the latest commit, significantly simplifying the solution:
+- **Before**: Complex JSON claims were required for backend authorization
+- **After**: Standard Keycloak realm roles are sufficient
+- **Impact**: We can now safely remove ALL complex JSON mappers without breaking backend authorization
 
 ## Executive Summary
 
-Based on analysis of the ClinicX codebase, the frontend freeze issue occurs when complex JSON mappers (`user_tenant_roles`, `accessible_tenants`) in JWT tokens cause parsing failures in the Angular application. This document provides an updated solution tailored to the ClinicX architecture.
+Based on analysis of the ClinicX codebase, the frontend freeze issue occurs when complex JSON mappers (`user_tenant_roles`, `accessible_tenants`) in JWT tokens cause parsing failures in the Angular application. With the removal of `TenantAwareJwtAuthoritiesConverter`, the solution is now much simpler.
 
 ## Current Implementation Analysis
 
@@ -15,13 +28,13 @@ Based on analysis of the ClinicX codebase, the frontend freeze issue occurs when
   - Line 453-458: `accessible_tenants` mapper with String type (JSON content)
   - Line 470-476: `user_tenant_roles` mapper with String type (JSON content)
 
-#### 2. TenantAwareJwtAuthoritiesConverter ⚠️ CRITICAL COMPONENT
-- **Location**: `clinicX/src/main/java/sy/sezar/clinicx/core/security/TenantAwareJwtAuthoritiesConverter.java`
+#### 2. KeycloakJwtGrantedAuthoritiesConverter (Current Implementation)
+- **Location**: `clinicX/src/main/java/sy/sezar/clinicx/core/security/KeycloakJwtGrantedAuthoritiesConverter.java`
 - **Current Behavior**: 
-  - Processes `user_tenant_roles` claim as JSON (lines 54-86)
-  - Handles both Map and String JSON formats
-  - **SECURITY CRITICAL**: Backend REQUIRES this claim for role-based authorization
-- **Impact**: Backend services depend on `user_tenant_roles` in JWT for authorization decisions
+  - Extracts roles from `realm_access` and `resource_access` claims
+  - Processes standard Keycloak role structures
+  - Maps roles to Spring Security authorities
+- **Note**: The complex `TenantAwareJwtAuthoritiesConverter` has been removed in commit 78088eb
 
 #### 3. TenantSwitchingServiceImpl
 - **Location**: `clinicX/src/main/java/sy/sezar/clinicx/tenant/service/impl/TenantSwitchingServiceImpl.java`
@@ -48,13 +61,11 @@ Current Token Structure:
 Total Token Size: 3-15KB (exceeds recommended 4KB limit)
 ```
 
-### Critical Discovery: Backend Authorization Dependency
-The `TenantAwareJwtAuthoritiesConverter` **requires** the `user_tenant_roles` claim in the JWT to:
-- Map tenant-specific roles to Spring Security authorities
-- Enforce role-based access control at the backend
-- Prevent cross-tenant privilege escalation
-
-This means we CANNOT simply remove these claims - we need a more sophisticated solution.
+### Update After Recent Changes (Commit 78088eb)
+The `TenantAwareJwtAuthoritiesConverter` has been removed, simplifying the architecture:
+- Backend now uses standard `KeycloakJwtGrantedAuthoritiesConverter`
+- Complex JSON claims (`user_tenant_roles`, `accessible_tenants`) are no longer required for authorization
+- This makes the solution simpler - we can now safely remove these complex claims from tokens
 
 ### Frontend Impact Points
 1. **Token Storage**: Browser localStorage/sessionStorage limitations
@@ -63,14 +74,18 @@ This means we CANNOT simply remove these claims - we need a more sophisticated s
 
 ## Immediate Solution for ClinicX
 
-### Solution Strategy: Audience-Based Token Claims
+### Simplified Solution Strategy
 
-Since the backend **requires** `user_tenant_roles` for authorization, we need a solution that:
-1. Keeps complex claims in backend tokens
-2. Removes complex claims from frontend tokens
-3. Uses Keycloak's audience feature to differentiate
+With the removal of `TenantAwareJwtAuthoritiesConverter`, we can now:
+1. Remove complex JSON claims from ALL tokens
+2. Use standard Keycloak realm roles for authorization
+3. Fetch tenant data via API endpoints instead of tokens
 
-### Step 1: Configure Audience-Specific Mappers [CRITICAL]
+### Step 1: Remove Complex Mappers [CRITICAL]
+
+**Current Problem**: The `configureProtocolMappers()` method in `KeycloakAdminServiceImpl` (lines 451-476) adds complex JSON mappers to BOTH frontend and backend clients:
+- Line 451-458: `accessible_tenants` mapper (JSON)
+- Line 470-476: `user_tenant_roles` mapper (JSON)
 
 Update `KeycloakAdminServiceImpl.configureProtocolMappers()`:
 
@@ -80,65 +95,61 @@ private void configureProtocolMappers(String realmName, String clientId) {
         RealmResource realmResource = getKeycloakInstance().realm(realmName);
         List<ProtocolMapperRepresentation> mappers = new ArrayList<>();
 
-        if (clientId.equals("clinicx-frontend")) {
-            // Frontend gets minimal claims
-            mappers.add(createUserAttributeMapper(
-                "tenant_id", "tenant_id", "tenant_id",
-                "String", true, true, true
-            ));
+        // Only add simple string mappers - NO JSON
+        // 1. Tenant ID Mapper
+        mappers.add(createUserAttributeMapper(
+            "tenant_id", "tenant_id", "tenant_id",
+            "String", true, true, true
+        ));
+
+        // 2. Active Tenant ID Mapper
+        mappers.add(createUserAttributeMapper(
+            "active_tenant_id", "active_tenant_id", "active_tenant_id",
+            "String", false, true, true
+        ));
+
+        // 3. Clinic Name Mapper
+        mappers.add(createUserAttributeMapper(
+            "clinic_name", "clinic_name", "clinic_name",
+            "String", true, true, true
+        ));
+
+        // 4. Clinic Type Mapper
+        mappers.add(createUserAttributeMapper(
+            "clinic_type", "clinic_type", "clinic_type",
+            "String", true, true, true
+        ));
+
+        // 5. Specialty Mapper
+        mappers.add(createUserAttributeMapper(
+            "specialty", "clinic_type", "specialty",
+            "String", false, true, true
+        ));
+
+        // DO NOT ADD accessible_tenants or user_tenant_roles
+        // These complex JSON mappers cause the frontend freeze
+
+        // Add mappers to the specific client
+        List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientId);
+        if (!clients.isEmpty()) {
+            String internalClientId = clients.get(0).getId();
+            ClientResource clientResource = realmResource.clients().get(internalClientId);
             
-            mappers.add(createUserAttributeMapper(
-                "active_tenant_id", "active_tenant_id", "active_tenant_id",
-                "String", false, true, true
-            ));
+            // Get existing mappers to avoid duplicates
+            List<ProtocolMapperRepresentation> existingMappers = 
+                clientResource.getProtocolMappers().getMappers();
+            Set<String> existingMapperNames = existingMappers.stream()
+                .map(ProtocolMapperRepresentation::getName)
+                .collect(Collectors.toSet());
             
-            mappers.add(createUserAttributeMapper(
-                "clinic_name", "clinic_name", "clinic_name",
-                "String", true, true, true
-            ));
-            
-            // Add a simplified role claim for frontend display only
-            mappers.add(createUserAttributeMapper(
-                "current_tenant_role", "current_tenant_role", "current_tenant_role",
-                "String", false, true, true
-            ));
-            
-        } else if (clientId.equals("clinicx-backend")) {
-            // Backend gets all claims including complex ones
-            mappers.add(createUserAttributeMapper(
-                "tenant_id", "tenant_id", "tenant_id",
-                "String", true, true, true
-            ));
-            
-            // CRITICAL: Backend needs this for TenantAwareJwtAuthoritiesConverter
-            mappers.add(createUserAttributeMapper(
-                "user_tenant_roles", "user_tenant_roles", "user_tenant_roles",
-                "String", false, true, false  // Only in access token
-            ));
-            
-            mappers.add(createUserAttributeMapper(
-                "accessible_tenants", "accessible_tenants", "accessible_tenants",
-                "String", false, true, false  // Only in access token
-            ));
-            
-            // Add audience mapper to ensure backend validates correctly
-            ProtocolMapperRepresentation audienceMapper = new ProtocolMapperRepresentation();
-            audienceMapper.setName("backend-audience");
-            audienceMapper.setProtocol("openid-connect");
-            audienceMapper.setProtocolMapper("oidc-audience-mapper");
-            audienceMapper.setConfig(Map.of(
-                "included.client.audience", "clinicx-backend",
-                "access.token.claim", "true"
-            ));
-            mappers.add(audienceMapper);
-        }
-        
-        // Apply mappers
-        ClientResource clientResource = realmResource.clients()
-            .get(findClientByClientId(realmResource, clientId).getId());
-        
-        for (ProtocolMapperRepresentation mapper : mappers) {
-            clientResource.getProtocolMappers().create(mapper);
+            // Add only new mappers
+            for (ProtocolMapperRepresentation mapper : mappers) {
+                if (!existingMapperNames.contains(mapper.getName())) {
+                    clientResource.getProtocolMappers().createMapper(mapper);
+                    log.info("Added mapper '{}' to client: {}", 
+                        mapper.getName(), clientId);
+                }
+            }
         }
         
     } catch (Exception e) {
@@ -200,9 +211,11 @@ public class UserTenantDataController {
 }
 ```
 
-### Step 3: Update TenantSwitchingServiceImpl
+### Step 3: Fix TenantSwitchingServiceImpl 
 
-Modify the service to update role information when switching tenants:
+**Critical Issue**: The `syncUserTenantsToKeycloak()` method (lines 383-437) is still creating the problematic JSON claims!
+
+Update the service to STOP syncing complex JSON to Keycloak:
 
 ```java
 @Service
@@ -220,17 +233,9 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
             throw new BusinessRuleException("Access denied to tenant: " + tenantId);
         }
         
-        // Get staff record for the new tenant
-        Staff staff = staffRepository.findByKeycloakUserIdAndTenantId(userId, tenantId)
-            .orElseThrow(() -> new BusinessRuleException("Staff record not found"));
-        
-        // Update both active_tenant_id AND current_tenant_role for frontend
+        // Update ONLY active_tenant_id - no complex JSON
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("active_tenant_id", List.of(tenantId));
-        attributes.put("current_tenant_role", List.of(getPrimaryRoleName(staff)));
-        
-        // IMPORTANT: Keep user_tenant_roles unchanged for backend authorization
-        // The backend still needs the full role mapping
         
         keycloakAdminService.updateUserAttributes(
             getCurrentRealm(), userId, attributes
@@ -238,9 +243,8 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
         
         return TenantSwitchResponseDto.builder()
             .tenantId(tenantId)
-            .role(getPrimaryRoleName(staff))
             .message("Switched successfully")
-            .requiresRefresh(true)  // Frontend must refresh token
+            .requiresRefresh(true)
             .build();
     }
     
@@ -248,7 +252,9 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
     public List<TenantAccessDto> getCurrentUserTenants() {
         String userId = getCurrentUserId();
         
-        // Fetch from database, not from JWT
+        // REMOVE the automatic sync to Keycloak (lines 53-68)
+        // This was creating the problematic JSON claims
+        
         List<Staff> staffList = staffRepository
             .findByKeycloakUserIdAndIsActiveIsTrue(userId);
         
@@ -257,6 +263,14 @@ public class TenantSwitchingServiceImpl implements TenantSwitchingService {
                 .validateUserAccess(userId, staff.getTenantId()))
             .map(this::mapToTenantAccessDto)
             .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Deprecated // This method should NOT be used
+    public void syncUserTenantsToKeycloak(String userId, String realmName, String username) {
+        // DO NOT sync complex JSON to Keycloak
+        // This method creates the problematic claims that freeze the frontend
+        log.warn("syncUserTenantsToKeycloak called but should not be used - skipping");
     }
 }
 ```
@@ -569,15 +583,13 @@ public class TenantCacheConfig {
 
 ## Important Security Considerations
 
-### Backend Authorization Integrity
-The `TenantAwareJwtAuthoritiesConverter` is critical for security:
-- **Lines 54-86**: Processes `user_tenant_roles` claim for role mapping
-- **Lines 41-44**: Uses `TenantContext.getCurrentTenant()` to filter roles
-- **Lines 112-136**: Only allows GLOBAL_ prefixed roles from realm_access
+### Simplified Backend Authorization (Post-Revert)
+After removing `TenantAwareJwtAuthoritiesConverter` (commit 78088eb), the backend now uses:
+- **KeycloakJwtGrantedAuthoritiesConverter**: Extracts roles from standard Keycloak claims
+- **Realm roles**: Authorization based on realm_access and resource_access claims
+- **No complex JSON claims required**: Simplifies token structure and prevents frontend freeze
 
-**CRITICAL**: The backend MUST continue to receive `user_tenant_roles` in JWT tokens for proper authorization. This solution maintains that while removing it from frontend tokens only.
-
-### Token Validation Flow
+### Simplified Token Flow
 ```mermaid
 sequenceDiagram
     participant Frontend
@@ -585,12 +597,15 @@ sequenceDiagram
     participant Keycloak
     
     Frontend->>Keycloak: Login (clinicx-frontend client)
-    Keycloak-->>Frontend: Simple token (no complex claims)
-    Frontend->>Backend: API call with simple token
-    Backend->>Backend: Validate audience claim
-    Backend->>Backend: TenantAwareJwtAuthoritiesConverter processes roles
-    Note over Backend: Backend token has user_tenant_roles
+    Keycloak-->>Frontend: Simple token (only basic claims)
+    Frontend->>Backend: API call with token
+    Backend->>Backend: KeycloakJwtGrantedAuthoritiesConverter extracts roles
+    Backend->>Backend: Authorize based on realm roles
     Backend-->>Frontend: Response
+    
+    Note over Frontend: Fetch tenant data via API if needed
+    Frontend->>Backend: GET /api/v1/user/tenant-access
+    Backend-->>Frontend: Tenant data (from database)
 ```
 
 ## Success Metrics
@@ -626,6 +641,72 @@ sequenceDiagram
 - **Frontend Team**: For Angular implementation
 - **Security Team**: For token security review
 
+## Implementation Checklist (Post-Revert)
+
+### Immediate Actions Required
+
+1. **Fix KeycloakAdminServiceImpl.java**
+   - [ ] Remove lines 451-458 (`accessible_tenants` mapper)
+   - [ ] Remove lines 470-476 (`user_tenant_roles` mapper)
+   - [ ] Keep only simple string mappers
+
+2. **Fix TenantSwitchingServiceImpl.java**
+   - [ ] Remove automatic sync in `getCurrentUserTenants()` (lines 53-68)
+   - [ ] Deprecate or remove `syncUserTenantsToKeycloak()` method (lines 383-437)
+   - [ ] Update `switchTenant()` to only update `active_tenant_id`
+
+3. **Clean Existing Keycloak Realms**
+   ```bash
+   # Remove problematic mappers from existing clients
+   kcadm.sh delete clients/{client-id}/protocol-mappers/accessible_tenants -r {realm}
+   kcadm.sh delete clients/{client-id}/protocol-mappers/user_tenant_roles -r {realm}
+   ```
+
+4. **Update User Attributes**
+   ```bash
+   # Remove JSON attributes from existing users
+   kcadm.sh update users/{user-id} -r {realm} \
+     -s 'attributes.accessible_tenants=' \
+     -s 'attributes.user_tenant_roles='
+   ```
+
+5. **Create API Endpoints**
+   - [ ] Implement `/api/v1/user/tenant-access` endpoint
+   - [ ] Implement `/api/v1/user/current-roles` endpoint
+
+6. **Update Frontend**
+   - [ ] Remove JSON parsing of complex claims
+   - [ ] Fetch tenant data via API instead of from token
+
+### Verification Steps
+
+1. **Check Token Size**
+   ```bash
+   # Should be < 2KB
+   curl -s https://keycloak/realms/{realm}/protocol/openid-connect/token \
+     -d "client_id=clinicx-frontend" \
+     -d "username=testuser" \
+     -d "password=****" \
+     -d "grant_type=password" | jq -r '.access_token' | wc -c
+   ```
+
+2. **Verify No Complex Claims**
+   ```bash
+   # Should NOT contain accessible_tenants or user_tenant_roles
+   curl -s https://keycloak/realms/{realm}/protocol/openid-connect/token \
+     -d "client_id=clinicx-frontend" \
+     -d "username=testuser" \
+     -d "password=****" \
+     -d "grant_type=password" | jq -r '.access_token' | \
+     awk -F. '{print $2}' | base64 -d | jq
+   ```
+
+3. **Test Frontend**
+   - [ ] Login works without freeze
+   - [ ] Page reload works without freeze
+   - [ ] Tenant switching works correctly
+   - [ ] Authorization still works with realm roles
+
 ## Appendix: Emergency Commands
 
 ```bash
@@ -648,7 +729,8 @@ kubectl logs -f deployment/clinicx-app | grep "JWT parse error"
 
 ---
 
-*Document Version: 2.0*  
+*Document Version: 3.0*  
 *Last Updated: 2025-01-18*  
+*Post-Revert Update: Reflects removal of TenantAwareJwtAuthoritiesConverter*  
 *Status: Ready for Implementation*  
 *Author: ClinicX Architecture Team*

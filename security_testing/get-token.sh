@@ -16,7 +16,7 @@ CONFIG='
       "users": {
         "saleh": "admin123",
         "ali":   "Admin123",
-        "ibro":  "Admin123"
+        "ibra":  "Admin123"
       }
     },
     "appointments-realm": {

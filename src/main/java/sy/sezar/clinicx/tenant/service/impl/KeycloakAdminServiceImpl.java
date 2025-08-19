@@ -568,7 +568,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     public void deleteRealm(String realmName) {
         try {
             getKeycloakInstance().realm(realmName).remove();
-        } catch (jakarta.ws.rs.NotFoundException e) {
+        } catch (NotFoundException e) {
             throw new BusinessRuleException("Realm not found: " + realmName);
         }
     }
@@ -578,7 +578,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         try {
             getKeycloakInstance().realm(realmName).toRepresentation();
             return true;
-        } catch (jakarta.ws.rs.NotFoundException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }
@@ -934,7 +934,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             } else {
                 throw new BusinessRuleException("User not found with ID: " + userId);
             }
-        } catch (jakarta.ws.rs.NotFoundException e) {
+        } catch (NotFoundException e) {
             log.error("User not found with ID: {}", userId);
             throw new BusinessRuleException("User not found with ID: " + userId);
         } catch (Exception e) {

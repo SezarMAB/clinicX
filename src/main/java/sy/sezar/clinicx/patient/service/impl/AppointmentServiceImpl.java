@@ -1,5 +1,8 @@
 package sy.sezar.clinicx.patient.service.impl;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -224,53 +227,45 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.debug("Appointment availability validation not yet implemented");
     }
 
-    @Override
-    public List<AppointmentCardDto> getTodayAppointmentsForCurrentUser() {
-        log.info("Getting today's appointments for current user");
-        
-        // Get current user's Keycloak ID
-        String keycloakUserId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new AccessDeniedException("No authenticated user found"));
-        
-        // Get current tenant
-        String currentTenantId = TenantContext.getCurrentTenant();
-        if (currentTenantId == null) {
-            throw new BusinessRuleException("No tenant context found");
-        }
-        
-        // Find the staff member for this user in the current tenant
-        Staff currentStaff = staffRepository.findByKeycloakUserIdAndTenantId(keycloakUserId, currentTenantId)
-                .orElseThrow(() -> new AccessDeniedException("Current user is not a staff member in this tenant"));
-        
-        log.debug("Found staff member {} with roles: {}", currentStaff.getFullName(), currentStaff.getRoles());
-        
-        // Get today's date range
-        LocalDate today = LocalDate.now();
-        Instant startOfDay = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant endOfDay = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
-        
-        List<Appointment> appointments;
-        
-        // Check user's role and fetch appointments accordingly
-        if (currentStaff.getRoles().contains(StaffRole.DOCTOR)) {
-            // Doctor: Get only their appointments
-            log.info("User is a DOCTOR, fetching only their appointments for today");
-            appointments = appointmentRepository.findByDoctorIdAndAppointmentDatetimeBetween(
-                    currentStaff.getId(), startOfDay, endOfDay);
-        } else if (currentStaff.getRoles().contains(StaffRole.NURSE) || 
-                   currentStaff.getRoles().contains(StaffRole.ASSISTANT) ||
-                   currentStaff.getRoles().contains(StaffRole.ADMIN) ||
-                   currentStaff.getRoles().contains(StaffRole.SUPER_ADMIN)) {
-            // Nurse/Assistant/Admin: Get all appointments for today
-            log.info("User is NURSE/ASSISTANT/ADMIN, fetching all appointments for today");
-            appointments = appointmentRepository
-                    .findByAppointmentDatetimeBetweenOrderByAppointmentDatetimeAsc(startOfDay, endOfDay);
-        } else {
-            // User doesn't have appropriate role
-            throw new AccessDeniedException("User does not have permission to view appointments. Required roles: DOCTOR, NURSE, or ASSISTANT");
-        }
-        
-        log.info("Found {} appointments for today", appointments.size());
-        return appointmentMapper.toAppointmentCardDtoList(appointments);
+  @Override
+  public List<AppointmentCardDto> getTodayAppointmentsForCurrentUser() {
+    log.info("Getting today's appointments for current user");
+
+    String keycloakUserId = SecurityUtils.getCurrentUserId()
+        .orElseThrow(() -> new AccessDeniedException("No authenticated user found"));
+
+    String tenantId = Optional.ofNullable(TenantContext.getCurrentTenant())
+        .orElseThrow(() -> new BusinessRuleException("No tenant context found"));
+
+    Staff currentStaff = staffRepository.findByKeycloakUserIdAndTenantId(keycloakUserId, tenantId)
+        .orElseThrow(() -> new AccessDeniedException("Current user is not a staff member in this tenant"));
+
+    log.debug("Found staff member {} with roles: {}", currentStaff.getFullName(), currentStaff.getRoles());
+
+    LocalDate today = LocalDate.now();
+    ZoneId zone = ZoneId.systemDefault();
+    Instant startOfDay = today.atStartOfDay(zone).toInstant();
+    Instant endOfDay = today.plusDays(1).atStartOfDay(zone).toInstant();
+
+    List<Appointment> appointments;
+    Set<StaffRole> roles = currentStaff.getRoles();
+
+    if (roles.contains(StaffRole.DOCTOR)) {
+      log.info("User is DOCTOR, fetching their appointments for today");
+      appointments = appointmentRepository.findByDoctorIdAndAppointmentDatetimeBetween(
+          currentStaff.getId(), startOfDay, endOfDay);
+    } else if (!Collections.disjoint(roles,
+        Set.of(StaffRole.NURSE, StaffRole.ASSISTANT, StaffRole.ADMIN, StaffRole.SUPER_ADMIN))) {
+      log.info("User is NURSE/ASSISTANT/ADMIN, fetching all appointments for today");
+      appointments = appointmentRepository.findByAppointmentDatetimeBetweenOrderByAppointmentDatetimeAsc(
+          startOfDay, endOfDay);
+    } else {
+      throw new AccessDeniedException(
+          "User lacks permission to view appointments. Required roles: DOCTOR, NURSE, ASSISTANT, ADMIN");
     }
+
+    log.info("Found {} appointments for today", appointments.size());
+    return appointmentMapper.toAppointmentCardDtoList(appointments);
+  }
+
 }

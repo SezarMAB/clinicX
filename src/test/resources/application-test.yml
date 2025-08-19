@@ -1,7 +1,7 @@
 # Test configuration
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb
     username: sa
     password: 
     driverClassName: org.h2.Driver
@@ -15,7 +15,7 @@ spring:
     show-sql: false
     
   flyway:
-    enabled: false  # Disable Flyway for tests
+    enabled: false
     
   security:
     oauth2:
@@ -23,19 +23,6 @@ spring:
         jwt:
           issuer-uri: http://localhost:18081/realms/clinicx-test
           jwk-set-uri: http://localhost:18081/realms/clinicx-test/protocol/openid-connect/certs
-
-# Application configuration for tests
-app:
-  security:
-    strict-tenant-validation: true
-    access-cache-ttl: 5  # Short TTL for testing
-  
-  multi-tenant:
-    enabled: false  # Disable for testing
-    
-  tenant:
-    mode: single
-    default-tenant: test-tenant
 
 # Test-specific configuration
 clinicx:
@@ -47,4 +34,3 @@ logging:
   level:
     root: WARN
     sy.sezar.clinicx: INFO
-    sy.sezar.clinicx.tenant.service.impl.TenantAccessValidatorImpl: DEBUG

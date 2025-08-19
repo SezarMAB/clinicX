@@ -93,16 +93,6 @@ app:
     realm-per-type: ${REALM_PER_TYPE:false}
   # Domain configuration
   domain: ${APP_DOMAIN}
-  # Security configuration
-  security:
-    # Enable strict tenant validation (database-first validation)
-    # When true: Database is checked FIRST, JWT is secondary
-    # When false: JWT is checked first, database is fallback (NOT RECOMMENDED)
-    strict-tenant-validation: true
-    # Cache TTL for access validation (in seconds)
-    # Lower values = more database hits but faster revocation
-    # Higher values = fewer database hits but delayed revocation
-    access-cache-ttl: 100
 
 # CORS configuration
 cors:

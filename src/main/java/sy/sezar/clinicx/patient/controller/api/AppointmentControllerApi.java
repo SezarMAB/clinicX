@@ -98,4 +98,15 @@ public interface AppointmentControllerApi {
     ResponseEntity<AppointmentCardDto> getAppointmentById(
             @Parameter(name = "id", description = "Appointment UUID", required = true)
             @PathVariable UUID id);
+
+    @GetMapping("/today")
+    @Operation(
+        summary = "Get today's appointments",
+        description = "Retrieves today's appointments based on user role. " +
+                     "DOCTOR: Returns only their own appointments. " +
+                     "NURSE/ASSISTANT/ADMIN: Returns all appointments for today."
+    )
+    @ApiResponse(responseCode = "200", description = "Appointments retrieved")
+    @ApiResponse(responseCode = "403", description = "User not authorized or not a staff member")
+    ResponseEntity<List<AppointmentCardDto>> getTodayAppointments();
 }

@@ -45,4 +45,14 @@ public interface AppointmentService {
      * Finds appointment by ID.
      */
     AppointmentCardDto findAppointmentById(UUID appointmentId);
+
+    /**
+     * Gets today's appointments based on the current user's role.
+     * For DOCTOR role: returns only their appointments.
+     * For NURSE/ASSISTANT/ADMIN roles: returns all appointments for today.
+     * 
+     * @return List of appointments for today based on user's role
+     * @throws AccessDeniedException if user is not a staff member
+     */
+    List<AppointmentCardDto> getTodayAppointmentsForCurrentUser();
 }

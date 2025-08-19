@@ -68,4 +68,11 @@ public class AppointmentControllerImpl implements AppointmentControllerApi {
         AppointmentCardDto appointment = appointmentService.findAppointmentById(id);
         return ResponseEntity.ok(appointment);
     }
+
+    @Override
+    public ResponseEntity<List<AppointmentCardDto>> getTodayAppointments() {
+        log.info("Retrieving today's appointments based on user role");
+        List<AppointmentCardDto> appointments = appointmentService.getTodayAppointmentsForCurrentUser();
+        return ResponseEntity.ok(appointments);
+    }
 }

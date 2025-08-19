@@ -27,7 +27,12 @@ public interface AppointmentService {
     List<AppointmentCardDto> getAppointmentsByDateRange(Instant startDateTime, Instant endDateTime);
 
     /**
-     * Gets appointments for a specific date (today's appointments).
+     * Gets appointments for a specific date based on the current user's role.
+     * For DOCTOR role: returns only their appointments for the given date.
+     * For NURSE/ASSISTANT/ADMIN roles: returns all appointments for the given date.
+     *
+     * @param date The date to get appointments for
+     * @return List of appointments for the given date based on user's role
      */
     List<AppointmentCardDto> getAppointmentsForDate(LocalDate date);
 
@@ -50,9 +55,15 @@ public interface AppointmentService {
      * Gets today's appointments based on the current user's role.
      * For DOCTOR role: returns only their appointments.
      * For NURSE/ASSISTANT/ADMIN roles: returns all appointments for today.
-     * 
+     *
      * @return List of appointments for today based on user's role
-     * @throws AccessDeniedException if user is not a staff member
      */
     List<AppointmentCardDto> getTodayAppointmentsForCurrentUser();
+    /**
+     * Gets today's appointments for the current user based on the provided date.
+     *
+     * @param today The date to get today's appointments for
+     * @return List of today's appointments for the current user
+     */
+    List<AppointmentCardDto> getTodayAppointmentsForCurrentUser(LocalDate today);
 }

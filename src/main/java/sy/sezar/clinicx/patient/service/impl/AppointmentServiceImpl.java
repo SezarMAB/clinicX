@@ -109,16 +109,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentCardDto> getAppointmentsForDate(LocalDate date) {
-        log.info("Getting appointments for specific date: {}", date);
-
-        Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant endOfDay = date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
-        log.debug("Date range converted to: {} - {}", startOfDay, endOfDay);
-
-        List<AppointmentCardDto> appointments = getAppointmentsByDateRange(startOfDay, endOfDay);
-        log.info("Retrieved {} appointments for date: {}", appointments.size(), date);
-
-        return appointments;
+        log.info("Getting appointments for date {} for current user", date);
+        return getTodayAppointmentsForCurrentUser(date);
     }
 
     @Override
@@ -229,6 +221,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
   @Override
   public List<AppointmentCardDto> getTodayAppointmentsForCurrentUser() {
+    return getTodayAppointmentsForCurrentUser(LocalDate.now());
+  }
+
+  @Override
+  public List<AppointmentCardDto> getTodayAppointmentsForCurrentUser(LocalDate today) {
     log.info("Getting today's appointments for current user");
 
     String keycloakUserId = SecurityUtils.getCurrentUserId()
@@ -242,7 +239,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     log.debug("Found staff member {} with roles: {}", currentStaff.getFullName(), currentStaff.getRoles());
 
-    LocalDate today = LocalDate.now();
     ZoneId zone = ZoneId.systemDefault();
     Instant startOfDay = today.atStartOfDay(zone).toInstant();
     Instant endOfDay = today.plusDays(1).atStartOfDay(zone).toInstant();

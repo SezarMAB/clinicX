@@ -13,7 +13,6 @@ import sy.sezar.clinicx.patient.model.DentalChart;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.repository.DentalChartRepository;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
-import sy.sezar.clinicx.patient.repository.ToothConditionRepository;
 import sy.sezar.clinicx.patient.service.DentalChartService;
 
 import java.time.LocalDate;
@@ -31,13 +30,11 @@ public class DentalChartServiceImpl implements DentalChartService {
 
     private final DentalChartRepository dentalChartRepository;
     private final PatientRepository patientRepository;
-    private final ToothConditionRepository toothConditionRepository;
-    private final ObjectMapper objectMapper;
 
     @Override
     public ChartDataDto getPatientDentalChart(UUID patientId) {
         log.info("Getting dental chart data for patient: {}", patientId);
-        
+
         if (patientId == null) {
             log.error("Patient ID cannot be null for dental chart retrieval");
             throw new IllegalArgumentException("Patient ID cannot be null");
@@ -48,24 +45,24 @@ public class DentalChartServiceImpl implements DentalChartService {
                     log.info("Creating new dental chart for patient: {}", patientId);
                     return createDefaultDentalChart(patientId);
                 });
-        
+
         return convertChartPayloadToChartDataDto(dentalChart.getChartData());
     }
-    
+
     @Override
     @Transactional
     public ChartToothDto updateToothCondition(UUID patientId, String toothId, ChartToothDto toothData) {
         log.info("Updating tooth {} for patient: {}", toothId, patientId);
-        
+
         DentalChart dentalChart = dentalChartRepository.findByPatientId(patientId)
                 .orElseGet(() -> createDefaultDentalChart(patientId));
-        
+
         ChartPayload.Tooth tooth = dentalChart.getChartData().getTeeth().get(toothId);
         if (tooth == null) {
             log.error("Tooth {} not found in dental chart for patient: {}", toothId, patientId);
             throw new NotFoundException("Tooth " + toothId + " not found for patient: " + patientId);
         }
-        
+
         // Update tooth data from DTO
         tooth.setCondition(toothData.condition());
         if (toothData.notes() != null) {
@@ -86,17 +83,17 @@ public class DentalChartServiceImpl implements DentalChartService {
             tooth.getFlags().setPeriapical(toothData.flags().periapical());
             tooth.getFlags().setAbscess(toothData.flags().abscess());
         }
-        
+
         tooth.setLastTreatmentDate(LocalDate.now().toString());
         dentalChartRepository.save(dentalChart);
-        
+
         return convertToothToChartToothDto(toothId, tooth);
     }
-    
+
     @Override
     public ChartToothDto getToothDetails(UUID patientId, String toothId) {
         log.info("Getting tooth {} details for patient: {}", toothId, patientId);
-        
+
         DentalChart dentalChart = dentalChartRepository.findByPatientId(patientId)
                 .orElseThrow(() -> {
                     log.error("Dental chart not found for patient: {}", patientId);
@@ -108,45 +105,45 @@ public class DentalChartServiceImpl implements DentalChartService {
             log.error("Tooth {} not found in dental chart for patient: {}", toothId, patientId);
             throw new NotFoundException("Tooth " + toothId + " not found for patient: " + patientId);
         }
-        
+
         return convertToothToChartToothDto(toothId, tooth);
     }
-    
+
     @Override
     @Transactional
-    public void updateSurfaceCondition(UUID patientId, String toothId, String surfaceName, 
+    public void updateSurfaceCondition(UUID patientId, String toothId, String surfaceName,
                                        String condition, String notes) {
         log.info("Updating surface {} of tooth {} for patient: {}", surfaceName, toothId, patientId);
-        
+
         DentalChart dentalChart = dentalChartRepository.findByPatientId(patientId)
                 .orElseThrow(() -> new NotFoundException("Dental chart not found for patient: " + patientId));
-        
+
         ChartPayload.Tooth tooth = dentalChart.getChartData().getTeeth().get(toothId);
         if (tooth == null) {
             throw new NotFoundException("Tooth " + toothId + " not found for patient: " + patientId);
         }
-        
+
         ChartPayload.Surface surface = tooth.getSurfaces().get(surfaceName);
         if (surface == null) {
             throw new NotFoundException("Surface " + surfaceName + " not found for tooth " + toothId);
         }
-        
+
         surface.setCondition(condition);
         // Note: Surface notes would be stored at tooth level if needed
-        
+
         dentalChartRepository.save(dentalChart);
     }
-    
+
     @Override
     @Transactional
     public ChartDataDto initializeDentalChart(UUID patientId) {
         log.info("Initializing dental chart for patient: {}", patientId);
-        
+
         // Check if chart already exists
         if (dentalChartRepository.findByPatientId(patientId).isPresent()) {
             throw new IllegalStateException("Dental chart already exists for patient: " + patientId);
         }
-        
+
         DentalChart dentalChart = createDefaultDentalChart(patientId);
         return convertChartPayloadToChartDataDto(dentalChart.getChartData());
     }
@@ -155,29 +152,29 @@ public class DentalChartServiceImpl implements DentalChartService {
     private DentalChart createDefaultDentalChart(UUID patientId) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new NotFoundException("Patient not found with ID: " + patientId));
-        
+
         DentalChart dentalChart = new DentalChart();
         dentalChart.setPatient(patient);
         dentalChart.setChartData(ChartPayload.createDefault());
-        
+
         return dentalChartRepository.save(dentalChart);
     }
-    
+
     private ChartDataDto convertChartPayloadToChartDataDto(ChartPayload chartPayload) {
         ChartDataDto.MetaDto meta = new ChartDataDto.MetaDto(
             chartPayload.getMeta().getVersion(),
             chartPayload.getMeta().getLastUpdated(),
             chartPayload.getMeta().getUpdatedBy()
         );
-        
+
         Map<String, ChartToothDto> teeth = new java.util.HashMap<>();
         chartPayload.getTeeth().forEach((toothId, tooth) -> {
             teeth.put(toothId, convertToothToChartToothDto(toothId, tooth));
         });
-        
+
         return new ChartDataDto(meta, teeth);
     }
-    
+
     private ChartToothDto convertToothToChartToothDto(String toothId, ChartPayload.Tooth tooth) {
         Map<String, ChartToothDto.SurfaceDto> surfaces = new java.util.HashMap<>();
         tooth.getSurfaces().forEach((name, surface) -> {
@@ -186,14 +183,14 @@ public class DentalChartServiceImpl implements DentalChartService {
                 null // Surface level notes not supported in current model
             ));
         });
-        
+
         ChartToothDto.FlagsDto flags = new ChartToothDto.FlagsDto(
             tooth.getFlags().isImpacted(),
             tooth.getFlags().isMobile(),
             tooth.getFlags().isPeriapical(),
             tooth.getFlags().isAbscess()
         );
-        
+
         return new ChartToothDto(
             toothId,
             tooth.getCondition(),

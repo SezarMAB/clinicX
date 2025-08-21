@@ -39,7 +39,6 @@ public class PatientServiceImpl implements PatientService {
     private final LabRequestRepository labRequestRepository;
     private final InvoiceRepository invoiceRepository;
     private final DentalChartRepository dentalChartRepository;
-    private final ToothConditionRepository toothConditionRepository;
     private final UpcomingAppointmentsViewRepository upcomingAppointmentsViewRepository;
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
     private final PatientCentralMapper patientMapper;

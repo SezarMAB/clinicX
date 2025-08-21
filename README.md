@@ -83,238 +83,316 @@ The application includes comprehensive test coverage:
 ```mermaid
 erDiagram
     clinic_info {
-        BOOLEAN id PK "Primary key, always TRUE"
-        VARCHAR name "Clinic name"
-        TEXT address "Clinic address"
-        VARCHAR phone_number "Contact phone"
-        VARCHAR email "Contact email"
-        VARCHAR timezone "Clinic timezone"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+        boolean id PK
+        varchar name
+        text address
+        varchar phone_number
+        varchar email
+        varchar timezone
+        timestamp created_at
+        timestamp updated_at
     }
-    specialties {
-        UUID id PK "Primary key"
-        VARCHAR name UK "Unique specialty name"
-        TEXT description "Specialty description"
-        BOOLEAN is_active "Active status"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+
+    tenants {
+        uuid id PK
+        varchar tenant_id UK
+        varchar name
+        varchar subdomain UK
+        varchar realm_name
+        boolean is_active
+        varchar contact_email
+        varchar contact_phone
+        text address
+        timestamp subscription_start_date
+        timestamp subscription_end_date
+        varchar subscription_plan
+        integer max_users
+        integer max_patients
+        varchar specialty
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
     }
+
+    specialty_types {
+        uuid id PK
+        varchar code UK
+        varchar name
+        varchar features
+        varchar realm_name
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
+    }
+
     staff {
-        UUID id PK "Primary key"
-        VARCHAR full_name "Staff member name"
-        VARCHAR role "Staff role"
-        VARCHAR email UK "Unique email"
-        VARCHAR phone_number "Contact phone"
-        BOOLEAN is_active "Active status"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+        uuid id PK
+        varchar full_name
+        varchar email
+        varchar phone_number
+        boolean is_active
+        varchar tenant_id
+        varchar keycloak_user_id
+        varchar source_realm
+        timestamp created_at
+        timestamp updated_at
     }
+
+    staff_roles {
+        uuid staff_id PK,FK
+        varchar role PK
+    }
+
+    user_tenant_access {
+        uuid id PK
+        varchar user_id
+        varchar tenant_id FK
+        boolean is_primary
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
+    }
+
+    user_tenant_access_roles {
+        uuid user_tenant_access_id PK,FK
+        varchar role PK
+    }
+
+    specialties {
+        uuid id PK
+        varchar name UK
+        text description
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
     staff_specialties {
-        UUID staff_id PK,FK "References staff"
-        UUID specialty_id PK,FK "References specialties"
+        uuid staff_id PK,FK
+        uuid specialty_id PK,FK
     }
+
     patients {
-        UUID id PK "Primary key"
-        VARCHAR public_facing_id UK "Public patient ID"
-        VARCHAR full_name "Patient name"
-        DATE date_of_birth "DOB"
-        VARCHAR gender "Patient gender"
-        VARCHAR phone_number "Contact phone"
-        VARCHAR email "Email address"
-        TEXT address "Home address"
-        VARCHAR insurance_provider "Insurance company"
-        VARCHAR insurance_number "Insurance ID"
-        TEXT important_medical_notes "Medical notes"
-        DECIMAL balance "Account balance"
-        BOOLEAN is_active "Active status"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
-        UUID created_by FK "References staff"
+        uuid id PK
+        varchar public_facing_id UK
+        varchar full_name
+        date date_of_birth
+        varchar gender
+        varchar phone_number
+        varchar email
+        text address
+        varchar insurance_provider
+        varchar insurance_number
+        text important_medical_notes
+        numeric balance
+        boolean is_active
+        uuid created_by FK
+        timestamp created_at
+        timestamp updated_at
     }
-    procedures {
-        UUID id PK "Primary key"
-        UUID specialty_id FK "References specialties"
-        VARCHAR procedure_code UK "Unique procedure code"
-        VARCHAR name "Procedure name"
-        TEXT description "Procedure description"
-        DECIMAL default_cost "Default cost"
-        INT default_duration_minutes "Default duration"
-        BOOLEAN is_active "Active status"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+
+    dental_charts {
+        uuid id PK
+        uuid patient_id UK,FK
+        json chart_data
+        timestamp created_at
+        timestamp updated_at
     }
+
     appointments {
-        UUID id PK "Primary key"
-        UUID specialty_id FK "References specialties"
-        UUID patient_id FK "References patients"
-        UUID doctor_id FK "References staff"
-        TIMESTAMPTZ appointment_datetime "Appointment date/time"
-        INT duration_minutes "Duration in minutes"
-        VARCHAR status "Appointment status"
-        TEXT notes "Appointment notes"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
-        UUID created_by FK "References staff"
+        uuid id PK
+        uuid specialty_id FK
+        uuid patient_id FK
+        uuid doctor_id FK
+        timestamp appointment_datetime
+        integer duration_minutes
+        varchar status
+        text notes
+        uuid created_by FK
+        timestamp created_at
+        timestamp updated_at
     }
+
+    procedures {
+        uuid id PK
+        uuid specialty_id FK
+        varchar procedure_code UK
+        varchar name
+        text description
+        numeric default_cost
+        integer default_duration_minutes
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
     treatments {
-        UUID id PK "Primary key"
-        UUID appointment_id FK "References appointments"
-        UUID patient_id FK "References patients"
-        UUID procedure_id FK "References procedures"
-        UUID doctor_id FK "References staff"
-        INT tooth_number "Tooth number (11-48)"
-        VARCHAR status "Treatment status"
-        DECIMAL cost "Treatment cost"
-        TEXT treatment_notes "Treatment notes"
-        DATE treatment_date "Treatment date"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
-        UUID created_by FK "References staff"
+        uuid id PK
+        uuid appointment_id FK
+        uuid patient_id FK
+        uuid procedure_id FK
+        uuid doctor_id FK
+        integer tooth_number
+        varchar status
+        numeric cost
+        text treatment_notes
+        date treatment_date
+        uuid created_by FK
+        timestamp created_at
+        timestamp updated_at
     }
+
     treatment_materials {
-        UUID id PK "Primary key"
-        UUID treatment_id FK "References treatments"
-        VARCHAR material_name "Material name"
-        DECIMAL quantity "Quantity used"
-        VARCHAR unit "Measurement unit"
-        DECIMAL cost_per_unit "Unit cost"
-        DECIMAL total_cost "Total cost"
-        VARCHAR supplier "Supplier name"
-        VARCHAR batch_number "Batch number"
-        TEXT notes "Material notes"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+        uuid id PK
+        uuid treatment_id FK
+        varchar material_name
+        numeric quantity
+        varchar unit
+        numeric cost_per_unit
+        numeric total_cost
+        varchar supplier
+        varchar batch_number
+        text notes
+        timestamp created_at
+        timestamp updated_at
     }
+
     tooth_conditions {
-        UUID id PK "Primary key"
-        VARCHAR code UK "Unique condition code"
-        VARCHAR name "Condition name"
-        TEXT description "Condition description"
-        VARCHAR color_hex "Display color"
-        BOOLEAN is_active "Active status"
-        TIMESTAMPTZ created_at "Creation timestamp"
+        uuid id PK
+        varchar code UK
+        varchar name
+        text description
+        varchar color_hex
+        boolean is_active
+        timestamp created_at
     }
-    patient_teeth {
-        UUID id PK "Primary key"
-        UUID patient_id FK "References patients"
-        INT tooth_number "Tooth number (11-48)"
-        UUID current_condition_id FK "References tooth_conditions"
-        TEXT notes "Tooth notes"
-        DATE last_treatment_date "Last treatment date"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
-    }
-    tooth_history {
-        UUID id PK "Primary key"
-        UUID patient_tooth_id FK "References patient_teeth"
-        UUID patient_id FK "References patients"
-        INT tooth_number "Tooth number"
-        UUID condition_id FK "References tooth_conditions"
-        UUID treatment_id FK "References treatments"
-        TIMESTAMPTZ change_date "Change date"
-        TEXT notes "History notes"
-        UUID recorded_by FK "References staff"
-        TIMESTAMPTZ created_at "Creation timestamp"
-    }
+
     invoices {
-        UUID id PK "Primary key"
-        UUID patient_id FK "References patients"
-        VARCHAR invoice_number UK "Unique invoice number"
-        DATE issue_date "Issue date"
-        DATE due_date "Due date"
-        DECIMAL total_amount "Total amount"
-        VARCHAR status "Invoice status"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
-        UUID created_by FK "References staff"
+        uuid id PK
+        uuid patient_id FK
+        varchar invoice_number UK
+        date issue_date
+        date due_date
+        numeric total_amount
+        varchar status
+        uuid created_by FK
+        timestamp created_at
+        timestamp updated_at
     }
+
     invoice_items {
-        UUID id PK "Primary key"
-        UUID invoice_id FK "References invoices"
-        UUID treatment_id UK,FK "References treatments"
-        VARCHAR description "Item description"
-        DECIMAL amount "Item amount"
-        TIMESTAMPTZ created_at "Creation timestamp"
+        uuid id PK
+        uuid invoice_id FK
+        uuid treatment_id UK,FK
+        varchar description
+        numeric amount
+        timestamp created_at
     }
+
     payments {
-        UUID id PK "Primary key"
-        UUID invoice_id FK "References invoices"
-        UUID patient_id FK "References patients"
-        DATE payment_date "Payment date"
-        DECIMAL amount "Payment amount"
-        VARCHAR payment_method "Payment method"
-        VARCHAR type "Payment type"
-        VARCHAR description "Payment description"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        UUID created_by FK "References staff"
+        uuid id PK
+        uuid invoice_id FK
+        uuid patient_id FK
+        date payment_date
+        numeric amount
+        varchar payment_method
+        varchar type
+        varchar description
+        varchar reference_number
+        uuid created_by FK
+        timestamp created_at
     }
+
     lab_requests {
-        UUID id PK "Primary key"
-        UUID patient_id FK "References patients"
-        VARCHAR order_number UK "Unique order number"
-        TEXT item_description "Item description"
-        INT tooth_number "Tooth number"
-        DATE date_sent "Date sent"
-        DATE date_due "Due date"
-        VARCHAR status "Request status"
-        VARCHAR lab_name "Lab name"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+        uuid id PK
+        uuid patient_id FK
+        varchar order_number UK
+        text item_description
+        integer tooth_number
+        date date_sent
+        date date_due
+        varchar status
+        varchar lab_name
+        timestamp created_at
+        timestamp updated_at
     }
+
     documents {
-        UUID id PK "Primary key"
-        UUID patient_id FK "References patients"
-        UUID uploaded_by_staff_id FK "References staff"
-        VARCHAR file_name "File name"
-        TEXT file_path "File path"
-        BIGINT file_size_bytes "File size"
-        VARCHAR mime_type "MIME type"
-        VARCHAR type "Document type"
-        TIMESTAMPTZ created_at "Creation timestamp"
+        uuid id PK
+        uuid patient_id FK
+        uuid uploaded_by_staff_id FK
+        varchar file_name
+        text file_path
+        bigint file_size_bytes
+        varchar mime_type
+        varchar type
+        timestamp created_at
     }
+
     notes {
-        UUID id PK "Primary key"
-        UUID patient_id FK "References patients"
-        TEXT content "Note content"
-        UUID created_by FK "References staff"
-        TIMESTAMPTZ note_date "Note date"
-        TIMESTAMPTZ created_at "Creation timestamp"
-        TIMESTAMPTZ updated_at "Last update timestamp"
+        uuid id PK
+        uuid patient_id FK
+        text content
+        uuid created_by FK
+        timestamp note_date
+        timestamp created_at
+        timestamp updated_at
     }
-    staff ||--o{ staff_specialties : "has"
-    specialties ||--o{ staff_specialties : "assigned to"
-    staff ||--o{ patients : "creates"
-    staff ||--o{ appointments : "performs"
-    staff ||--o{ appointments : "creates"
-    staff ||--o{ treatments : "performs"
-    staff ||--o{ treatments : "creates"
-    staff ||--o{ tooth_history : "records"
-    staff ||--o{ invoices : "creates"
-    staff ||--o{ payments : "creates"
-    staff ||--o{ documents : "uploads"
-    staff ||--o{ notes : "creates"
-    specialties ||--o{ procedures : "contains"
-    specialties ||--o{ appointments : "for"
-    patients ||--o{ appointments : "has"
-    patients ||--o{ treatments : "receives"
-    patients ||--o{ patient_teeth : "has"
-    patients ||--o{ tooth_history : "has"
-    patients ||--o{ invoices : "billed"
-    patients ||--o{ payments : "makes"
-    patients ||--o{ lab_requests : "has"
-    patients ||--o{ documents : "has"
-    patients ||--o{ notes : "has"
-    procedures ||--o{ treatments : "performed"
-    appointments ||--o{ treatments : "contains"
-    treatments ||--o{ invoice_items : "billed"
-    treatments ||--o{ tooth_history : "recorded"
-    treatments ||--o{ treatment_materials : "uses"
-    tooth_conditions ||--o{ patient_teeth : "current"
-    tooth_conditions ||--o{ tooth_history : "changed to"
-    patient_teeth ||--o{ tooth_history : "tracked"
-    invoices ||--o{ invoice_items : "contains"
-    invoices ||--o{ payments : "paid by"
+
+    flyway_schema_history {
+        integer installed_rank PK
+        varchar version
+        varchar description
+        varchar type
+        varchar script
+        integer checksum
+        varchar installed_by
+        timestamp installed_on
+        integer execution_time
+        boolean success
+    }
+
+%% Relationships
+    staff ||--o{ staff_roles : has
+    staff ||--o{ staff_specialties : has
+    specialties ||--o{ staff_specialties : has
+    specialties ||--o{ appointments : for
+    specialties ||--o{ procedures : contains
+
+    patients ||--o{ appointments : has
+    patients ||--o{ treatments : receives
+    patients ||--o{ invoices : has
+    patients ||--o{ payments : makes
+    patients ||--o{ lab_requests : has
+    patients ||--o{ documents : has
+    patients ||--o{ notes : has
+    patients ||--|| dental_charts : has
+
+    staff ||--o{ appointments : conducts
+    staff ||--o{ treatments : performs
+    staff ||--o{ patients : creates
+    staff ||--o{ invoices : creates
+    staff ||--o{ payments : records
+    staff ||--o{ documents : uploads
+    staff ||--o{ notes : creates
+    staff ||--o{ appointments : creates
+    staff ||--o{ treatments : creates
+
+    appointments ||--o{ treatments : generates
+    procedures ||--o{ treatments : used-in
+    treatments ||--o{ treatment_materials : uses
+    treatments ||--o| invoice_items : billed-in
+
+    invoices ||--o{ invoice_items : contains
+    invoices ||--o{ payments : receives
+
+    tenants ||--o{ user_tenant_access : has
+    user_tenant_access ||--o{ user_tenant_access_roles : has
 
 ```
 ## 📚 API Documentation

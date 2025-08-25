@@ -1,0 +1,133 @@
+# Development profile with Keycloak
+spring:
+  cache:
+    cache-names: specialties, specialty
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=60m
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clinic_x?currentSchema=public
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/local_demo_data
+
+  # Allow circular references in dev (for rapid development)
+  main:
+    allow-circular-references: true
+
+  # Security configuration for multi-tenant Keycloak
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Default issuer-uri for development (master realm)
+          issuer-uri: http://localhost:18081/realms/master
+          # jwk-set-uri is dynamically determined by MultiTenantJwtDecoder
+#          audiences: clinicx-backend
+
+
+# Reduced logging in development
+logging:
+  level:
+    root: INFO
+    sy.sezar.clinicx: DEBUG
+    org.springframework.security: DEBUG  # Reduce security logs
+    org.springframework.security.oauth2: DEBUG
+
+# CORS configuration for development
+cors:
+  allowed-origins:
+    - http://localhost:4200
+    - http://*.localhost:4200
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  exposed-headers:
+    - Authorization
+  allow-credentials: true
+
+
+# Development-specific tenant configuration
+#clinicx:
+#  tenant:
+#    mode: single  # Enable multi-tenant mode to match Angular
+#    default-id: dev-tenant-001
+
+#  security:
+#    keycloak:
+#      # Default realm for development (matches Angular's detectRealm() for localhost)
+#      realm: master
+#      client-id: clinicx-backend
+#      client-secret: ${KEYCLOAK_CLIENT_SECRET:SERq6fNbsj9GXaFJ2P87YthsKK64cUKp}
+
+# Application-specific configuration
+app:
+  # Multi-tenant configuration
+  multi-tenant:
+    enabled: true
+    default-realm: master
+    realm-per-type: true  # Enable realm-per-type instead of realm-per-tenant
+    # Pattern for realm naming: clinic-{subdomain}
+    realm-prefix: clinic-
+  tenant:
+    mode: multi  # Enable multi-tenant mode to match Angular
+    default-tenant: master
+    validation:
+      enabled: true  # Enable tenant access validation
+    specialty-realm-mapping:
+      enabled: true
+      auto-create-realm: true
+      default-features:
+        - APPOINTMENTS  # All specialties get appointments by default
+
+  # Domain configuration
+  domain: "localhost:4200"  # For development
+
+
+# Specialty type configurations
+specialty:
+  types:
+    - code: CLINIC
+      name: General Clinic
+      realm-name: clinic-realm
+      features:
+        - ALL
+    - code: DENTAL
+      name: Dental Clinic
+      realm-name: dental-realm
+      features:
+        - DENTAL
+        - APPOINTMENTS
+    - code: APPOINTMENTS
+      name: Appointments Only
+      realm-name: appointments-realm
+      features:
+        - APPOINTMENTS
+        -
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:18081
+  master-realm: master
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin
+
+  # Frontend client configuration (public client)
+  frontend:
+    client-id: clinicx-frontend
+    # No secret needed for public client

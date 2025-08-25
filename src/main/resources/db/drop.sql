@@ -58,6 +58,9 @@ DROP FUNCTION IF EXISTS validate_appointment_schedule();
 DROP FUNCTION IF EXISTS update_appointment_slot();
 DROP FUNCTION IF EXISTS update_patient_balance();
 
+
+
+
 -- ====================================================================
 -- STEP 3: DROP VIEWS (Optional - CASCADE on tables will drop these too)
 -- ====================================================================
@@ -114,7 +117,7 @@ DROP TABLE IF EXISTS tooth_surface_conditions CASCADE;
 DROP TABLE IF EXISTS tooth_surfaces CASCADE;
 DROP TABLE IF EXISTS tooth_measurements CASCADE;
 DROP TABLE IF EXISTS tooth_history CASCADE;
-DROP TABLE IF EXISTS patient_teeth CASCADE;
+DROP TABLE IF EXISTS dental_charts CASCADE;
 DROP TABLE IF EXISTS tooth_conditions CASCADE;
 
 -- Drop medical records tables
@@ -133,6 +136,17 @@ DROP TABLE IF EXISTS staff CASCADE;
 DROP TABLE IF EXISTS specialties CASCADE;
 DROP TABLE IF EXISTS clinic_info CASCADE;
 
+-- Drop Tenant Management tables
+DROP TABLE IF EXISTS tenants CASCADE;
+DROP TABLE IF EXISTS specialty_types CASCADE;
+DROP TABLE IF EXISTS user_tenant_access CASCADE;
+
+
+DROP TABLE IF EXISTS staff_roles CASCADE;
+DROP TABLE IF EXISTS user_tenant_access_roles;
+
+-- Drop financial functions
+DROP FUNCTION IF EXISTS update_updated_at_column();
 
 DROP TABLE IF EXISTS flyway_schema_history CASCADE;
 
@@ -149,6 +163,50 @@ DROP SEQUENCE IF EXISTS invoice_number_seq;
 -- Uncomment these lines only if you're sure no other schemas use these extensions
 DROP EXTENSION IF EXISTS btree_gist;
 DROP EXTENSION IF EXISTS pgcrypto;
+
+
+-- ================================
+-- DROP TRIGGERS AND FUNCTIONS
+-- ================================
+
+DROP TRIGGER IF EXISTS trg_calculate_material_total_cost ON treatment_materials;
+
+DROP FUNCTION IF EXISTS calculate_material_total_cost CASCADE;
+DROP FUNCTION IF EXISTS get_treatment_material_cost(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_patient_material_cost(UUID) CASCADE;
+
+-- ================================
+-- DROP VIEWS
+-- ================================
+
+DROP VIEW IF EXISTS v_patient_financial_summary;
+DROP VIEW IF EXISTS v_material_usage_stats;
+DROP VIEW IF EXISTS v_treatment_material_summary;
+
+-- ================================
+-- DROP INDEXES
+-- ================================
+
+DROP INDEX IF EXISTS idx_treatment_materials_created_at;
+DROP INDEX IF EXISTS idx_treatment_materials_supplier;
+DROP INDEX IF EXISTS idx_treatment_materials_name;
+DROP INDEX IF EXISTS idx_treatment_materials_treatment;
+
+DROP INDEX IF EXISTS idx_patients_full_name_lower;
+DROP INDEX IF EXISTS idx_patients_email_lower;
+DROP INDEX IF EXISTS idx_treatments_date;
+DROP INDEX IF EXISTS idx_treatments_status;
+DROP INDEX IF EXISTS idx_treatments_tooth_number;
+
+DROP INDEX IF EXISTS idx_user_tenant_access_user_id;
+DROP INDEX IF EXISTS idx_user_tenant_access_tenant_id;
+DROP INDEX IF EXISTS idx_tenants_specialty;
+
+-- ================================
+-- DROP TABLES
+-- ================================
+
+DROP TABLE IF EXISTS treatment_materials CASCADE;
 
 COMMIT;
 

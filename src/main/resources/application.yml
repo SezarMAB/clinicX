@@ -2,22 +2,133 @@ spring:
   application:
     name: clinicX
 
+  datasource:
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driverClassName: ${spring.datasource.driverClassName}
+
+#  profiles:
+#    active: postgres  # Default to H2 for development. Use 'postgres' for PostgreSQL
+
   jpa:
+    show-sql: false
     properties:
       hibernate:
+        dialect: ${spring.jpa.properties.hibernate.dialect}
         hbm2ddl:
           auto: validate
-  datasource:
-    url: jdbc:postgresql://localhost:5432/clinicx?currentSchema=public
-    username: postgres
-    password: postgres
-    driverClassName: org.postgresql.Driver
+        format_sql: true
+
   flyway:
     enabled: true
     baselineOnMigrate: true
     baseline-version: 0
-    out-of-order: true # NOTE only for local development
-    locations: classpath:db/migration
+    out-of-order: true
+    locations: ${flyway.locations}
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
+
+  # Security configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Dynamic issuer-uri will be handled by MultiTenantJwtDecoder
+          # These are fallback values for single-tenant mode
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:18081/realms/master}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:18081/realms/master/protocol/openid-connect/certs}
+
+# ClinicX specific configuration
+#clinicx:
+#  tenant:
+#    mode: ${TENANT_MODE:single}  # Options: single, multi
+#    default-id: ${DEFAULT_TENANT_ID:default-tenant}
+
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    sy.sezar.clinicx: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Application-specific configuration
+app:
+  date:
+    formats:
+      datetime:
+        - "yyyy-MM-dd'T'HH:mm:ss"
+        - "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        - "yyyy-MM-dd'T'HH:mm:ssX"
+        - "yyyy-MM-dd HH:mm:ss"
+      date: "yyyy-MM-dd"
+    default-timezone: UTC
+  tenant:
+    mode: ${TENANT_MODE:single}  # Options: single, multi
+    default-tenant: ${DEFAULT_TENANT_ID:master}
+    # Specialty realm mapping configuration
+    specialty-realm-mapping:
+      enabled: ${SPECIALTY_REALM_MAPPING_ENABLED:false}
+      auto-create-realm: ${AUTO_CREATE_REALM:true}
+      template-realm: ${TEMPLATE_REALM:master}
+      default-features:
+        - CORE
+        - APPOINTMENTS
+  # Multi-tenant configuration
+  multi-tenant:
+    enabled: ${MULTI_TENANT_ENABLED:true}
+    default-realm: ${DEFAULT_REALM:master}
+    # Pattern for realm naming: clinic-{subdomain}
+    realm-prefix: ${REALM_PREFIX:clinic-}
+    # Realm-per-type configuration
+    realm-per-type: ${REALM_PER_TYPE:false}
+  # Domain configuration
+  domain: ${APP_DOMAIN}
+
+# CORS configuration
+cors:
+  allowed-origins:
+    - http://localhost:4200
+    - http://*.localhost:4200
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  exposed-headers:
+    - Authorization
+  allow-credentials: true
+
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:18081
+  master-realm: master
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin
+
+# Springdoc OpenAPI configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  security-schemes:
+    bearer-jwt:
+      type: http
+      scheme: bearer
+      bearer-format: JWT
+      description: "Enter JWT Bearer token"

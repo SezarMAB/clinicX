@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  # ───────────────────────────
+  # 1) Postgres
+  # ───────────────────────────
+  db:
+    image: postgres:16-alpine            # multi-arch (arm64/amd64) manifest
+    platform: linux/arm64                # ← forces the ARM layer on M-series Macs
+    container_name: keycloak_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: change-me       # 🔒 change in production
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [keycloak_net_clinicX]
+
+  # ───────────────────────────
+  # 3) One-shot export helper
+  #    (run with: docker compose run --rm keycloak-export)
+  # ───────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2   # current GA (July 2025) [docs](https://www.keycloak.org/getting-started/getting-started-docker)
+    platform: linux/arm64
+    container_name: keycloak
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KEYCLOAK_ADMIN: admin                   # bootstrap admin (dev only)
+      KEYCLOAK_ADMIN_PASSWORD: admin          # ↳ change these!
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: change-me
+      # Optional: turn on metrics & health endpoints
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    command: ["start-dev"]                    # use 'start' for prod
+    ports:
+      - "18081:8080"
+    volumes:
+      - ./import:/opt/keycloak/data/import
+    restart: unless-stopped
+    networks: [keycloak_net_clinicX]
+
+
+  # docker compose run --rm keycloak-import
+  keycloak-import:
+    image: quay.io/keycloak/keycloak:26.3.2
+    entrypoint: ["/opt/keycloak/bin/kc.sh"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: change-me
+      QUARKUS_HTTP_ENABLED: 'false'
+      QUARKUS_MANAGEMENT_ENABLED: 'false'
+    command:
+      - import
+      - --dir
+      - /opt/keycloak/data             # looks at *every* JSON inside
+      - --override
+      - "true"
+    volumes:
+      - ./import:/opt/keycloak/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    networks: [keycloak_net_clinicX]
+  # ───────────────────────────
+  # 3) One-shot export helper
+  #    (run with: docker compose run --rm keycloak-export)
+  # ───────────────────────────
+  #  docker compose run --rm keycloak-export
+  # excerpt – ONLY the export helper changed
+  keycloak-export:
+    image: quay.io/keycloak/keycloak:26.3.2
+    platform: linux/arm64
+    profiles: [ "export" ]
+    entrypoint: [ "/opt/keycloak/bin/kc.sh" ]
+    command:
+      - export
+      - --dir
+      - /opt/keycloak/data
+      - --users
+      - realm_file
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: change-me
+      QUARKUS_HTTP_ENABLED: 'false'
+      QUARKUS_MANAGEMENT_ENABLED: 'false'
+    volumes:
+      - ./backup:/opt/keycloak/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    networks: [ keycloak_net_clinicX ]
+
+networks:
+  keycloak_net_clinicX:
+
+volumes:
+  pg_data:

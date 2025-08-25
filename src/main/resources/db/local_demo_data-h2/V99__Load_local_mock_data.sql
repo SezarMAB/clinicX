@@ -8,32 +8,50 @@
 MERGE INTO clinic_info (id, name, address, phone_number, email, timezone) KEY(id) VALUES 
 (TRUE, 'عيادة الأسنان المتقدمة', 'شارع الملك فهد، حي الروضة، جدة', '+966 12 123 4567', 'info@advanced-dental.sa', 'Asia/Riyadh');
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'DOCTOR', 'doctor1@clinic.sa', '+966 571183769', TRUE);
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'د. علي الإبراهيم', 'doctor1@clinic.sa', '+966 571183769', TRUE);
+
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', 'DOCTOR');
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('844e0809-f1e1-4f79-9c7c-d09754b25b6b', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'DOCTOR', 'doctor2@clinic.sa', '+966 534077971', TRUE);
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'د. حسن المصري', 'doctor2@clinic.sa', '+966 534077971', TRUE);
+
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', 'DOCTOR');
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('d9dcc98a-517b-4518-8d50-acdbf4a0b5d2', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'DOCTOR', 'doctor3@clinic.sa', '+966 560019543', TRUE);
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'د. عمر الحسن', 'doctor3@clinic.sa', '+966 560019543', TRUE);
+
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', 'DOCTOR');
 
 INSERT INTO staff_specialties (staff_id, specialty_id)
 VALUES ('b5ee786d-b86e-4ca3-a705-4417f1c65b03', (SELECT id FROM specialties WHERE name = 'General Dentistry'));
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'NURSE', 'nurse1@clinic.sa', '+966 575896163', TRUE);
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'أمل الخالد', 'nurse1@clinic.sa', '+966 575896163', TRUE);
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'NURSE', 'nurse2@clinic.sa', '+966 595905431', TRUE);
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('e9947118-bf36-494d-a826-eb6d6a0571ca', 'NURSE');
 
-INSERT INTO staff (id, full_name, role, email, phone_number, is_active)
-VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'RECEPTIONIST', 'reception@clinic.sa', '+966 548333325', TRUE);
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'رانيا الأحمد', 'nurse2@clinic.sa', '+966 595905431', TRUE);
+
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('a56a1fa3-f4f2-4a38-9dad-3cb6fa710f08', 'NURSE');
+
+INSERT INTO staff (id, full_name, email, phone_number, is_active)
+VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'أمل السعيد', 'reception@clinic.sa', '+966 548333325', TRUE);
+
+INSERT INTO staff_roles (staff_id, role)
+VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'RECEPTIONIST');
 
 -- Procedures
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
+import sy.sezar.clinicx.patient.model.enums.PaymentMethod;
+import sy.sezar.clinicx.patient.model.enums.PaymentStatus;
 import sy.sezar.clinicx.clinic.model.Staff;
 
 import java.math.BigDecimal;
@@ -42,14 +44,20 @@ public class Payment {
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
-    @Size(max = 50)
-    @Column(name = "payment_method", length = 50)
-    private String paymentMethod;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false, length = 50)
+    private PaymentMethod paymentMethod;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 50)
     private PaymentType type = PaymentType.PAYMENT;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 50)
+    private PaymentStatus status = PaymentStatus.COMPLETED;
 
     @Size(max = 255)
     @Column(name = "description", length = 255)

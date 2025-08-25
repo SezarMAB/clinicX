@@ -3,6 +3,7 @@ package sy.sezar.clinicx.patient.dto;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
+import sy.sezar.clinicx.patient.model.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,8 +20,7 @@ public record PaymentUpdateRequest(
     
     LocalDate paymentDate,
     
-    @Size(max = 50, message = "Payment method cannot exceed 50 characters")
-    String paymentMethod,
+    PaymentMethod paymentMethod,
     
     PaymentType type,
     

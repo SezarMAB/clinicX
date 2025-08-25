@@ -3,86 +3,110 @@ package sy.sezar.clinicx.core.security;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utility class for security-related operations.
+ * Utility class for Spring Security operations.
  */
+@Slf4j
 public final class SecurityUtils {
-    
+
     private SecurityUtils() {
-        // Utility class
+        // Private constructor to prevent instantiation
     }
-    
+
+    /**
+     * Get the current authenticated user's ID from the JWT token.
+     * 
+     * @return The user ID or null if not authenticated
+     */
+    public static String getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            // Try different possible claim names for user ID
+            if (jwt.getClaim("sub") != null) {
+                return jwt.getClaim("sub");
+            }
+            if (jwt.getClaim("user_id") != null) {
+                return jwt.getClaim("user_id");
+            }
+            if (jwt.getClaim("preferred_username") != null) {
+                return jwt.getClaim("preferred_username");
+            }
+        }
+        
+        return null;
+    }
+
     /**
      * Get the current authenticated user's username.
      * 
-     * @return Optional containing the username if authenticated
+     * @return The username or null if not authenticated
      */
-    public static Optional<String> getCurrentUsername() {
-        return getAuthentication()
-            .map(Authentication::getName);
+    public static String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            if (jwt.getClaim("preferred_username") != null) {
+                return jwt.getClaim("preferred_username");
+            }
+            if (jwt.getClaim("name") != null) {
+                return jwt.getClaim("name");
+            }
+        }
+        
+        return null;
     }
-    
-    /**
-     * Get the current JWT token.
-     * 
-     * @return Optional containing the JWT if present
-     */
-    public static Optional<Jwt> getCurrentJwt() {
-        return getAuthentication()
-            .filter(auth -> auth.getPrincipal() instanceof Jwt)
-            .map(auth -> (Jwt) auth.getPrincipal());
-    }
-    
-    /**
-     * Get the current user's ID from the JWT subject claim.
-     * 
-     * @return Optional containing the user ID if present
-     */
-    public static Optional<String> getCurrentUserId() {
-        return getCurrentJwt()
-            .map(jwt -> jwt.getClaimAsString("sub"));
-    }
-    
-    /**
-     * Get the current tenant ID from the JWT.
-     * 
-     * @return Optional containing the tenant ID if present
-     */
-    public static Optional<String> getCurrentTenantId() {
-        return getCurrentJwt()
-            .map(jwt -> jwt.getClaimAsString("tenant_id"));
-    }
-    
+
     /**
      * Check if the current user has a specific role.
      * 
-     * @param role the role to check (without ROLE_ prefix)
-     * @return true if the user has the role
+     * @param role The role to check (without ROLE_ prefix)
+     * @return true if the user has the role, false otherwise
      */
     public static boolean hasRole(String role) {
-        return getAuthentication()
-            .map(auth -> auth.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + role)))
-            .orElse(false);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication != null && authentication.getAuthorities() != null) {
+            String roleWithPrefix = "ROLE_" + role;
+            return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals(roleWithPrefix));
+        }
+        
+        return false;
     }
-    
+
     /**
-     * Check if the current user has a specific feature enabled.
+     * Check if a user is authenticated.
      * 
-     * @param feature the feature to check (e.g., "FEATURE_DENTAL_MODULE")
-     * @return true if the user has the feature
+     * @return true if authenticated, false otherwise
      */
-    public static boolean hasFeature(String feature) {
-        return getAuthentication()
-            .map(auth -> auth.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals(feature)))
-            .orElse(false);
+    public static boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated();
     }
-    
-    private static Optional<Authentication> getAuthentication() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+
+    /**
+     * Get the current tenant ID from the JWT token.
+     * 
+     * @return The tenant ID or null if not present
+     */
+    public static String getCurrentTenantId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            if (jwt.getClaim("tenant_id") != null) {
+                return jwt.getClaim("tenant_id");
+            }
+            if (jwt.getClaim("tenantId") != null) {
+                return jwt.getClaim("tenantId");
+            }
+        }
+        
+        return null;
     }
 }

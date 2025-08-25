@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import sy.sezar.clinicx.patient.model.enums.InvoiceItemType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,6 +31,10 @@ public class InvoiceItem {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "treatment_id", unique = true)
     private Treatment treatment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_type", length = 30)
+    private InvoiceItemType itemType = InvoiceItemType.PROCEDURE;
 
     @NotNull
     @Size(max = 255)

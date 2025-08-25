@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
+import sy.sezar.clinicx.patient.model.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,8 +27,7 @@ public record BulkPaymentItem(
     LocalDate paymentDate,
     
     @NotNull(message = "Payment method is required")
-    @Size(max = 50, message = "Payment method cannot exceed 50 characters")
-    String paymentMethod,
+    PaymentMethod paymentMethod,
     
     @NotNull(message = "Payment type is required")
     PaymentType type,

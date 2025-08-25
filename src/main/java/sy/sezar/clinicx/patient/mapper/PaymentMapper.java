@@ -39,6 +39,7 @@ public interface PaymentMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "type", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(source = "notes", target = "description")
     Payment toEntity(PaymentCreateRequest request);
 
@@ -54,6 +55,7 @@ public interface PaymentMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "type", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(source = "reason", target = "description")
     @Mapping(source = "refundDate", target = "paymentDate")
     Payment toRefundEntity(RefundRequest request);
@@ -70,6 +72,7 @@ public interface PaymentMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "type", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(source = "notes", target = "description")
     void updatePaymentFromRequest(PaymentCreateRequest request, @MappingTarget Payment payment);
 }

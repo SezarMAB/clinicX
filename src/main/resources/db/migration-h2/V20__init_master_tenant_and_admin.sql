@@ -66,7 +66,7 @@ MERGE INTO staff (
     created_at,
     updated_at
 ) KEY(id) VALUES (
-    PARSEUUID('d4184f81-356a-4d28-82a3-c457fe645d41'),
+    'd4184f81-356a-4d28-82a3-c457fe645d41',
     'System Administrator',
     'admin@master-clinic.com',
     '+1-555-0100',
@@ -80,7 +80,7 @@ MERGE INTO staff (
 -- Insert role into staff_roles table
 MERGE INTO staff_roles (staff_id, role)
 KEY(staff_id, role)
-VALUES (PARSEUUID('d4184f81-356a-4d28-82a3-c457fe645d41'), 'ADMIN');
+VALUES ('d4184f81-356a-4d28-82a3-c457fe645d41', 'ADMIN');
 
 -- ====================================================================
 -- USER TENANT ACCESS RELATIONSHIP

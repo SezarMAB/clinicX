@@ -127,7 +127,7 @@ SPRING_PROFILES_ACTIVE=h2,realm-per-type APP_DOMAIN=example.com ./gradlew bootRu
 ### Adding New Entities
 1. Create JPA entity in appropriate model package
 2. Add repository interface extending `JpaRepository`
-3. Create DTOs for API requests/responses
+3. Create DTOs with Java records for API requests/responses
 4. Implement MapStruct mapper
 5. Add service layer with validation
 6. Create REST controller with proper security annotations

@@ -28,7 +28,7 @@ public interface TreatmentControllerApi {
         summary = "Create new treatment",
         description = "Creates a new treatment record for a patient."
     )
-    @ApiResponse(responseCode = "201", description = "Treatment created",
+    @ApiResponse(responseCode = "201", description = "Visit created",
                 content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "404", description = "Patient or procedure not found")
@@ -47,7 +47,7 @@ public interface TreatmentControllerApi {
             @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
         }
     )
-    @ApiResponse(responseCode = "200", description = "Treatment history retrieved")
+    @ApiResponse(responseCode = "200", description = "Visit history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
@@ -59,11 +59,11 @@ public interface TreatmentControllerApi {
         summary = "Get treatment by ID",
         description = "Retrieves a specific treatment by its UUID."
     )
-    @ApiResponse(responseCode = "200", description = "Treatment found",
+    @ApiResponse(responseCode = "200", description = "Visit found",
                 content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
-    @ApiResponse(responseCode = "404", description = "Treatment not found")
+    @ApiResponse(responseCode = "404", description = "Visit not found")
     ResponseEntity<TreatmentLogDto> getTreatmentById(
-            @Parameter(name = "id", description = "Treatment UUID", required = true)
+            @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id);
 
     @PutMapping("/{id}")
@@ -71,12 +71,12 @@ public interface TreatmentControllerApi {
         summary = "Update treatment",
         description = "Updates an existing treatment record."
     )
-    @ApiResponse(responseCode = "200", description = "Treatment updated",
+    @ApiResponse(responseCode = "200", description = "Visit updated",
                 content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
-    @ApiResponse(responseCode = "404", description = "Treatment not found")
+    @ApiResponse(responseCode = "404", description = "Visit not found")
     @ApiResponse(responseCode = "400", description = "Validation error")
     ResponseEntity<TreatmentLogDto> updateTreatment(
-            @Parameter(name = "id", description = "Treatment UUID", required = true)
+            @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody TreatmentCreateRequest request);
 
@@ -85,10 +85,10 @@ public interface TreatmentControllerApi {
         summary = "Delete treatment",
         description = "Deletes a treatment record by its UUID."
     )
-    @ApiResponse(responseCode = "204", description = "Treatment deleted")
-    @ApiResponse(responseCode = "404", description = "Treatment not found")
+    @ApiResponse(responseCode = "204", description = "Visit deleted")
+    @ApiResponse(responseCode = "404", description = "Visit not found")
     ResponseEntity<Void> deleteTreatment(
-            @Parameter(name = "id", description = "Treatment UUID", required = true)
+            @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id);
 
     @PostMapping("/search")

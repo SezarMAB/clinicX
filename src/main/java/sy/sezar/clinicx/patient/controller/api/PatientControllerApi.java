@@ -139,7 +139,7 @@ public interface PatientControllerApi {
             @Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
         }
     )
-    @ApiResponse(responseCode = "200", description = "Treatment history retrieved")
+    @ApiResponse(responseCode = "200", description = "Visit history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
     ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(
             @Parameter(description = "Patient ID") @PathVariable UUID id,

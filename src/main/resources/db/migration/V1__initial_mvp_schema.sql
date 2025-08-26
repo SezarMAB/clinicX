@@ -125,7 +125,7 @@ CREATE TABLE appointments (
                               CONSTRAINT chk_appointment_duration CHECK (duration_minutes > 0)
 );
 
-CREATE TABLE treatments (
+CREATE TABLE visits (
                             id                   UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
                             appointment_id       UUID           NOT NULL REFERENCES appointments (id) ON DELETE CASCADE,
                             patient_id           UUID           NOT NULL REFERENCES patients (id) ON DELETE CASCADE,
@@ -134,8 +134,8 @@ CREATE TABLE treatments (
                             tooth_number         INT,
                             status               VARCHAR(50)    NOT NULL DEFAULT 'COMPLETED',
                             cost                 DECIMAL(10, 2) NOT NULL,
-                            treatment_notes      TEXT,
-                            treatment_date       DATE           NOT NULL,
+                            visit_notes      TEXT,
+                            visit_date       DATE           NOT NULL,
                             created_at           TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
                             updated_at           TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
                             created_by           UUID REFERENCES staff(id),
@@ -163,7 +163,7 @@ INSERT INTO tooth_conditions (code, name, description, color_hex) VALUES
                                                                       ('CAVITY', 'Cavity', 'Tooth has cavity/caries', '#FF5722'),
                                                                       ('FILLED', 'Filled', 'Tooth has been filled', '#2196F3'),
                                                                       ('CROWN', 'Crown', 'Tooth has a crown', '#9C27B0'),
-                                                                      ('ROOT_CANAL', 'Root Canal', 'Tooth has had root canal treatment', '#FF9800'),
+                                                                      ('ROOT_CANAL', 'Root Canal', 'Tooth has had root canal visit', '#FF9800'),
                                                                       ('EXTRACTED', 'Extracted', 'Tooth has been extracted', '#9E9E9E'),
                                                                       ('MISSING', 'Missing', 'Tooth is congenitally missing', '#757575'),
                                                                       ('IMPLANT', 'Implant', 'Dental implant', '#00BCD4'),
@@ -177,7 +177,7 @@ CREATE TABLE patient_teeth (
                                tooth_number         INT NOT NULL CHECK (tooth_number BETWEEN 11 AND 48),
                                current_condition_id UUID REFERENCES tooth_conditions(id),
                                notes                TEXT,
-                               last_treatment_date  DATE,
+                               last_visits_date  DATE,
                                created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                UNIQUE(patient_id, tooth_number)
@@ -189,7 +189,7 @@ CREATE TABLE tooth_history (
                                patient_id       UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
                                tooth_number     INT NOT NULL,
                                condition_id     UUID REFERENCES tooth_conditions(id),
-                               treatment_id     UUID REFERENCES treatments(id),
+                               visit_id     UUID REFERENCES visits(id),
                                change_date      TIMESTAMPTZ NOT NULL,
                                notes            TEXT,
                                recorded_by      UUID NOT NULL REFERENCES staff(id),
@@ -218,7 +218,7 @@ CREATE TABLE invoices (
 CREATE TABLE invoice_items (
                                id           UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
                                invoice_id   UUID           NOT NULL REFERENCES invoices (id) ON DELETE CASCADE,
-                               treatment_id UUID UNIQUE             REFERENCES treatments (id) ON DELETE RESTRICT,
+                               visit_id UUID UNIQUE             REFERENCES visits (id) ON DELETE RESTRICT,
                                description  VARCHAR(255)   NOT NULL,
                                amount       DECIMAL(10, 2) NOT NULL,
                                created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
@@ -295,9 +295,9 @@ CREATE INDEX idx_appointments_patient ON appointments(patient_id);
 CREATE INDEX idx_appointments_doctor ON appointments(doctor_id);
 CREATE INDEX idx_appointments_status ON appointments(status);
 
--- Treatment indexes
-CREATE INDEX idx_treatments_patient ON treatments(patient_id);
-CREATE INDEX idx_treatments_appointment ON treatments(appointment_id);
+-- visit indexes
+CREATE INDEX idx_visits_patient ON visits(patient_id);
+CREATE INDEX idx_visits_appointment ON visits(appointment_id);
 
 -- Financial indexes
 CREATE INDEX idx_invoices_patient ON invoices(patient_id);
@@ -321,7 +321,7 @@ SELECT
     tc.name as condition_name,
     tc.color_hex,
     pt.notes,
-    pt.last_treatment_date
+    pt.last_visits_date
 FROM patient_teeth pt
          LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
 ORDER BY pt.tooth_number;

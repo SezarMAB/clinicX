@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialSearchCriteria;
 import sy.sezar.clinicx.patient.model.Patient;
-import sy.sezar.clinicx.patient.model.Treatment;
+import sy.sezar.clinicx.patient.model.Visit;
 import sy.sezar.clinicx.patient.model.TreatmentMaterial;
 
 import java.time.LocalDate;
@@ -33,22 +33,22 @@ public final class TreatmentMaterialSpecifications {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Treatment ID filter
+            // Visit ID filter
             if (criteria.treatmentId() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("treatment").get("id"), criteria.treatmentId()));
             }
 
             // Patient ID filter
             if (criteria.patientId() != null) {
-                Join<TreatmentMaterial, Treatment> treatmentJoin = root.join("treatment", JoinType.LEFT);
-                Join<Treatment, Patient> patientJoin = treatmentJoin.join("patient", JoinType.LEFT);
+                Join<TreatmentMaterial, Visit> treatmentJoin = root.join("treatment", JoinType.LEFT);
+                Join<Visit, Patient> patientJoin = treatmentJoin.join("patient", JoinType.LEFT);
                 predicates.add(criteriaBuilder.equal(patientJoin.get("id"), criteria.patientId()));
             }
 
             // Material name exact match
             if (StringUtils.hasText(criteria.materialName())) {
                 predicates.add(criteriaBuilder.equal(
-                    criteriaBuilder.lower(root.get("materialName")), 
+                    criteriaBuilder.lower(root.get("materialName")),
                     criteria.materialName().toLowerCase()
                 ));
             }
@@ -64,7 +64,7 @@ public final class TreatmentMaterialSpecifications {
             // Material name contains
             if (StringUtils.hasText(criteria.materialNameContains())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("materialName")), 
+                    criteriaBuilder.lower(root.get("materialName")),
                     "%" + criteria.materialNameContains().toLowerCase() + "%"
                 ));
             }
@@ -72,7 +72,7 @@ public final class TreatmentMaterialSpecifications {
             // Supplier filter
             if (StringUtils.hasText(criteria.supplier())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("supplier")), 
+                    criteriaBuilder.lower(root.get("supplier")),
                     "%" + criteria.supplier().toLowerCase() + "%"
                 ));
             }
@@ -88,7 +88,7 @@ public final class TreatmentMaterialSpecifications {
             // Batch number filter
             if (StringUtils.hasText(criteria.batchNumber())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("batchNumber")), 
+                    criteriaBuilder.lower(root.get("batchNumber")),
                     "%" + criteria.batchNumber().toLowerCase() + "%"
                 ));
             }
@@ -96,7 +96,7 @@ public final class TreatmentMaterialSpecifications {
             // Unit filter
             if (StringUtils.hasText(criteria.unit())) {
                 predicates.add(criteriaBuilder.equal(
-                    criteriaBuilder.lower(root.get("unit")), 
+                    criteriaBuilder.lower(root.get("unit")),
                     criteria.unit().toLowerCase()
                 ));
             }
@@ -128,14 +128,14 @@ public final class TreatmentMaterialSpecifications {
             // Notes search
             if (StringUtils.hasText(criteria.notesContain())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("notes")), 
+                    criteriaBuilder.lower(root.get("notes")),
                     "%" + criteria.notesContain().toLowerCase() + "%"
                 ));
             }
 
             // Used date range (based on treatment date)
             if (criteria.usedFrom() != null || criteria.usedTo() != null) {
-                Join<TreatmentMaterial, Treatment> treatmentJoin = root.join("treatment", JoinType.LEFT);
+                Join<TreatmentMaterial, Visit> treatmentJoin = root.join("treatment", JoinType.LEFT);
                 if (criteria.usedFrom() != null) {
                     predicates.add(criteriaBuilder.greaterThanOrEqualTo(treatmentJoin.get("treatmentDate"), criteria.usedFrom()));
                 }
@@ -147,13 +147,13 @@ public final class TreatmentMaterialSpecifications {
             // Creation date range
             if (criteria.createdFrom() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdFrom()
                 ));
             }
             if (criteria.createdTo() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdTo()
                 ));
             }
@@ -169,7 +169,7 @@ public final class TreatmentMaterialSpecifications {
      * @return A Specification for TreatmentMaterials
      */
     public static Specification<TreatmentMaterial> byTreatmentId(java.util.UUID treatmentId) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("treatment").get("id"), treatmentId);
     }
 
@@ -180,9 +180,9 @@ public final class TreatmentMaterialSpecifications {
      * @return A Specification for TreatmentMaterials
      */
     public static Specification<TreatmentMaterial> byMaterialName(String materialName) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("materialName")), 
+                criteriaBuilder.lower(root.get("materialName")),
                 "%" + materialName.toLowerCase() + "%"
             );
     }
@@ -194,9 +194,9 @@ public final class TreatmentMaterialSpecifications {
      * @return A Specification for TreatmentMaterials
      */
     public static Specification<TreatmentMaterial> bySupplier(String supplier) {
-        return (root, query, criteriaBuilder) -> 
+        return (root, query, criteriaBuilder) ->
             criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("supplier")), 
+                criteriaBuilder.lower(root.get("supplier")),
                 "%" + supplier.toLowerCase() + "%"
             );
     }

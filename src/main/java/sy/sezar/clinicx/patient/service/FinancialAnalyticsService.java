@@ -60,7 +60,7 @@ public interface FinancialAnalyticsService {
      *
      * @param startDate Start date
      * @param endDate End date
-     * @return Treatment cost analysis
+     * @return Visit cost analysis
      */
     TreatmentCostAnalysisDto getTreatmentCostAnalysis(LocalDate startDate, LocalDate endDate);
 

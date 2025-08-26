@@ -5,7 +5,7 @@
 -- Note: This demo data script avoids updating patient_teeth to prevent trigger errors
 -- The track_tooth_history() trigger expects a created_by field that doesn't exist in patient_teeth table
 
-MERGE INTO clinic_info (id, name, address, phone_number, email, timezone) KEY(id) VALUES 
+MERGE INTO clinic_info (id, name, address, phone_number, email, timezone) KEY(id) VALUES
 (TRUE, 'عيادة الأسنان المتقدمة', 'شارع الملك فهد، حي الروضة، جدة', '+966 12 123 4567', 'info@advanced-dental.sa', 'Asia/Riyadh');
 
 INSERT INTO staff (id, full_name, email, phone_number, is_active)
@@ -55,7 +55,7 @@ VALUES ('d7f81d26-ce95-4104-aafb-5a0e355621a4', 'RECEPTIONIST');
 
 -- Procedures
 INSERT INTO procedures (specialty_id, procedure_code, name, description, default_cost, default_duration_minutes)
-VALUES 
+VALUES
 ((SELECT id FROM specialties WHERE name = 'General Dentistry'), 'DEN001', 'كشف و استشارة', 'فحص شامل للأسنان واللثة', 150.00, 30),
 ((SELECT id FROM specialties WHERE name = 'General Dentistry'), 'DEN002', 'تنظيف الأسنان', 'إزالة الجير والتلميع', 300.00, 45),
 ((SELECT id FROM specialties WHERE name = 'General Dentistry'), 'DEN003', 'حشو بسيط', 'حشو تجاويف صغيرة', 250.00, 30),
@@ -69,7 +69,7 @@ VALUES
 
 -- Patients with Arabic names
 INSERT INTO patients (id, public_facing_id, full_name, date_of_birth, gender, phone_number, email, address, insurance_provider, insurance_number, balance, created_by)
-VALUES 
+VALUES
 ('c5a8b9e2-7f3d-4e2a-9b1c-8d5f6a3e2c1a', 'P-2024-0001', 'محمد أحمد الغامدي', '1985-03-15', 'MALE', '+966 551234567', 'mohammed.alghamdi@email.com', 'حي الروضة، جدة', 'بوبا العربية', 'BUPA123456', 500.00, '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
 ('d6b9c0f3-8e4e-5f3b-ac2d-9e6a7b4f3d2b', 'P-2024-0002', 'فاطمة علي الزهراني', '1990-07-22', 'FEMALE', '+966 552345678', 'fatima.zahrani@email.com', 'حي الشاطئ، جدة', 'التعاونية', 'TAWAN789012', -200.00, '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
 ('e7c0d1a4-9f5f-6a4c-bd3e-0f7b8c5a4e3c', 'P-2024-0003', 'عبدالله سعيد القحطاني', '1978-11-10', 'MALE', '+966 553456789', 'abdullah.qahtani@email.com', 'حي الحمراء، جدة', NULL, NULL, 0.00, '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
@@ -89,7 +89,7 @@ UPDATE patients SET important_medical_notes = 'حامل في الشهر الخا
 
 -- Appointments
 INSERT INTO appointments (id, specialty_id, patient_id, doctor_id, appointment_datetime, duration_minutes, status, notes, created_by)
-VALUES 
+VALUES
 -- Today's appointments
 ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', (SELECT id FROM specialties WHERE name = 'General Dentistry'), 'c5a8b9e2-7f3d-4e2a-9b1c-8d5f6a3e2c1a', '844e0809-f1e1-4f79-9c7c-d09754b25b6b', CURRENT_TIMESTAMP + INTERVAL '2' HOUR, 30, 'SCHEDULED', 'كشف دوري', 'd7f81d26-ce95-4104-aafb-5a0e355621a4'),
 ('b2c3d4e5-f6a7-8901-bcde-f23456789012', (SELECT id FROM specialties WHERE name = 'General Dentistry'), 'd6b9c0f3-8e4e-5f3b-ac2d-9e6a7b4f3d2b', 'd9dcc98a-517b-4518-8d50-acdbf4a0b5d2', CURRENT_TIMESTAMP + INTERVAL '3' HOUR, 45, 'SCHEDULED', 'تنظيف أسنان', 'd7f81d26-ce95-4104-aafb-5a0e355621a4'),
@@ -110,8 +110,8 @@ VALUES
 ('c9a0a1a2-a3a4-5678-caaa-901234567890', (SELECT id FROM specialties WHERE name = 'General Dentistry'), 'a3c6a7a0-5a1a-2a0c-ba9a-6a3a4c1a0a9c', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', CURRENT_TIMESTAMP - INTERVAL '5' DAY, 30, 'NO_SHOW', 'المريض لم يحضر', 'd7f81d26-ce95-4104-aafb-5a0e355621a4');
 
 -- Treatments
-INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id, tooth_number, status, cost, treatment_notes, treatment_date, created_by)
-VALUES 
+INSERT INTO treatments (id, appointment_id, patient_id, procedure_id, doctor_id, tooth_number, status, cost,  visit_notes,  visit_date, created_by)
+VALUES
 -- Completed treatments
 ('a1a2b3c4-d5e6-f789-0abc-def123456789', 'f6a7b8c9-a0a1-2345-fabc-678901234567', 'b0f3a4a7-2c8c-9a7f-ea6b-3c0a1f8a7b6f', (SELECT id FROM procedures WHERE procedure_code = 'DEN002'), 'b5ee786d-b86e-4ca3-a705-4417f1c65b03', NULL, 'COMPLETED', 300.00, 'تنظيف شامل مع إزالة الجير', CURRENT_DATE - INTERVAL '7' DAY, 'b5ee786d-b86e-4ca3-a705-4417f1c65b03'),
 ('a2b3c4d5-e6f7-a890-1bcd-ef234567890a', 'a7b8c9a0-a1a2-3456-abca-789012345678', 'c1a4b5a8-3a9a-0a8a-fb7c-4a1a2a9a8c7a', (SELECT id FROM procedures WHERE procedure_code = 'DEN003'), '844e0809-f1e1-4f79-9c7c-d09754b25b6b', 24, 'COMPLETED', 250.00, 'حشو بسيط لتسوس سطحي', CURRENT_DATE - INTERVAL '14' DAY, '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
@@ -123,7 +123,7 @@ VALUES
 
 -- Treatment materials for some treatments
 INSERT INTO treatment_materials (treatment_id, material_name, quantity, unit, cost_per_unit, total_cost, supplier, batch_number, notes)
-VALUES 
+VALUES
 ('a2b3c4d5-e6f7-a890-1bcd-ef234567890a', 'Composite Resin A2', 1.5, 'gm', 50.00, 75.00, 'Dental Supplies Co.', 'CR-2024-001', 'لون A2 للأسنان الأمامية'),
 ('a3c4d5e6-f7a8-b901-2cde-f3456789012b', 'Composite Resin A3', 2.0, 'gm', 50.00, 100.00, 'Dental Supplies Co.', 'CR-2024-002', 'لون A3 للأسنان الخلفية'),
 ('a4d5e6f7-a8b9-c012-3def-456789012345', 'Gutta Percha Points', 5.0, 'points', 2.00, 10.00, 'Endo Materials Ltd.', 'GP-2024-015', 'نقاط حشو قنوات الجذر'),
@@ -131,7 +131,7 @@ VALUES
 
 -- Invoices
 INSERT INTO invoices (id, patient_id, invoice_number, issue_date, due_date, total_amount, status, created_by)
-VALUES 
+VALUES
 ('b1a2b3c4-d5e6-f789-0123-456789abcdef', 'b0f3a4a7-2c8c-9a7f-ea6b-3c0a1f8a7b6f', 'INV-000001', CURRENT_DATE - INTERVAL '7' DAY, CURRENT_DATE + INTERVAL '23' DAY, 300.00, 'PAID', 'b5ee786d-b86e-4ca3-a705-4417f1c65b03'),
 ('b2b3c4d5-e6f7-a890-1234-567890abcdef', 'c1a4b5a8-3a9a-0a8a-fb7c-4a1a2a9a8c7a', 'INV-000002', CURRENT_DATE - INTERVAL '14' DAY, CURRENT_DATE + INTERVAL '16' DAY, 250.00, 'PAID', '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
 ('b3c4d5e6-f7a8-b901-2345-678901abcdef', 'c5a8b9e2-7f3d-4e2a-9b1c-8d5f6a3e2c1a', 'INV-000003', CURRENT_DATE - INTERVAL '30' DAY, CURRENT_DATE, 450.00, 'UNPAID', '844e0809-f1e1-4f79-9c7c-d09754b25b6b'),
@@ -140,7 +140,7 @@ VALUES
 
 -- Invoice items
 INSERT INTO invoice_items (invoice_id, treatment_id, description, amount)
-VALUES 
+VALUES
 ('b1a2b3c4-d5e6-f789-0123-456789abcdef', 'a1a2b3c4-d5e6-f789-0abc-def123456789', 'تنظيف أسنان', 300.00),
 ('b2b3c4d5-e6f7-a890-1234-567890abcdef', 'a2b3c4d5-e6f7-a890-1bcd-ef234567890a', 'حشو بسيط - سن 24', 250.00),
 ('b3c4d5e6-f7a8-b901-2345-678901abcdef', 'a3c4d5e6-f7a8-b901-2cde-f3456789012b', 'حشو مركب - ضرس 36', 450.00),
@@ -149,7 +149,7 @@ VALUES
 
 -- Payments
 INSERT INTO payments (invoice_id, patient_id, payment_date, amount, payment_method, type, description, created_by)
-VALUES 
+VALUES
 ('b1a2b3c4-d5e6-f789-0123-456789abcdef', 'b0f3a4a7-2c8c-9a7f-ea6b-3c0a1f8a7b6f', CURRENT_DATE - INTERVAL '7' DAY, 300.00, 'CASH', 'PAYMENT', 'دفع كامل', 'd7f81d26-ce95-4104-aafb-5a0e355621a4'),
 ('b2b3c4d5-e6f7-a890-1234-567890abcdef', 'c1a4b5a8-3a9a-0a8a-fb7c-4a1a2a9a8c7a', CURRENT_DATE - INTERVAL '14' DAY, 250.00, 'CREDIT_CARD', 'PAYMENT', 'دفع كامل', 'd7f81d26-ce95-4104-aafb-5a0e355621a4'),
 ('b4d5e6f7-a8b9-c012-3456-789012abcdef', 'd6b9c0f3-8e4e-5f3b-ac2d-9e6a7b4f3d2b', CURRENT_DATE - INTERVAL '40' DAY, 1000.00, 'BANK_TRANSFER', 'PAYMENT', 'دفع جزئي', 'd7f81d26-ce95-4104-aafb-5a0e355621a4'),
@@ -158,7 +158,7 @@ VALUES
 
 -- Lab requests
 INSERT INTO lab_requests (patient_id, order_number, item_description, tooth_number, date_sent, date_due, lab_name, status)
-VALUES 
+VALUES
 ('a9e2f3c6-1b7b-8c6e-df5a-2b9a0e7c6a5e', 'LAB-2024-001', 'تاج خزفي - لون A2', 26, CURRENT_DATE - INTERVAL '3' DAY, CURRENT_DATE + INTERVAL '4' DAY, 'مختبر الأسنان المتقدم', 'IN_PROGRESS'),
 ('a2b5c6a9-4a0a-1a9b-ac8a-5a2a3b0a9a8b', 'LAB-2024-002', 'جسر ثلاثي 34-36', NULL, CURRENT_DATE - INTERVAL '10' DAY, CURRENT_DATE - INTERVAL '3' DAY, 'مختبر الابتسامة', 'COMPLETED'),
 ('a3c6a7a0-5a1a-2a0c-ba9a-6a3a4c1a0a9c', 'LAB-2024-003', 'قالب دراسة للفكين', NULL, CURRENT_DATE - INTERVAL '1' DAY, CURRENT_DATE + INTERVAL '7' DAY, 'مختبر الأسنان المتقدم', 'PENDING');

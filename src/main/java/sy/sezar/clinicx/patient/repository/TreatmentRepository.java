@@ -4,15 +4,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import sy.sezar.clinicx.patient.model.Treatment;
+import sy.sezar.clinicx.patient.model.Visit;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Repository for accessing patient Treatment records.
+ * Repository for accessing patient Visit records.
  */
-public interface TreatmentRepository extends JpaRepository<Treatment, UUID>, JpaSpecificationExecutor<Treatment> {
+public interface TreatmentRepository extends JpaRepository<Visit, UUID>, JpaSpecificationExecutor<Visit> {
 
     /**
      * Finds a paginated list of treatments for a specific patient, ordered by date.
@@ -21,7 +21,7 @@ public interface TreatmentRepository extends JpaRepository<Treatment, UUID>, Jpa
      * @param pageable  Pagination and sorting information.
      * @return A Page of treatments.
      */
-    Page<Treatment> findByPatientIdOrderByTreatmentDateDesc(UUID patientId, Pageable pageable);
+    Page<Visit> findByPatientIdOrderByTreatmentDateDesc(UUID patientId, Pageable pageable);
 
     /**
      * Finds a list of treatments for a specific patient.
@@ -29,5 +29,5 @@ public interface TreatmentRepository extends JpaRepository<Treatment, UUID>, Jpa
      * @param patientId The UUID of the patient.
      * @return A list of treatments.
      */
-    List<Treatment> findByPatientId(UUID patientId);
+    List<Visit> findByPatientId(UUID patientId);
 }

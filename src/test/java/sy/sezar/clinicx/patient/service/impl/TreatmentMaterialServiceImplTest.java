@@ -14,7 +14,7 @@ import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentMaterialDto;
 import sy.sezar.clinicx.patient.mapper.TreatmentMaterialMapper;
-import sy.sezar.clinicx.patient.model.Treatment;
+import sy.sezar.clinicx.patient.model.Visit;
 import sy.sezar.clinicx.patient.model.TreatmentMaterial;
 import sy.sezar.clinicx.patient.repository.TreatmentMaterialRepository;
 import sy.sezar.clinicx.patient.repository.TreatmentRepository;
@@ -49,7 +49,7 @@ class TreatmentMaterialServiceImplTest {
     private UUID treatmentId;
     private UUID patientId;
     private UUID materialId;
-    private Treatment treatment;
+    private Visit visit;
     private TreatmentMaterial treatmentMaterial;
     private TreatmentMaterialCreateRequest createRequest;
     private TreatmentMaterialDto materialDto;
@@ -60,12 +60,12 @@ class TreatmentMaterialServiceImplTest {
         patientId = UUID.randomUUID();
         materialId = UUID.randomUUID();
 
-        treatment = new Treatment();
-        treatment.setId(treatmentId);
+        visit = new Visit();
+        visit.setId(treatmentId);
 
         treatmentMaterial = new TreatmentMaterial();
         treatmentMaterial.setId(materialId);
-        treatmentMaterial.setTreatment(treatment);
+        treatmentMaterial.setVisit(visit);
         treatmentMaterial.setMaterialName("Composite Resin");
         treatmentMaterial.setQuantity(new BigDecimal("2.5"));
         treatmentMaterial.setUnit("grams");
@@ -107,7 +107,7 @@ class TreatmentMaterialServiceImplTest {
     @Test
     void create_ShouldCreateTreatmentMaterial_WhenValidRequest() {
         // Given
-        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(treatment));
+        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
         when(treatmentMaterialMapper.toEntity(createRequest)).thenReturn(treatmentMaterial);
         when(treatmentMaterialRepository.save(any(TreatmentMaterial.class))).thenReturn(treatmentMaterial);
         when(treatmentMaterialMapper.toDto(treatmentMaterial)).thenReturn(materialDto);
@@ -131,7 +131,7 @@ class TreatmentMaterialServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> treatmentMaterialService.create(createRequest))
             .isInstanceOf(NotFoundException.class)
-            .hasMessage("Treatment not found with id: " + treatmentId);
+            .hasMessage("Visit not found with id: " + treatmentId);
 
         verify(treatmentRepository).findById(treatmentId);
         verifyNoInteractions(treatmentMaterialMapper, treatmentMaterialRepository);
@@ -160,7 +160,7 @@ class TreatmentMaterialServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> treatmentMaterialService.findById(materialId))
             .isInstanceOf(NotFoundException.class)
-            .hasMessage("Treatment material not found with id: " + materialId);
+            .hasMessage("Visit material not found with id: " + materialId);
 
         verify(treatmentMaterialRepository).findById(materialId);
         verifyNoInteractions(treatmentMaterialMapper);
@@ -171,8 +171,8 @@ class TreatmentMaterialServiceImplTest {
         // Given
         List<TreatmentMaterial> materials = Arrays.asList(treatmentMaterial);
         List<TreatmentMaterialDto> materialDtos = Arrays.asList(materialDto);
-        
-        when(treatmentMaterialRepository.findByTreatmentId(treatmentId)).thenReturn(materials);
+
+        when(treatmentMaterialRepository.findByVisitId(treatmentId)).thenReturn(materials);
         when(treatmentMaterialMapper.toDtoList(materials)).thenReturn(materialDtos);
 
         // When
@@ -180,7 +180,7 @@ class TreatmentMaterialServiceImplTest {
 
         // Then
         assertThat(result).isEqualTo(materialDtos);
-        verify(treatmentMaterialRepository).findByTreatmentId(treatmentId);
+        verify(treatmentMaterialRepository).findByVisitId(treatmentId);
         verify(treatmentMaterialMapper).toDtoList(materials);
     }
 
@@ -189,8 +189,8 @@ class TreatmentMaterialServiceImplTest {
         // Given
         Pageable pageable = PageRequest.of(0, 10);
         Page<TreatmentMaterial> materialsPage = new PageImpl<>(Arrays.asList(treatmentMaterial));
-        
-        when(treatmentMaterialRepository.findByTreatmentId(treatmentId, pageable)).thenReturn(materialsPage);
+
+        when(treatmentMaterialRepository.findByVisitId(treatmentId, pageable)).thenReturn(materialsPage);
         when(treatmentMaterialMapper.toDto(treatmentMaterial)).thenReturn(materialDto);
 
         // When
@@ -199,14 +199,14 @@ class TreatmentMaterialServiceImplTest {
         // Then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0)).isEqualTo(materialDto);
-        verify(treatmentMaterialRepository).findByTreatmentId(treatmentId, pageable);
+        verify(treatmentMaterialRepository).findByVisitId(treatmentId, pageable);
     }
 
     @Test
     void update_ShouldUpdateTreatmentMaterial_WhenExists() {
         // Given
         when(treatmentMaterialRepository.findById(materialId)).thenReturn(Optional.of(treatmentMaterial));
-        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(treatment));
+        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
         when(treatmentMaterialRepository.save(treatmentMaterial)).thenReturn(treatmentMaterial);
         when(treatmentMaterialMapper.toDto(treatmentMaterial)).thenReturn(materialDto);
 
@@ -229,7 +229,7 @@ class TreatmentMaterialServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> treatmentMaterialService.update(materialId, createRequest))
             .isInstanceOf(NotFoundException.class)
-            .hasMessage("Treatment material not found with id: " + materialId);
+            .hasMessage("Visit material not found with id: " + materialId);
 
         verify(treatmentMaterialRepository).findById(materialId);
         verifyNoMoreInteractions(treatmentRepository, treatmentMaterialRepository, treatmentMaterialMapper);
@@ -256,7 +256,7 @@ class TreatmentMaterialServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> treatmentMaterialService.delete(materialId))
             .isInstanceOf(NotFoundException.class)
-            .hasMessage("Treatment material not found with id: " + materialId);
+            .hasMessage("Visit material not found with id: " + materialId);
 
         verify(treatmentMaterialRepository).existsById(materialId);
         verify(treatmentMaterialRepository, never()).deleteById(materialId);

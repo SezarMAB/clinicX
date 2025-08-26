@@ -48,9 +48,9 @@ DO $$
         SET appointment_datetime = v_new_start + ((a.appointment_datetime - v_src_min) * v_scale)
         WHERE a.created_by = ANY (v_staff_ids);
 
-        -- 2) Treatments: align treatment_date to the (new) appointment date
-        UPDATE treatments t
-        SET treatment_date = (v_new_start + ((a.appointment_datetime - v_src_min) * v_scale))::date
+        -- 2) visits: align  visit_date to the (new) appointment date
+        UPDATE visits t
+        SET  visit_date = (v_new_start + ((a.appointment_datetime - v_src_min) * v_scale))::date
         FROM appointments a
         WHERE t.appointment_id = a.id
           AND a.created_by = ANY (v_staff_ids);

@@ -29,8 +29,8 @@ public class InvoiceItem {
     private Invoice invoice;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "treatment_id", unique = true)
-    private Treatment treatment;
+    @JoinColumn(name = "visit_id", unique = true)
+    private Visit visit;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "item_type", length = 30)

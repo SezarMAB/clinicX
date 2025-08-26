@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides reusable specifications for querying Treatment entities.
+ * Provides reusable specifications for querying Visit entities.
  */
 public final class TreatmentSpecifications {
 
@@ -28,7 +28,7 @@ public final class TreatmentSpecifications {
      * @param criteria The search criteria
      * @return A Specification for Treatments
      */
-    public static Specification<Treatment> byAdvancedCriteria(TreatmentSearchCriteria criteria) {
+    public static Specification<Visit> byAdvancedCriteria(TreatmentSearchCriteria criteria) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -62,7 +62,7 @@ public final class TreatmentSpecifications {
                 predicates.add(root.get("toothNumber").in(criteria.toothNumbers()));
             }
 
-            // Treatment date range
+            // Visit date range
             if (criteria.treatmentDateFrom() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("treatmentDate"), criteria.treatmentDateFrom()));
             }
@@ -88,7 +88,7 @@ public final class TreatmentSpecifications {
 
             // Procedure name filter
             if (StringUtils.hasText(criteria.procedureName())) {
-                Join<Treatment, Procedure> procedureJoin = root.join("procedure", JoinType.LEFT);
+                Join<Visit, Procedure> procedureJoin = root.join("procedure", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
                     criteriaBuilder.lower(procedureJoin.get("name")),
                     "%" + criteria.procedureName().toLowerCase() + "%"
@@ -97,7 +97,7 @@ public final class TreatmentSpecifications {
 
             // Doctor name filter
             if (StringUtils.hasText(criteria.doctorName())) {
-                Join<Treatment, Staff> doctorJoin = root.join("doctor", JoinType.LEFT);
+                Join<Visit, Staff> doctorJoin = root.join("doctor", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
                     criteriaBuilder.lower(doctorJoin.get("fullName")),
                     "%" + criteria.doctorName().toLowerCase() + "%"
@@ -106,7 +106,7 @@ public final class TreatmentSpecifications {
 
             // Patient name filter
             if (StringUtils.hasText(criteria.patientName())) {
-                Join<Treatment, Patient> patientJoin = root.join("patient", JoinType.LEFT);
+                Join<Visit, Patient> patientJoin = root.join("patient", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(
                     criteriaBuilder.lower(patientJoin.get("fullName")),
                     "%" + criteria.patientName().toLowerCase() + "%"
@@ -115,7 +115,7 @@ public final class TreatmentSpecifications {
 
             // Has materials filter
             if (criteria.hasMaterials() != null) {
-                Join<Treatment, TreatmentMaterial> materialJoin = root.join("materials", JoinType.LEFT);
+                Join<Visit, TreatmentMaterial> materialJoin = root.join("materials", JoinType.LEFT);
                 if (criteria.hasMaterials()) {
                     predicates.add(criteriaBuilder.isNotNull(materialJoin.get("id")));
                     query.distinct(true);
@@ -148,7 +148,7 @@ public final class TreatmentSpecifications {
      * @param patientId The patient ID
      * @return A Specification for Treatments
      */
-    public static Specification<Treatment> byPatientId(java.util.UUID patientId) {
+    public static Specification<Visit> byPatientId(java.util.UUID patientId) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("patient").get("id"), patientId);
     }
@@ -159,7 +159,7 @@ public final class TreatmentSpecifications {
      * @param doctorId The doctor ID
      * @return A Specification for Treatments
      */
-    public static Specification<Treatment> byDoctorId(java.util.UUID doctorId) {
+    public static Specification<Visit> byDoctorId(java.util.UUID doctorId) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("doctor").get("id"), doctorId);
     }
@@ -170,7 +170,7 @@ public final class TreatmentSpecifications {
      * @param toothNumber The tooth number
      * @return A Specification for Treatments
      */
-    public static Specification<Treatment> byToothNumber(Integer toothNumber) {
+    public static Specification<Visit> byToothNumber(Integer toothNumber) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("toothNumber"), toothNumber);
     }
@@ -182,7 +182,7 @@ public final class TreatmentSpecifications {
      * @param to End date (inclusive)
      * @return A Specification for Treatments
      */
-    public static Specification<Treatment> byDateRange(LocalDate from, LocalDate to) {
+    public static Specification<Visit> byDateRange(LocalDate from, LocalDate to) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (from != null) {

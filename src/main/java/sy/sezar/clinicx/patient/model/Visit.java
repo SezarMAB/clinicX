@@ -14,10 +14,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "treatments")
+@Table(name = "visits")
 @Getter
 @Setter
-public class Treatment extends BaseEntity {
+public class Visit extends BaseEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,18 +50,18 @@ public class Treatment extends BaseEntity {
     @Column(name = "cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal cost;
 
-    @Column(name = "treatment_notes")
+    @Column(name = "visit_notes")
     private String treatmentNotes;
 
     @NotNull
-    @Column(name = "treatment_date", nullable = false)
+    @Column(name = "visit_date", nullable = false)
     private LocalDate treatmentDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Staff createdBy;
 
-    @OneToMany(mappedBy = "treatment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "visit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<TreatmentMaterial> materials = new HashSet<>();
 }
 

@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import sy.sezar.clinicx.patient.dto.PatientSearchCriteria;
 import sy.sezar.clinicx.patient.model.Appointment;
 import sy.sezar.clinicx.patient.model.Patient;
-import sy.sezar.clinicx.patient.model.Treatment;
+import sy.sezar.clinicx.patient.model.Visit;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -74,7 +74,7 @@ public final class PatientSpecifications {
             // Name filter
             if (StringUtils.hasText(criteria.name())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("fullName")), 
+                    criteriaBuilder.lower(root.get("fullName")),
                     "%" + criteria.name().toLowerCase() + "%"
                 ));
             }
@@ -82,7 +82,7 @@ public final class PatientSpecifications {
             // Public facing ID filter
             if (StringUtils.hasText(criteria.publicFacingId())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("publicFacingId")), 
+                    criteriaBuilder.lower(root.get("publicFacingId")),
                     "%" + criteria.publicFacingId().toLowerCase() + "%"
                 ));
             }
@@ -90,7 +90,7 @@ public final class PatientSpecifications {
             // Phone number filter
             if (StringUtils.hasText(criteria.phoneNumber())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("phoneNumber")), 
+                    criteriaBuilder.lower(root.get("phoneNumber")),
                     "%" + criteria.phoneNumber().toLowerCase() + "%"
                 ));
             }
@@ -98,7 +98,7 @@ public final class PatientSpecifications {
             // Email filter
             if (StringUtils.hasText(criteria.email())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("email")), 
+                    criteriaBuilder.lower(root.get("email")),
                     "%" + criteria.email().toLowerCase() + "%"
                 ));
             }
@@ -106,7 +106,7 @@ public final class PatientSpecifications {
             // Gender filter
             if (StringUtils.hasText(criteria.gender())) {
                 predicates.add(criteriaBuilder.equal(
-                    criteriaBuilder.lower(root.get("gender")), 
+                    criteriaBuilder.lower(root.get("gender")),
                     criteria.gender().toLowerCase()
                 ));
             }
@@ -114,7 +114,7 @@ public final class PatientSpecifications {
             // Insurance provider filter
             if (StringUtils.hasText(criteria.insuranceProvider())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("insuranceProvider")), 
+                    criteriaBuilder.lower(root.get("insuranceProvider")),
                     "%" + criteria.insuranceProvider().toLowerCase() + "%"
                 ));
             }
@@ -122,7 +122,7 @@ public final class PatientSpecifications {
             // Insurance number filter
             if (StringUtils.hasText(criteria.insuranceNumber())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("insuranceNumber")), 
+                    criteriaBuilder.lower(root.get("insuranceNumber")),
                     "%" + criteria.insuranceNumber().toLowerCase() + "%"
                 ));
             }
@@ -188,13 +188,13 @@ public final class PatientSpecifications {
             // Creation date range
             if (criteria.createdFrom() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdFrom()
                 ));
             }
             if (criteria.createdTo() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
-                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")), 
+                    criteriaBuilder.function("DATE", LocalDate.class, root.get("createdAt")),
                     criteria.createdTo()
                 ));
             }
@@ -212,7 +212,7 @@ public final class PatientSpecifications {
 
             // Has treatments
             if (criteria.hasTreatments() != null) {
-                Join<Patient, Treatment> treatmentJoin = root.join("treatments", JoinType.LEFT);
+                Join<Patient, Visit> treatmentJoin = root.join("treatments", JoinType.LEFT);
                 if (criteria.hasTreatments()) {
                     predicates.add(criteriaBuilder.isNotNull(treatmentJoin.get("id")));
                     query.distinct(true);
@@ -224,7 +224,7 @@ public final class PatientSpecifications {
             // Address filter
             if (StringUtils.hasText(criteria.address())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("address")), 
+                    criteriaBuilder.lower(root.get("address")),
                     "%" + criteria.address().toLowerCase() + "%"
                 ));
             }

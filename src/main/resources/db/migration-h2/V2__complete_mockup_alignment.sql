@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS treatment_materials (
     notes            TEXT,
     created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (treatment_id) REFERENCES treatments (id) ON DELETE CASCADE,
     CONSTRAINT chk_material_quantity_positive CHECK (quantity > 0),
     CONSTRAINT chk_material_cost_per_unit_positive CHECK (cost_per_unit >= 0),
@@ -44,7 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_treatment_materials_created_at ON treatment_mater
 -- Enhanced search capabilities (H2 doesn't support functional indexes)
 -- CREATE INDEX IF NOT EXISTS idx_patients_full_name_lower ON patients(LOWER(full_name));
 -- CREATE INDEX IF NOT EXISTS idx_patients_email_lower ON patients(LOWER(email));
-CREATE INDEX IF NOT EXISTS idx_treatments_date ON treatments(treatment_date);
+CREATE INDEX IF NOT EXISTS idx_treatments_date ON treatments( visit_date);
 CREATE INDEX IF NOT EXISTS idx_treatments_status ON treatments(status);
 CREATE INDEX IF NOT EXISTS idx_treatments_tooth_number ON treatments(tooth_number);
 
@@ -54,7 +54,7 @@ CREATE INDEX IF NOT EXISTS idx_treatments_tooth_number ON treatments(tooth_numbe
 
 -- View to get treatment material summary by treatment
 CREATE VIEW IF NOT EXISTS v_treatment_material_summary AS
-SELECT 
+SELECT
     tm.treatment_id,
     COUNT(tm.id) as material_count,
     SUM(tm.total_cost) as total_material_cost,
@@ -64,7 +64,7 @@ GROUP BY tm.treatment_id;
 
 -- View to get material usage statistics
 CREATE VIEW IF NOT EXISTS v_material_usage_stats AS
-SELECT 
+SELECT
     tm.material_name,
     COUNT(tm.id) as usage_count,
     SUM(tm.quantity) as total_quantity_used,
@@ -148,7 +148,7 @@ $$;
 
 -- Note: H2 triggers require Java implementation, so we'll handle this in the application layer
 -- The actual calculation would be: NEW.total_cost = NEW.quantity * NEW.cost_per_unit
--- 
+--
 -- If you need triggers in H2, you would create a Java class that implements org.h2.api.Trigger
 -- and then reference it in the CREATE TRIGGER statement
 
@@ -157,6 +157,6 @@ $$;
 -- ====================================================================
 
 -- Add constraint to ensure material names are not empty
-ALTER TABLE treatment_materials 
-ADD CONSTRAINT IF NOT EXISTS chk_material_name_not_empty 
+ALTER TABLE treatment_materials
+ADD CONSTRAINT IF NOT EXISTS chk_material_name_not_empty
 CHECK (LENGTH(TRIM(material_name)) > 0);

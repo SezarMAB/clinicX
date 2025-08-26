@@ -27,7 +27,7 @@ public class TreatmentControllerImpl implements TreatmentControllerApi {
     @Override
     public ResponseEntity<TreatmentLogDto> createTreatment(UUID patientId, TreatmentCreateRequest request) {
         log.info("Creating new treatment for patient ID: {} (procedure: {})", patientId, request.procedureId());
-        log.debug("Treatment creation request validation: {}", request);
+        log.debug("Visit creation request validation: {}", request);
 
         try {
             TreatmentLogDto treatment = treatmentService.createTreatment(patientId, request);
@@ -57,7 +57,7 @@ public class TreatmentControllerImpl implements TreatmentControllerApi {
     @Override
     public ResponseEntity<TreatmentLogDto> updateTreatment(UUID id, TreatmentCreateRequest request) {
         log.info("Updating treatment with ID: {}", id);
-        log.debug("Treatment update request validation: {}", request);
+        log.debug("Visit update request validation: {}", request);
 
         try {
             TreatmentLogDto treatment = treatmentService.updateTreatment(id, request);

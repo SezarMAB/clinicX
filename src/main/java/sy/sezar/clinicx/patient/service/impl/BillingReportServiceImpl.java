@@ -49,8 +49,8 @@ public class BillingReportServiceImpl implements BillingReportService {
 
     @Override
     @Transactional(readOnly = true)
-    public RevenueReportDto generateRevenueReport(LocalDate startDate, LocalDate endDate, 
-                                                  String groupBy, boolean includeProcedureBreakdown, 
+    public RevenueReportDto generateRevenueReport(LocalDate startDate, LocalDate endDate,
+                                                  String groupBy, boolean includeProcedureBreakdown,
                                                   boolean includeDoctorBreakdown) {
         log.info("Generating revenue report from {} to {}", startDate, endDate);
         // TODO: Implement when DTO structure is finalized
@@ -59,11 +59,11 @@ public class BillingReportServiceImpl implements BillingReportService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PatientBalanceDto> getOutstandingBalances(BigDecimal minBalance, 
-                                                          boolean includeZeroBalances, 
+    public Page<PatientBalanceDto> getOutstandingBalances(BigDecimal minBalance,
+                                                          boolean includeZeroBalances,
                                                           String sortBy, Pageable pageable) {
         log.debug("Getting outstanding balances with minBalance: {}", minBalance);
-        
+
         // TODO: Implement when repository methods and DTOs are available
         List<PatientBalanceDto> balances = new ArrayList<>();
         return new PageImpl<>(balances, pageable, 0);
@@ -72,7 +72,7 @@ public class BillingReportServiceImpl implements BillingReportService {
     @Override
     @Transactional(readOnly = true)
     public CollectionReportDto generateCollectionReport(LocalDate startDate, LocalDate endDate,
-                                                        boolean includePaymentMethods, 
+                                                        boolean includePaymentMethods,
                                                         boolean includeDailyBreakdown) {
         log.info("Generating collection report from {} to {}", startDate, endDate);
         // TODO: Implement when DTO structure is finalized
@@ -85,7 +85,7 @@ public class BillingReportServiceImpl implements BillingReportService {
                                                       LocalDate startDate, LocalDate endDate,
                                                       Pageable pageable) {
         log.debug("Getting insurance claims with status: {}, provider: {}", status, provider);
-        
+
         // TODO: Implement when insurance claim entities are available
         List<InsuranceClaimDto> claims = new ArrayList<>();
         return new PageImpl<>(claims, pageable, 0);
@@ -114,7 +114,7 @@ public class BillingReportServiceImpl implements BillingReportService {
     public ProcedureAnalysisDto generateProcedureAnalysis(LocalDate startDate, LocalDate endDate,
                                                           UUID specialtyId, Integer minCount) {
         log.info("Generating procedure analysis from {} to {}", startDate, endDate);
-        // TODO: Implement when Treatment repository methods are available
+        // TODO: Implement when Visit repository methods are available
         return null;
     }
 
@@ -123,7 +123,7 @@ public class BillingReportServiceImpl implements BillingReportService {
     public DoctorPerformanceDto generateDoctorPerformance(LocalDate startDate, LocalDate endDate,
                                                           UUID doctorId, boolean includeProcedures) {
         log.info("Generating doctor performance report from {} to {}", startDate, endDate);
-        // TODO: Implement when Treatment repository methods are available
+        // TODO: Implement when Visit repository methods are available
         return null;
     }
 
@@ -146,14 +146,14 @@ public class BillingReportServiceImpl implements BillingReportService {
     @Override
     public byte[] exportReport(String reportType, String format, ExportReportRequest request) {
         log.info("Exporting {} report in {} format", reportType, format);
-        
+
         // This would use a report generation library like JasperReports or Apache POI
         // For now, returning mock data
         String mockContent = String.format(
             "Report Type: %s\nFormat: %s\nDate Range: %s to %s\n\nThis is a mock report export.",
             reportType, format, request.startDate(), request.endDate()
         );
-        
+
         return mockContent.getBytes();
     }
 }

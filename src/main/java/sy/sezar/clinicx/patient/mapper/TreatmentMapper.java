@@ -5,15 +5,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
 import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
-import sy.sezar.clinicx.patient.model.Treatment;
+import sy.sezar.clinicx.patient.model.Visit;
 
 /**
- * Mapper for converting between Treatment entity and its DTOs.
+ * Mapper for converting between Visit entity and its DTOs.
  */
 @Mapper(componentModel = "spring")
 public interface TreatmentMapper {
 
-    // Treatment <-> TreatmentLogDto
+    // Visit <-> TreatmentLogDto
     @Mapping(source = "id", target = "treatmentId")
     @Mapping(source = "treatmentDate", target = "treatmentDate")
     @Mapping(target = "treatmentTime", ignore = true)
@@ -26,10 +26,10 @@ public interface TreatmentMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "treatmentNotes", target = "notes")
     @Mapping(target = "nextAppointment", ignore = true)
-    TreatmentLogDto toTreatmentLogDto(Treatment treatment);
-    List<TreatmentLogDto> toTreatmentLogDtoList(List<Treatment> treatments);
+    TreatmentLogDto toTreatmentLogDto(Visit visit);
+    List<TreatmentLogDto> toTreatmentLogDtoList(List<Visit> visits);
 
-    // TreatmentCreateRequest -> Treatment
+    // TreatmentCreateRequest -> Visit
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -39,5 +39,5 @@ public interface TreatmentMapper {
     @Mapping(target = "doctor", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "materials", ignore = true)
-    Treatment toTreatment(TreatmentCreateRequest request);
+    Visit toTreatment(TreatmentCreateRequest request);
 }

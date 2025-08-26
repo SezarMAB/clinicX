@@ -172,9 +172,9 @@ CREATE TABLE treatments
     cost                 DECIMAL(10, 2) NOT NULL,
     currency             VARCHAR(3)     NOT NULL DEFAULT 'EUR',
     material_used        VARCHAR(255),
-    treatment_notes      TEXT,
+     visit_notes      TEXT,
     post_op_instructions TEXT,
-    treatment_date       DATE           NOT NULL,
+     visit_date       DATE           NOT NULL,
     is_billable          BOOLEAN        NOT NULL DEFAULT TRUE,         -- NEW: Some treatments might be non-billable
     created_at           TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
@@ -222,8 +222,8 @@ CREATE TABLE patient_teeth (
                                current_condition_id UUID REFERENCES tooth_conditions(id),
                                notes TEXT,
     -- Denormalized fields for performance
-                               last_treatment_date DATE,
-                               next_scheduled_treatment_date DATE,
+                               last_ visit_date DATE,
+                               next_scheduled_ visit_date DATE,
                                is_monitored BOOLEAN NOT NULL DEFAULT FALSE, -- Flag for teeth requiring monitoring
                                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -612,7 +612,7 @@ CREATE INDEX idx_appointments_doctor_date ON appointments(doctor_id, appointment
 CREATE INDEX idx_appointment_slots_availability ON appointment_slots(doctor_id, slot_datetime) WHERE is_available = TRUE;
 
 -- Treatment indexes
-CREATE INDEX idx_treatments_patient_date ON treatments(patient_id, treatment_date);
+CREATE INDEX idx_treatments_patient_date ON treatments(patient_id,  visit_date);
 CREATE INDEX idx_treatments_appointment ON treatments(appointment_id);
 CREATE INDEX idx_treatments_billable ON treatments(id) WHERE is_billable = TRUE;
 
@@ -668,8 +668,8 @@ SELECT
     tc.color_hex,
     pt.notes,
     pt.is_monitored,
-    pt.last_treatment_date,
-    pt.next_scheduled_treatment_date,
+    pt.last_ visit_date,
+    pt.next_scheduled_ visit_date,
     pt.updated_at as last_updated
 FROM patient_teeth pt
          LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
@@ -684,7 +684,7 @@ SELECT
     pt.tooth_number,
     tc.name as condition_name,
     pt.notes,
-    pt.last_treatment_date,
+    pt.last_ visit_date,
     CASE
         WHEN tc.code IN ('CAVITY', 'FRACTURED') THEN 'HIGH'
         WHEN pt.is_monitored THEN 'MEDIUM'
@@ -695,7 +695,7 @@ FROM patient_teeth pt
          JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
 WHERE (tc.code IN ('CAVITY', 'FRACTURED', 'IMPACTED')
     OR pt.is_monitored = TRUE
-    OR pt.next_scheduled_treatment_date < CURRENT_DATE)
+    OR pt.next_scheduled_ visit_date < CURRENT_DATE)
   AND p.deleted_at IS NULL
 ORDER BY priority DESC, p.full_name;
 
@@ -710,7 +710,7 @@ SELECT
     COUNT(DISTINCT pt.id) FILTER (WHERE tc.code = 'FILLED') as filled_teeth,
     COUNT(DISTINCT pt.id) FILTER (WHERE tc.code IN ('EXTRACTED', 'MISSING')) as missing_teeth,
     COUNT(DISTINCT pt.id) FILTER (WHERE pt.is_monitored = TRUE) as monitored_teeth,
-    MAX(pt.last_treatment_date) as last_dental_treatment
+    MAX(pt.last_ visit_date) as last_dental_treatment
 FROM patients p
          LEFT JOIN patient_teeth pt ON p.id = pt.patient_id
          LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
@@ -1153,8 +1153,8 @@ BEGIN
                             'colorHex', tc.color_hex,
                             'notes', pt.notes,
                             'isMonitored', pt.is_monitored,
-                            'lastTreatmentDate', pt.last_treatment_date,
-                            'nextScheduledDate', pt.next_scheduled_treatment_date
+                            'lastTreatmentDate', pt.last_ visit_date,
+                            'nextScheduledDate', pt.next_scheduled_ visit_date
                     ) ORDER BY pt.tooth_number
                             )
            ) INTO v_result

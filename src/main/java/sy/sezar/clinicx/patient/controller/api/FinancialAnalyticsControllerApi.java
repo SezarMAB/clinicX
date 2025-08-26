@@ -87,7 +87,7 @@ public interface FinancialAnalyticsControllerApi {
         summary = "Get treatment cost analysis",
         description = "Retrieves comprehensive treatment cost analysis for a date range."
     )
-    @ApiResponse(responseCode = "200", description = "Treatment cost analysis retrieved successfully",
+    @ApiResponse(responseCode = "200", description = "Visit cost analysis retrieved successfully",
                 content = @Content(schema = @Schema(implementation = TreatmentCostAnalysisDto.class)))
     ResponseEntity<TreatmentCostAnalysisDto> getTreatmentCostAnalysis(
             @Parameter(description = "Start date", required = true)

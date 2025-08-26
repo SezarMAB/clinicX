@@ -13,11 +13,11 @@ import java.util.UUID;
 public record GenerateInvoiceRequest(
     @NotNull(message = "Patient ID is required")
     UUID patientId,
-    
-    @NotNull(message = "Treatment IDs are required")
+
+    @NotNull(message = "Visit IDs are required")
     @NotEmpty(message = "At least one treatment ID is required")
     List<UUID> treatmentIds,
-    
+
     LocalDate issueDate,
     LocalDate dueDate,
     String notes,

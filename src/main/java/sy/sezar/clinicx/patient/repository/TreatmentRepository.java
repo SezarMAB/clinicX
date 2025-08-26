@@ -21,7 +21,7 @@ public interface TreatmentRepository extends JpaRepository<Visit, UUID>, JpaSpec
      * @param pageable  Pagination and sorting information.
      * @return A Page of treatments.
      */
-    Page<Visit> findByPatientIdOrderByTreatmentDateDesc(UUID patientId, Pageable pageable);
+    Page<Visit> findByPatientIdOrderByVisitDateDesc(UUID patientId, Pageable pageable);
 
     /**
      * Finds a list of treatments for a specific patient.

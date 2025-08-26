@@ -12,16 +12,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
-import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
-import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
+import sy.sezar.clinicx.patient.dto.VisitCreateRequest;
+import sy.sezar.clinicx.patient.dto.VisitLogDto;
+import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/treatments")
 @Tag(name = "Treatments", description = "Operations related to patient treatment management")
-public interface TreatmentControllerApi {
+public interface VisitControllerApi {
 
     @PostMapping
     @Operation(
@@ -29,13 +29,13 @@ public interface TreatmentControllerApi {
         description = "Creates a new treatment record for a patient."
     )
     @ApiResponse(responseCode = "201", description = "Visit created",
-                content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
+                content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "404", description = "Patient or procedure not found")
-    ResponseEntity<TreatmentLogDto> createTreatment(
+    ResponseEntity<VisitLogDto> createTreatment(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @RequestParam UUID patientId,
-            @Valid @RequestBody TreatmentCreateRequest request);
+            @Valid @RequestBody VisitCreateRequest request);
 
     @GetMapping("/patient/{patientId}")
     @Operation(
@@ -44,15 +44,15 @@ public interface TreatmentControllerApi {
         parameters = {
             @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
             @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
-            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: visitDate", example = "visitDate")
         }
     )
     @ApiResponse(responseCode = "200", description = "Visit history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
-    ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(
+    ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @PathVariable UUID patientId,
-            @Parameter(hidden = true) @PageableDefault(sort = "treatmentDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
+            @Parameter(hidden = true) @PageableDefault(sort = "visitDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 
     @GetMapping("/{id}")
     @Operation(
@@ -60,9 +60,9 @@ public interface TreatmentControllerApi {
         description = "Retrieves a specific treatment by its UUID."
     )
     @ApiResponse(responseCode = "200", description = "Visit found",
-                content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
+                content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "404", description = "Visit not found")
-    ResponseEntity<TreatmentLogDto> getTreatmentById(
+    ResponseEntity<VisitLogDto> getTreatmentById(
             @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id);
 
@@ -72,13 +72,13 @@ public interface TreatmentControllerApi {
         description = "Updates an existing treatment record."
     )
     @ApiResponse(responseCode = "200", description = "Visit updated",
-                content = @Content(schema = @Schema(implementation = TreatmentLogDto.class)))
+                content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "404", description = "Visit not found")
     @ApiResponse(responseCode = "400", description = "Validation error")
-    ResponseEntity<TreatmentLogDto> updateTreatment(
+    ResponseEntity<VisitLogDto> updateTreatment(
             @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id,
-            @Valid @RequestBody TreatmentCreateRequest request);
+            @Valid @RequestBody VisitCreateRequest request);
 
     @DeleteMapping("/{id}")
     @Operation(
@@ -98,11 +98,11 @@ public interface TreatmentControllerApi {
         parameters = {
             @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
             @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
-            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
+            @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: visitDate", example = "visitDate")
         }
     )
     @ApiResponse(responseCode = "200", description = "Treatments retrieved")
-    ResponseEntity<Page<TreatmentLogDto>> searchTreatments(
-            @Valid @RequestBody TreatmentSearchCriteria criteria,
-            @Parameter(hidden = true) @PageableDefault(sort = "treatmentDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
+    ResponseEntity<Page<VisitLogDto>> searchTreatments(
+            @Valid @RequestBody VisitSearchCriteria criteria,
+            @Parameter(hidden = true) @PageableDefault(sort = "visitDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 }

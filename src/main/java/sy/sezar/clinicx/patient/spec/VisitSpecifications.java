@@ -5,7 +5,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
-import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
+import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 import sy.sezar.clinicx.patient.model.*;
 import sy.sezar.clinicx.clinic.model.Staff;
 
@@ -16,9 +16,9 @@ import java.util.List;
 /**
  * Provides reusable specifications for querying Visit entities.
  */
-public final class TreatmentSpecifications {
+public final class VisitSpecifications {
 
-    private TreatmentSpecifications() {
+    private VisitSpecifications() {
         // Private constructor to prevent instantiation
     }
 
@@ -26,9 +26,9 @@ public final class TreatmentSpecifications {
      * Creates a comprehensive specification based on advanced search criteria.
      *
      * @param criteria The search criteria
-     * @return A Specification for Treatments
+     * @return A Specification for visits
      */
-    public static Specification<Visit> byAdvancedCriteria(TreatmentSearchCriteria criteria) {
+    public static Specification<Visit> byAdvancedCriteria(VisitSearchCriteria criteria) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -63,11 +63,11 @@ public final class TreatmentSpecifications {
             }
 
             // Visit date range
-            if (criteria.treatmentDateFrom() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("treatmentDate"), criteria.treatmentDateFrom()));
+            if (criteria.visitDateFrom() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("visitDate"), criteria.visitDateFrom()));
             }
-            if (criteria.treatmentDateTo() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("treatmentDate"), criteria.treatmentDateTo()));
+            if (criteria.visitDateTo() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("visitDate"), criteria.visitDateTo()));
             }
 
             // Cost range
@@ -81,7 +81,7 @@ public final class TreatmentSpecifications {
             // Notes search
             if (StringUtils.hasText(criteria.notesContain())) {
                 predicates.add(criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("treatmentNotes")),
+                    criteriaBuilder.lower(root.get("visitNotes")),
                     "%" + criteria.notesContain().toLowerCase() + "%"
                 ));
             }
@@ -143,10 +143,10 @@ public final class TreatmentSpecifications {
     }
 
     /**
-     * Creates a specification to find treatments by patient ID.
+     * Creates a specification to find visits by patient ID.
      *
      * @param patientId The patient ID
-     * @return A Specification for Treatments
+     * @return A Specification for visits
      */
     public static Specification<Visit> byPatientId(java.util.UUID patientId) {
         return (root, query, criteriaBuilder) ->
@@ -154,10 +154,10 @@ public final class TreatmentSpecifications {
     }
 
     /**
-     * Creates a specification to find treatments by doctor ID.
+     * Creates a specification to find visits by doctor ID.
      *
      * @param doctorId The doctor ID
-     * @return A Specification for Treatments
+     * @return A Specification for visits
      */
     public static Specification<Visit> byDoctorId(java.util.UUID doctorId) {
         return (root, query, criteriaBuilder) ->
@@ -165,10 +165,10 @@ public final class TreatmentSpecifications {
     }
 
     /**
-     * Creates a specification to find treatments by tooth number.
+     * Creates a specification to find visits by tooth number.
      *
      * @param toothNumber The tooth number
-     * @return A Specification for Treatments
+     * @return A Specification for visits
      */
     public static Specification<Visit> byToothNumber(Integer toothNumber) {
         return (root, query, criteriaBuilder) ->
@@ -176,20 +176,20 @@ public final class TreatmentSpecifications {
     }
 
     /**
-     * Creates a specification to find treatments within a date range.
+     * Creates a specification to find visits within a date range.
      *
      * @param from Start date (inclusive)
      * @param to End date (inclusive)
-     * @return A Specification for Treatments
+     * @return A Specification for visits
      */
     public static Specification<Visit> byDateRange(LocalDate from, LocalDate to) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (from != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("treatmentDate"), from));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("visitDate"), from));
             }
             if (to != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("treatmentDate"), to));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("visitDate"), to));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

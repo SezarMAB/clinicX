@@ -15,7 +15,7 @@ import java.util.List;
 public interface TreatmentMaterialMapper {
 
     // TreatmentMaterial -> TreatmentMaterialDto
-    @Mapping(source = "visit.id", target = "treatmentId")
+    @Mapping(source = "visit.id", target = "visitId")
     TreatmentMaterialDto toDto(TreatmentMaterial treatmentMaterial);
 
     List<TreatmentMaterialDto> toDtoList(List<TreatmentMaterial> treatmentMaterials);

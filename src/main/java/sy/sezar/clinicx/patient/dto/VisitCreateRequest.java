@@ -1,6 +1,5 @@
 package sy.sezar.clinicx.patient.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import sy.sezar.clinicx.patient.model.enums.TreatmentStatus;
@@ -12,12 +11,12 @@ import java.util.UUID;
 /**
  * Request DTO for creating/updating treatment records from the treatment form.
  */
-public record TreatmentCreateRequest(
+public record VisitCreateRequest(
     @NotNull
-    LocalDate treatmentDate,
+    LocalDate visitDate,
 
     @NotNull
-    LocalTime treatmentTime,
+    LocalTime visitTime,
 
     Integer toothNumber,
 
@@ -45,6 +44,6 @@ public record TreatmentCreateRequest(
     @Positive
     Integer durationMinutes,
 
-    String treatmentNotes,
-    String postTreatmentInstructions
+    String visitNotes,
+    String postVisitInstructions
 ) {}

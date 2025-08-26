@@ -2,9 +2,9 @@ package sy.sezar.clinicx.patient.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
-import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
-import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
+import sy.sezar.clinicx.patient.dto.VisitCreateRequest;
+import sy.sezar.clinicx.patient.dto.VisitLogDto;
+import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 
 import java.util.UUID;
 
@@ -16,22 +16,22 @@ public interface TreatmentService {
     /**
      * Creates a new treatment record for a specific patient.
      */
-    TreatmentLogDto createTreatment(UUID patientId, TreatmentCreateRequest request);
+    VisitLogDto createTreatment(UUID patientId, VisitCreateRequest request);
 
     /**
      * Gets treatment history for a patient with pagination.
      */
-    Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable);
+    Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable);
 
     /**
      * Finds a treatment by ID.
      */
-    TreatmentLogDto findTreatmentById(UUID treatmentId);
+    VisitLogDto findTreatmentById(UUID treatmentId);
 
     /**
      * Updates a treatment record.
      */
-    TreatmentLogDto updateTreatment(UUID treatmentId, TreatmentCreateRequest request);
+    VisitLogDto updateTreatment(UUID treatmentId, VisitCreateRequest request);
 
     /**
      * Deletes a treatment record.
@@ -41,5 +41,5 @@ public interface TreatmentService {
     /**
      * Advanced search for treatments with multiple criteria.
      */
-    Page<TreatmentLogDto> searchTreatments(TreatmentSearchCriteria criteria, Pageable pageable);
+    Page<VisitLogDto> searchTreatments(VisitSearchCriteria criteria, Pageable pageable);
 }

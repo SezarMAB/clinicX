@@ -23,7 +23,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<PatientSummaryDto> getPatientById(UUID id) {
         log.info("Retrieving patient with ID: {}", id);
-        
+
         try {
             PatientSummaryDto patient = patientService.findPatientById(id);
             log.info("Successfully retrieved patient with ID: {} - Status: 200 OK", id);
@@ -37,7 +37,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<Page<PatientSummaryDto>> getAllPatients(String searchTerm, Pageable pageable) {
         log.info("Retrieving patients with search term: '{}' and pagination: {}", searchTerm, pageable);
-        
+
         try {
             Page<PatientSummaryDto> patients = patientService.findAllPatients(searchTerm, pageable);
             log.info("Successfully retrieved {} patients - Status: 200 OK", patients.getNumberOfElements());
@@ -59,7 +59,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     public ResponseEntity<PatientSummaryDto> createPatient(PatientCreateRequest request) {
         log.info("Creating new patient with name: {}", request.fullName());
         log.debug("Patient creation request validation: {}", request);
-        
+
         try {
             PatientSummaryDto patient = patientService.createPatient(request);
             log.info("Successfully created patient: {} - Status: 201 CREATED", patient.publicFacingId());
@@ -74,7 +74,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     public ResponseEntity<PatientSummaryDto> updatePatient(UUID id, PatientUpdateRequest request) {
         log.info("Updating patient with ID: {}", id);
         log.debug("Patient update request validation: {}", request);
-        
+
         try {
             PatientSummaryDto patient = patientService.updatePatient(id, request);
             log.info("Successfully updated patient with ID: {} - Status: 200 OK", id);
@@ -88,7 +88,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<Void> deletePatient(UUID id) {
         log.info("Deactivating patient with ID: {}", id);
-        
+
         try {
             patientService.deactivatePatient(id);
             log.info("Successfully deactivated patient with ID: {} - Status: 204 NO CONTENT", id);
@@ -114,9 +114,9 @@ public class PatientControllerImpl implements PatientControllerApi {
     }
 
     @Override
-    public ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(UUID id, Pageable pageable) {
+    public ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(UUID id, Pageable pageable) {
         log.info("Retrieving treatment history for patient ID: {} with pagination: {}", id, pageable);
-        Page<TreatmentLogDto> treatments = patientService.getPatientTreatmentHistory(id, pageable);
+        Page<VisitLogDto> treatments = patientService.getPatientTreatmentHistory(id, pageable);
         return ResponseEntity.ok(treatments);
     }
 

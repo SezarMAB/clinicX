@@ -137,10 +137,10 @@ public final class TreatmentMaterialSpecifications {
             if (criteria.usedFrom() != null || criteria.usedTo() != null) {
                 Join<TreatmentMaterial, Visit> treatmentJoin = root.join("treatment", JoinType.LEFT);
                 if (criteria.usedFrom() != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(treatmentJoin.get("treatmentDate"), criteria.usedFrom()));
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(treatmentJoin.get("visitDate"), criteria.usedFrom()));
                 }
                 if (criteria.usedTo() != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(treatmentJoin.get("treatmentDate"), criteria.usedTo()));
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(treatmentJoin.get("visitDate"), criteria.usedTo()));
                 }
             }
 

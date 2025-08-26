@@ -225,10 +225,10 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
+    public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
         log.info("Getting treatment history for patient ID: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
+        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
         log.debug("Found {} treatments (page {} of {}) for patient: {}",
                 treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
 

@@ -9,13 +9,13 @@ import java.util.UUID;
 /**
  * Used in the treatment log table showing patient visit history.
  */
-public record TreatmentLogDto(
-    UUID treatmentId,
-    LocalDate treatmentDate,
-    LocalTime treatmentTime,
+public record VisitLogDto(
+    UUID visitId,
+    LocalDate visitDate,
+    LocalTime visitTime,
     String visitType,
     Integer toothNumber,
-    String treatmentName,
+    String visitName,
     String doctorName,
     Integer durationMinutes,
     BigDecimal cost,

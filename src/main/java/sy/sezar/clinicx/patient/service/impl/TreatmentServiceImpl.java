@@ -8,9 +8,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.core.exception.NotFoundException;
-import sy.sezar.clinicx.patient.dto.TreatmentCreateRequest;
-import sy.sezar.clinicx.patient.dto.TreatmentLogDto;
-import sy.sezar.clinicx.patient.dto.TreatmentSearchCriteria;
+import sy.sezar.clinicx.patient.dto.VisitCreateRequest;
+import sy.sezar.clinicx.patient.dto.VisitLogDto;
+import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 import sy.sezar.clinicx.patient.mapper.TreatmentMapper;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Procedure;
@@ -19,7 +19,7 @@ import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.repository.ProcedureRepository;
 import sy.sezar.clinicx.patient.repository.TreatmentRepository;
 import sy.sezar.clinicx.patient.service.TreatmentService;
-import sy.sezar.clinicx.patient.spec.TreatmentSpecifications;
+import sy.sezar.clinicx.patient.spec.VisitSpecifications;
 import sy.sezar.clinicx.clinic.model.Staff;
 import sy.sezar.clinicx.clinic.repository.StaffRepository;
 
@@ -42,7 +42,7 @@ public class TreatmentServiceImpl implements TreatmentService {
 
     @Override
     @Transactional
-    public TreatmentLogDto createTreatment(UUID patientId, TreatmentCreateRequest request) {
+    public VisitLogDto createTreatment(UUID patientId, VisitCreateRequest request) {
         log.info("Creating new visit for patient: {} with procedure: {}", patientId, request.procedureId());
         log.debug("Visit creation request: {}", request);
 
@@ -81,10 +81,10 @@ public class TreatmentServiceImpl implements TreatmentService {
     }
 
     @Override
-    public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
+    public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
         log.info("Getting treatment history for patient: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
+        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
         log.info("Found {} treatments (page {} of {}) for patient: {}",
                 treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
 
@@ -92,7 +92,7 @@ public class TreatmentServiceImpl implements TreatmentService {
     }
 
     @Override
-    public TreatmentLogDto findTreatmentById(UUID treatmentId) {
+    public VisitLogDto findTreatmentById(UUID treatmentId) {
         log.info("Finding visit by ID: {}", treatmentId);
 
         Visit visit = treatmentRepository.findById(treatmentId)
@@ -102,14 +102,14 @@ public class TreatmentServiceImpl implements TreatmentService {
                 });
 
         log.debug("Found visit: {} for patient: {} performed on: {}",
-                visit.getProcedure().getName(), visit.getPatient().getId(), visit.getTreatmentDate());
+                visit.getProcedure().getName(), visit.getPatient().getId(), visit.getVisitDate());
 
         return treatmentMapper.toTreatmentLogDto(visit);
     }
 
     @Override
     @Transactional
-    public TreatmentLogDto updateTreatment(UUID treatmentId, TreatmentCreateRequest request) {
+    public VisitLogDto updateTreatment(UUID treatmentId, VisitCreateRequest request) {
         log.info("Updating visit with ID: {} - new cost: {}, status: {}", treatmentId, request.cost(), request.status());
         log.debug("Visit update request: {}", request);
 
@@ -123,10 +123,10 @@ public class TreatmentServiceImpl implements TreatmentService {
                 visit.getCost(), visit.getStatus(), visit.getProcedure().getName());
 
         // Update visit fields from request
-        visit.setTreatmentDate(request.treatmentDate());
+        visit.setVisitDate(request.visitDate());
         visit.setCost(request.cost());
         visit.setStatus(request.status());
-        visit.setTreatmentNotes(request.treatmentNotes());
+        visit.setVisitNotes(request.visitNotes());
         visit.setToothNumber(request.toothNumber());
 
         // Update relationships if IDs changed
@@ -174,11 +174,11 @@ public class TreatmentServiceImpl implements TreatmentService {
     }
 
     @Override
-    public Page<TreatmentLogDto> searchTreatments(TreatmentSearchCriteria criteria, Pageable pageable) {
+    public Page<VisitLogDto> searchTreatments(VisitSearchCriteria criteria, Pageable pageable) {
         log.info("Searching treatments with criteria: {}", criteria);
         log.debug("Search pagination: {}", pageable);
 
-        Specification<Visit> spec = TreatmentSpecifications.byAdvancedCriteria(criteria);
+        Specification<Visit> spec = VisitSpecifications.byAdvancedCriteria(criteria);
         Page<Visit> treatments = treatmentRepository.findAll(spec, pageable);
 
         log.info("Visit search found {} results (page {} of {})",

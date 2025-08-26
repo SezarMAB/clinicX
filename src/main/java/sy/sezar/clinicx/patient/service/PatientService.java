@@ -65,7 +65,7 @@ public interface PatientService {
     /**
      * Gets patient treatment history with pagination.
      */
-    Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable);
+    Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable);
 
     /**
      * Gets patient lab requests with pagination.

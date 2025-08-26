@@ -211,9 +211,9 @@ public final class PatientSpecifications {
             }
 
             // Has treatments
-            if (criteria.hasTreatments() != null) {
-                Join<Patient, Visit> treatmentJoin = root.join("treatments", JoinType.LEFT);
-                if (criteria.hasTreatments()) {
+            if (criteria.hasVisits() != null) {
+                Join<Patient, Visit> treatmentJoin = root.join("visits", JoinType.LEFT);
+                if (criteria.hasVisits()) {
                     predicates.add(criteriaBuilder.isNotNull(treatmentJoin.get("id")));
                     query.distinct(true);
                 } else {

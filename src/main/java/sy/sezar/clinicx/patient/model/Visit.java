@@ -51,11 +51,11 @@ public class Visit extends BaseEntity {
     private BigDecimal cost;
 
     @Column(name = "visit_notes")
-    private String treatmentNotes;
+    private String visitNotes;
 
     @NotNull
     @Column(name = "visit_date", nullable = false)
-    private LocalDate treatmentDate;
+    private LocalDate visitDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")

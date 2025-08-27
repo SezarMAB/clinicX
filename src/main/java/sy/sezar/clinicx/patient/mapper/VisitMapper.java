@@ -11,7 +11,7 @@ import sy.sezar.clinicx.patient.model.Visit;
  * Mapper for converting between Visit entity and its DTOs.
  */
 @Mapper(componentModel = "spring")
-public interface TreatmentMapper {
+public interface VisitMapper {
 
     // Visit <-> VisitLogDto
     @Mapping(source = "id", target = "visitId")

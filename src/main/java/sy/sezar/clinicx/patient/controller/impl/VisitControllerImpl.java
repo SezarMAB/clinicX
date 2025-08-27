@@ -12,7 +12,7 @@ import sy.sezar.clinicx.patient.controller.api.VisitControllerApi;
 import sy.sezar.clinicx.patient.dto.VisitCreateRequest;
 import sy.sezar.clinicx.patient.dto.VisitLogDto;
 import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
-import sy.sezar.clinicx.patient.service.TreatmentService;
+import sy.sezar.clinicx.patient.service.VisitService;
 
 import java.util.UUID;
 
@@ -22,15 +22,15 @@ import java.util.UUID;
 @Slf4j
 public class VisitControllerImpl implements VisitControllerApi {
 
-    private final TreatmentService treatmentService;
+    private final VisitService visitService;
 
     @Override
-    public ResponseEntity<VisitLogDto> createTreatment(UUID patientId, VisitCreateRequest request) {
+    public ResponseEntity<VisitLogDto> createVisit(UUID patientId, VisitCreateRequest request) {
         log.info("Creating new treatment for patient ID: {} (procedure: {})", patientId, request.procedureId());
         log.debug("Visit creation request validation: {}", request);
 
         try {
-            VisitLogDto treatment = treatmentService.createTreatment(patientId, request);
+            VisitLogDto treatment = visitService.createTreatment(patientId, request);
             log.info("Successfully created treatment with ID: {} for patient: {} - Status: 201 CREATED",
                     treatment.visitId(), patientId);
             return ResponseEntity.status(HttpStatus.CREATED).body(treatment);
@@ -43,14 +43,14 @@ public class VisitControllerImpl implements VisitControllerApi {
     @Override
     public ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
         log.info("Retrieving treatment history for patient ID: {} with pagination: {}", patientId, pageable);
-        Page<VisitLogDto> treatments = treatmentService.getPatientTreatmentHistory(patientId, pageable);
+        Page<VisitLogDto> treatments = visitService.getPatientTreatmentHistory(patientId, pageable);
         return ResponseEntity.ok(treatments);
     }
 
     @Override
     public ResponseEntity<VisitLogDto> getTreatmentById(UUID id) {
         log.info("Retrieving treatment with ID: {}", id);
-        VisitLogDto treatment = treatmentService.findTreatmentById(id);
+        VisitLogDto treatment = visitService.findTreatmentById(id);
         return ResponseEntity.ok(treatment);
     }
 
@@ -60,7 +60,7 @@ public class VisitControllerImpl implements VisitControllerApi {
         log.debug("Visit update request validation: {}", request);
 
         try {
-            VisitLogDto treatment = treatmentService.updateTreatment(id, request);
+            VisitLogDto treatment = visitService.updateTreatment(id, request);
             log.info("Successfully updated treatment with ID: {} - Status: 200 OK", id);
             return ResponseEntity.ok(treatment);
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public class VisitControllerImpl implements VisitControllerApi {
         log.info("Deleting treatment with ID: {}", id);
 
         try {
-            treatmentService.deleteTreatment(id);
+            visitService.deleteTreatment(id);
             log.info("Successfully deleted treatment with ID: {} - Status: 204 NO CONTENT", id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class VisitControllerImpl implements VisitControllerApi {
     @Override
     public ResponseEntity<Page<VisitLogDto>> searchTreatments(VisitSearchCriteria criteria, Pageable pageable) {
         log.info("Advanced search for treatments with criteria: {}", criteria);
-        Page<VisitLogDto> treatments = treatmentService.searchTreatments(criteria, pageable);
+        Page<VisitLogDto> treatments = visitService.searchTreatments(criteria, pageable);
         return ResponseEntity.ok(treatments);
     }
 }

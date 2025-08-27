@@ -15,7 +15,7 @@ import sy.sezar.clinicx.patient.mapper.TreatmentMaterialMapper;
 import sy.sezar.clinicx.patient.model.Visit;
 import sy.sezar.clinicx.patient.model.TreatmentMaterial;
 import sy.sezar.clinicx.patient.repository.TreatmentMaterialRepository;
-import sy.sezar.clinicx.patient.repository.TreatmentRepository;
+import sy.sezar.clinicx.patient.repository.VisitRepository;
 import sy.sezar.clinicx.patient.service.TreatmentMaterialService;
 import sy.sezar.clinicx.patient.spec.TreatmentMaterialSpecifications;
 
@@ -30,7 +30,7 @@ import java.util.UUID;
 public class TreatmentMaterialServiceImpl implements TreatmentMaterialService {
 
     private final TreatmentMaterialRepository treatmentMaterialRepository;
-    private final TreatmentRepository treatmentRepository;
+    private final VisitRepository visitRepository;
     private final TreatmentMaterialMapper treatmentMaterialMapper;
 
     @Override
@@ -40,7 +40,7 @@ public class TreatmentMaterialServiceImpl implements TreatmentMaterialService {
                 request.treatmentId(), request.materialName());
         log.debug("Visit material create request details: {}", request);
 
-        Visit visit = treatmentRepository.findById(request.treatmentId())
+        Visit visit = visitRepository.findById(request.treatmentId())
                 .orElseThrow(() -> {
                     log.error("Visit not found with ID: {}", request.treatmentId());
                     return new NotFoundException("Visit not found with id: " + request.treatmentId());
@@ -129,7 +129,7 @@ public class TreatmentMaterialServiceImpl implements TreatmentMaterialService {
                     return new NotFoundException("Visit material not found with id: " + id);
                 });
 
-        Visit visit = treatmentRepository.findById(request.treatmentId())
+        Visit visit = visitRepository.findById(request.treatmentId())
                 .orElseThrow(() -> {
                     log.error("Visit not found with ID: {} during material update", request.treatmentId());
                     return new NotFoundException("Visit not found with id: " + request.treatmentId());

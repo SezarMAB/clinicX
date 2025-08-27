@@ -8,26 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sy.sezar.clinicx.patient.dto.*;
-import sy.sezar.clinicx.core.exception.ResourceNotFoundException;
-import sy.sezar.clinicx.patient.model.*;
-import sy.sezar.clinicx.clinic.model.Staff;
-import sy.sezar.clinicx.patient.model.enums.InvoiceStatus;
-import sy.sezar.clinicx.patient.model.enums.PaymentType;
-import sy.sezar.clinicx.patient.model.enums.TreatmentStatus;
 import sy.sezar.clinicx.patient.repository.*;
 import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import sy.sezar.clinicx.patient.service.BillingReportService;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Comprehensive implementation of BillingReportService for generating billing and financial reports.
@@ -42,7 +30,7 @@ public class BillingReportServiceImpl implements BillingReportService {
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
     private final PatientRepository patientRepository;
-    private final TreatmentRepository treatmentRepository;
+    private final VisitRepository visitRepository;
     private final StaffRepository staffRepository;
     private final ProcedureRepository procedureRepository;
     private final EntityManager entityManager;

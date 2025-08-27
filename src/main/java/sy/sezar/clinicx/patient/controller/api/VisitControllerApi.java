@@ -32,7 +32,7 @@ public interface VisitControllerApi {
                 content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "404", description = "Patient or procedure not found")
-    ResponseEntity<VisitLogDto> createTreatment(
+    ResponseEntity<VisitLogDto> createVisit(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @RequestParam UUID patientId,
             @Valid @RequestBody VisitCreateRequest request);

@@ -11,14 +11,14 @@ import sy.sezar.clinicx.core.exception.NotFoundException;
 import sy.sezar.clinicx.patient.dto.VisitCreateRequest;
 import sy.sezar.clinicx.patient.dto.VisitLogDto;
 import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
-import sy.sezar.clinicx.patient.mapper.TreatmentMapper;
+import sy.sezar.clinicx.patient.mapper.VisitMapper;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Procedure;
 import sy.sezar.clinicx.patient.model.Visit;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.repository.ProcedureRepository;
-import sy.sezar.clinicx.patient.repository.TreatmentRepository;
-import sy.sezar.clinicx.patient.service.TreatmentService;
+import sy.sezar.clinicx.patient.repository.VisitRepository;
+import sy.sezar.clinicx.patient.service.VisitService;
 import sy.sezar.clinicx.patient.spec.VisitSpecifications;
 import sy.sezar.clinicx.clinic.model.Staff;
 import sy.sezar.clinicx.clinic.repository.StaffRepository;
@@ -26,16 +26,16 @@ import sy.sezar.clinicx.clinic.repository.StaffRepository;
 import java.util.UUID;
 
 /**
- * Implementation of TreatmentService with business logic.
+ * Implementation of VisitService with business logic.
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class TreatmentServiceImpl implements TreatmentService {
+public class VisitServiceImpl implements VisitService {
 
-    private final TreatmentRepository treatmentRepository;
-    private final TreatmentMapper treatmentMapper;
+    private final VisitRepository visitRepository;
+    private final VisitMapper visitMapper;
     private final PatientRepository patientRepository;
     private final ProcedureRepository procedureRepository;
     private final StaffRepository staffRepository;
@@ -46,7 +46,7 @@ public class TreatmentServiceImpl implements TreatmentService {
         log.info("Creating new visit for patient: {} with procedure: {}", patientId, request.procedureId());
         log.debug("Visit creation request: {}", request);
 
-        Visit visit = treatmentMapper.toTreatment(request);
+        Visit visit = visitMapper.toTreatment(request);
 
         // Set patient, procedure, doctor from request IDs
         Patient patient = patientRepository.findById(patientId)
@@ -73,29 +73,29 @@ public class TreatmentServiceImpl implements TreatmentService {
         visit.setDoctor(doctor);
         log.debug("Set doctor: {} for visit", doctor.getFullName());
 
-        Visit savedVisit = treatmentRepository.save(visit);
+        Visit savedVisit = visitRepository.save(visit);
         log.info("Successfully created visit with ID: {} for patient: {} (procedure: {}, cost: {})",
                 savedVisit.getId(), patientId, procedure.getName(), savedVisit.getCost());
 
-        return treatmentMapper.toTreatmentLogDto(savedVisit);
+        return visitMapper.toTreatmentLogDto(savedVisit);
     }
 
     @Override
     public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
         log.info("Getting treatment history for patient: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
+        Page<Visit> treatments = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
         log.info("Found {} treatments (page {} of {}) for patient: {}",
                 treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
 
-        return treatments.map(treatmentMapper::toTreatmentLogDto);
+        return treatments.map(visitMapper::toTreatmentLogDto);
     }
 
     @Override
     public VisitLogDto findTreatmentById(UUID treatmentId) {
         log.info("Finding visit by ID: {}", treatmentId);
 
-        Visit visit = treatmentRepository.findById(treatmentId)
+        Visit visit = visitRepository.findById(treatmentId)
                 .orElseThrow(() -> {
                     log.error("Visit not found with ID: {}", treatmentId);
                     return new NotFoundException("Visit not found with ID: " + treatmentId);
@@ -104,7 +104,7 @@ public class TreatmentServiceImpl implements TreatmentService {
         log.debug("Found visit: {} for patient: {} performed on: {}",
                 visit.getProcedure().getName(), visit.getPatient().getId(), visit.getVisitDate());
 
-        return treatmentMapper.toTreatmentLogDto(visit);
+        return visitMapper.toTreatmentLogDto(visit);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class TreatmentServiceImpl implements TreatmentService {
         log.info("Updating visit with ID: {} - new cost: {}, status: {}", treatmentId, request.cost(), request.status());
         log.debug("Visit update request: {}", request);
 
-        Visit visit = treatmentRepository.findById(treatmentId)
+        Visit visit = visitRepository.findById(treatmentId)
                 .orElseThrow(() -> {
                     log.error("Visit not found with ID: {} during update", treatmentId);
                     return new NotFoundException("Visit not found with ID: " + treatmentId);
@@ -152,11 +152,11 @@ public class TreatmentServiceImpl implements TreatmentService {
             log.debug("Updated to doctor: {}", doctor.getFullName());
         }
 
-        Visit updatedVisit = treatmentRepository.save(visit);
+        Visit updatedVisit = visitRepository.save(visit);
         log.info("Successfully updated visit with ID: {} - Final cost: {}, status: {}",
                 treatmentId, updatedVisit.getCost(), updatedVisit.getStatus());
 
-        return treatmentMapper.toTreatmentLogDto(updatedVisit);
+        return visitMapper.toTreatmentLogDto(updatedVisit);
     }
 
     @Override
@@ -164,12 +164,12 @@ public class TreatmentServiceImpl implements TreatmentService {
     public void deleteTreatment(UUID treatmentId) {
         log.info("Deleting treatment with ID: {}", treatmentId);
 
-        if (!treatmentRepository.existsById(treatmentId)) {
+        if (!visitRepository.existsById(treatmentId)) {
             log.error("Cannot delete - treatment not found with ID: {}", treatmentId);
             throw new NotFoundException("Visit not found with ID: " + treatmentId);
         }
 
-        treatmentRepository.deleteById(treatmentId);
+        visitRepository.deleteById(treatmentId);
         log.info("Successfully deleted treatment with ID: {}", treatmentId);
     }
 
@@ -179,11 +179,11 @@ public class TreatmentServiceImpl implements TreatmentService {
         log.debug("Search pagination: {}", pageable);
 
         Specification<Visit> spec = VisitSpecifications.byAdvancedCriteria(criteria);
-        Page<Visit> treatments = treatmentRepository.findAll(spec, pageable);
+        Page<Visit> treatments = visitRepository.findAll(spec, pageable);
 
         log.info("Visit search found {} results (page {} of {})",
                 treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages());
 
-        return treatments.map(treatmentMapper::toTreatmentLogDto);
+        return treatments.map(visitMapper::toTreatmentLogDto);
     }
 }

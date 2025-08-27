@@ -17,7 +17,7 @@ import sy.sezar.clinicx.patient.mapper.TreatmentMaterialMapper;
 import sy.sezar.clinicx.patient.model.Visit;
 import sy.sezar.clinicx.patient.model.TreatmentMaterial;
 import sy.sezar.clinicx.patient.repository.TreatmentMaterialRepository;
-import sy.sezar.clinicx.patient.repository.TreatmentRepository;
+import sy.sezar.clinicx.patient.repository.VisitRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -38,7 +38,7 @@ class TreatmentMaterialServiceImplTest {
     private TreatmentMaterialRepository treatmentMaterialRepository;
 
     @Mock
-    private TreatmentRepository treatmentRepository;
+    private VisitRepository visitRepository;
 
     @Mock
     private TreatmentMaterialMapper treatmentMaterialMapper;
@@ -107,7 +107,7 @@ class TreatmentMaterialServiceImplTest {
     @Test
     void create_ShouldCreateTreatmentMaterial_WhenValidRequest() {
         // Given
-        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
+        when(visitRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
         when(treatmentMaterialMapper.toEntity(createRequest)).thenReturn(treatmentMaterial);
         when(treatmentMaterialRepository.save(any(TreatmentMaterial.class))).thenReturn(treatmentMaterial);
         when(treatmentMaterialMapper.toDto(treatmentMaterial)).thenReturn(materialDto);
@@ -117,7 +117,7 @@ class TreatmentMaterialServiceImplTest {
 
         // Then
         assertThat(result).isEqualTo(materialDto);
-        verify(treatmentRepository).findById(treatmentId);
+        verify(visitRepository).findById(treatmentId);
         verify(treatmentMaterialMapper).toEntity(createRequest);
         verify(treatmentMaterialRepository).save(any(TreatmentMaterial.class));
         verify(treatmentMaterialMapper).toDto(treatmentMaterial);
@@ -126,14 +126,14 @@ class TreatmentMaterialServiceImplTest {
     @Test
     void create_ShouldThrowNotFoundException_WhenTreatmentNotFound() {
         // Given
-        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.empty());
+        when(visitRepository.findById(treatmentId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> treatmentMaterialService.create(createRequest))
             .isInstanceOf(NotFoundException.class)
             .hasMessage("Visit not found with id: " + treatmentId);
 
-        verify(treatmentRepository).findById(treatmentId);
+        verify(visitRepository).findById(treatmentId);
         verifyNoInteractions(treatmentMaterialMapper, treatmentMaterialRepository);
     }
 
@@ -206,7 +206,7 @@ class TreatmentMaterialServiceImplTest {
     void update_ShouldUpdateTreatmentMaterial_WhenExists() {
         // Given
         when(treatmentMaterialRepository.findById(materialId)).thenReturn(Optional.of(treatmentMaterial));
-        when(treatmentRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
+        when(visitRepository.findById(treatmentId)).thenReturn(Optional.of(visit));
         when(treatmentMaterialRepository.save(treatmentMaterial)).thenReturn(treatmentMaterial);
         when(treatmentMaterialMapper.toDto(treatmentMaterial)).thenReturn(materialDto);
 
@@ -216,7 +216,7 @@ class TreatmentMaterialServiceImplTest {
         // Then
         assertThat(result).isEqualTo(materialDto);
         verify(treatmentMaterialRepository).findById(materialId);
-        verify(treatmentRepository).findById(treatmentId);
+        verify(visitRepository).findById(treatmentId);
         verify(treatmentMaterialRepository).save(treatmentMaterial);
         verify(treatmentMaterialMapper).toDto(treatmentMaterial);
     }
@@ -232,7 +232,7 @@ class TreatmentMaterialServiceImplTest {
             .hasMessage("Visit material not found with id: " + materialId);
 
         verify(treatmentMaterialRepository).findById(materialId);
-        verifyNoMoreInteractions(treatmentRepository, treatmentMaterialRepository, treatmentMaterialMapper);
+        verifyNoMoreInteractions(visitRepository, treatmentMaterialRepository, treatmentMaterialMapper);
     }
 
     @Test

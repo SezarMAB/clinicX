@@ -33,7 +33,7 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
     private final DocumentRepository documentRepository;
-    private final TreatmentRepository treatmentRepository;
+    private final VisitRepository visitRepository;
     private final AppointmentRepository appointmentRepository;
     private final NoteRepository noteRepository;
     private final LabRequestRepository labRequestRepository;
@@ -43,7 +43,7 @@ public class PatientServiceImpl implements PatientService {
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
     private final PatientCentralMapper patientMapper;
     private final DocumentMapper documentMapper;
-    private final TreatmentMapper treatmentMapper;
+    private final VisitMapper visitMapper;
     private final AppointmentMapper appointmentMapper;
     private final NoteSummaryMapper noteSummaryMapper;
     private final LabRequestMapper labRequestMapper;
@@ -228,11 +228,11 @@ public class PatientServiceImpl implements PatientService {
     public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
         log.info("Getting treatment history for patient ID: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = treatmentRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
+        Page<Visit> treatments = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
         log.debug("Found {} treatments (page {} of {}) for patient: {}",
                 treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
 
-        return treatments.map(treatmentMapper::toTreatmentLogDto);
+        return treatments.map(visitMapper::toTreatmentLogDto);
     }
 
     @Override

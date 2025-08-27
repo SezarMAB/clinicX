@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Service interface for managing patient treatments.
  */
-public interface TreatmentService {
+public interface VisitService {
 
     /**
      * Creates a new treatment record for a specific patient.

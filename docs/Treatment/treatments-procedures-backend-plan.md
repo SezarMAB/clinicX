@@ -1,16 +1,16 @@
-# Backend Plan: Visit (Visit) With Multiple Procedures
+# Backend Plan: Visit (Encounter) With Multiple Procedures
 
-Here’s a backend-first plan to model “one Visit (visit) with many Procedures” while you’re still pre‑prod. I’ll assume Java + Spring Boot + JPA, but the ideas map to any stack.
+Here’s a backend-first plan to model “one Visit (encounter) with many Procedures” while you’re still pre‑prod. Assumes Java + Spring Boot + JPA, but the ideas map to any stack.
 
 ## Overview
-- Goal: Evolve from Visit having a single procedure to Visit (visit/encounter) owning many procedures, with optional lab tracking (e.g., crowns).
-- Benefits: Correct billing (line items), clearer workflow/status per procedure, per-tooth detail, better reporting, and future-proofing.
+- Goal: Evolve from one-procedure-per-visit to Visit (encounter) owning many Procedures, with optional lab tracking (e.g., crowns).
+- Benefits: Correct billing (line items), clearer workflow/status per procedure, per‑tooth detail, better reporting, and future‑proofing.
 
 ## Domain Model
-- Visit (aka Visit/Encounter): Header for an appointment; owns procedures.
-- Procedure: Billable line item under a visit (code/name, tooth/surface, fee, status, timings).
+- Visit (aka Encounter): Header for an appointment; owns procedures.
+- Procedure: Billable clinical line item under a Visit (code/name, tooth/surface, fee, status, timings).
 - Lab Case: Optional record attached to a crown procedure for lab workflow (sent/received).
-- Naming tip: If possible, rename “Visit” to “Visit/Encounter” to avoid confusion with “Procedure”.
+- Tip: Using Visit + Procedure aligns with FHIR/HL7 and most EHRs.
 
 ## Database Schema
 - visits
@@ -90,21 +90,35 @@ stateDiagram-v2
   IN_PROGRESS --> COMPLETED
   PLANNED --> CANCELLED
   IN_PROGRESS --> CANCELLED
-  state "Procedure" as P
 ```
 
 ## Money & Units
 - Use DECIMAL/BigDecimal for money; store currency if multi-currency is possible.
 - Derive Visit.totalCost = SUM(procedure.unit_fee × quantity) on read; cache only if needed.
 
+## Materials Placement (Recommended)
+- Prefer Procedure‑level materials for accurate costing:
+  - ProcedureMaterial: id, procedure_id, material_id, qty, unit, unit_cost, total_cost, consumed_at, notes
+- Optional Visit‑level consumables (rare): for non‑attributable items (e.g., PPE) use VisitMaterial with visit_id.
+- Aggregation endpoint can report all materials used in a visit by joining all procedure materials under that visit.
+
+## Billing Models (Single Total vs Line Items)
+- One billable procedure + non‑billable steps:
+  - Keep one priced procedure (e.g., Crown #14) and record sub‑steps as billable=false.
+  - Create a single invoice item for the priced procedure; sub‑steps remain clinical only.
+- Case/Bundle price:
+  - A Case (plan item) with a single price; link all procedures (billable=false) to the case and invoice the case.
+- Installments without splitting the charge:
+  - Create one invoice and allocate multiple payments to it; or take deposits (patient credit) and apply at completion.
+
 ## Spring/JPA Entities (outline)
 - Visit
   - `@Entity` with `@OneToMany(mappedBy = "visit", orphanRemoval = true, cascade = PERSIST)` to procedures.
-  - Consider soft-deletes; avoid cascading REMOVE if you don’t want to delete procedures automatically.
+  - Consider soft‑deletes; avoid cascading REMOVE if you don’t want to delete procedures automatically.
 - Procedure
   - `@ManyToOne(fetch = LAZY)` Visit; `@Enumerated(EnumType.STRING)` for status.
 - LabCase
-  - `@OneToOne` or `@ManyToOne` to Procedure depending on your needs.
+  - `@OneToOne` or `@ManyToOne` to Procedure depending on needs.
 
 ## DTOs
 - VisitDto: id, patientId, appointmentId, date, time, providerId, notes, procedureCount, totalCost.
@@ -142,7 +156,7 @@ sequenceDiagram
 ## Service Layer
 - Use `@Transactional` boundaries; validate status transitions.
 - Optimistic locking with `@Version` or `updatedAt` checks.
-- Multi-tenant filtering (tenant_id) in all queries.
+- Multi‑tenant filtering (tenant_id) in all queries.
 
 ## Validation
 - Bean Validation: `@NotNull`, `@DecimalMin("0.00")`, `@Size` on codes/names.
@@ -150,7 +164,7 @@ sequenceDiagram
 
 ## Migrations (pre‑prod fast path)
 - Create `procedures` and `lab_cases` tables.
-- Backfill: For each existing visit, insert one procedure with name/cost/status from Visit.
+- Backfill: For each existing visit, insert one procedure with name/cost/status from the visit.
 - Stop writing name/cost/status on Visit header; later drop deprecated columns.
 
 ## Queries & Performance
@@ -180,4 +194,4 @@ sequenceDiagram
 
 ---
 
-By adopting this model now (pre‑prod), you’ll get clean billing and flexible workflows for crowns and everyday visits (exams, fillings, extractions, endo, implants) without retrofitting later.
+Adopting this model now (pre‑prod) gives clean billing and flexible workflows for crowns and everyday visits (exams, fillings, extractions, endo, implants) without retrofitting later. Also standardizes material tracking at the procedure level for accurate cost and analytics.

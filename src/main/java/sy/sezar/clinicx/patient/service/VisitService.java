@@ -9,37 +9,37 @@ import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 import java.util.UUID;
 
 /**
- * Service interface for managing patient treatments.
+ * Service interface for managing patient visits.
  */
 public interface VisitService {
 
     /**
-     * Creates a new treatment record for a specific patient.
+     * Creates a new visit record for a specific patient.
      */
-    VisitLogDto createTreatment(UUID patientId, VisitCreateRequest request);
+    VisitLogDto createVisit(UUID patientId, VisitCreateRequest request);
 
     /**
-     * Gets treatment history for a patient with pagination.
+     * Gets visit history for a patient with pagination.
      */
-    Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable);
+    Page<VisitLogDto> getPatientVisitHistory(UUID patientId, Pageable pageable);
 
     /**
-     * Finds a treatment by ID.
+     * Finds a visit by ID.
      */
-    VisitLogDto findTreatmentById(UUID treatmentId);
+    VisitLogDto findVisitById(UUID visitId);
 
     /**
-     * Updates a treatment record.
+     * Updates a visit record.
      */
-    VisitLogDto updateTreatment(UUID treatmentId, VisitCreateRequest request);
+    VisitLogDto updateVisit(UUID visitId, VisitCreateRequest request);
 
     /**
-     * Deletes a treatment record.
+     * Deletes a visit record.
      */
-    void deleteTreatment(UUID treatmentId);
+    void deleteVisit(UUID visitId);
 
     /**
-     * Advanced search for treatments with multiple criteria.
+     * Advanced search for visits with multiple criteria.
      */
-    Page<VisitLogDto> searchTreatments(VisitSearchCriteria criteria, Pageable pageable);
+    Page<VisitLogDto> searchVisits(VisitSearchCriteria criteria, Pageable pageable);
 }

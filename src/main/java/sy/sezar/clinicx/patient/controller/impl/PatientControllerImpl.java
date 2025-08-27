@@ -116,7 +116,7 @@ public class PatientControllerImpl implements PatientControllerApi {
     @Override
     public ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(UUID id, Pageable pageable) {
         log.info("Retrieving treatment history for patient ID: {} with pagination: {}", id, pageable);
-        Page<VisitLogDto> treatments = patientService.getPatientTreatmentHistory(id, pageable);
+        Page<VisitLogDto> treatments = patientService.getPatientVisitHistory(id, pageable);
         return ResponseEntity.ok(treatments);
     }
 

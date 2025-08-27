@@ -225,14 +225,14 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
-        log.info("Getting treatment history for patient ID: {} with pagination: {}", patientId, pageable);
+    public Page<VisitLogDto> getPatientVisitHistory(UUID patientId, Pageable pageable) {
+        log.info("Getting visit history for patient ID: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
-        log.debug("Found {} treatments (page {} of {}) for patient: {}",
-                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
+        Page<Visit> visits = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
+        log.debug("Found {} visits (page {} of {}) for patient: {}",
+                visits.getNumberOfElements(), visits.getNumber() + 1, visits.getTotalPages(), patientId);
 
-        return treatments.map(visitMapper::toTreatmentLogDto);
+        return visits.map(visitMapper::toVisitLogDto);
     }
 
     @Override

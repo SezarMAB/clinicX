@@ -26,8 +26,8 @@ public interface VisitMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "visitNotes", target = "notes")
     @Mapping(target = "nextAppointment", ignore = true)
-    VisitLogDto toTreatmentLogDto(Visit visit);
-    List<VisitLogDto> toTreatmentLogDtoList(List<Visit> visits);
+    VisitLogDto toVisitLogDto(Visit visit);
+    List<VisitLogDto> toVisitLogDtoList(List<Visit> visits);
 
     // VisitCreateRequest -> Visit
     @Mapping(target = "id", ignore = true)
@@ -39,5 +39,5 @@ public interface VisitMapper {
     @Mapping(target = "doctor", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "materials", ignore = true)
-    Visit toTreatment(VisitCreateRequest request);
+    Visit toVisit(VisitCreateRequest request);
 }

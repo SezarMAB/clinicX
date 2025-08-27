@@ -34,8 +34,8 @@ public final class TreatmentMaterialSpecifications {
             List<Predicate> predicates = new ArrayList<>();
 
             // Visit ID filter
-            if (criteria.treatmentId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("treatment").get("id"), criteria.treatmentId()));
+            if (criteria.visitId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("visit").get("id"), criteria.visitId()));
             }
 
             // Patient ID filter

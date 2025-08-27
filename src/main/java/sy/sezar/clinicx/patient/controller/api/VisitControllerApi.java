@@ -19,14 +19,14 @@ import sy.sezar.clinicx.patient.dto.VisitSearchCriteria;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/treatments")
-@Tag(name = "Treatments", description = "Operations related to patient treatment management")
+@RequestMapping("/api/v1/visits")
+@Tag(name = "Visits", description = "Operations related to patient visit management")
 public interface VisitControllerApi {
 
     @PostMapping
     @Operation(
-        summary = "Create new treatment",
-        description = "Creates a new treatment record for a patient."
+        summary = "Create new visit",
+        description = "Creates a new visit record for a patient."
     )
     @ApiResponse(responseCode = "201", description = "Visit created",
                 content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
@@ -39,8 +39,8 @@ public interface VisitControllerApi {
 
     @GetMapping("/patient/{patientId}")
     @Operation(
-        summary = "Get patient treatment history",
-        description = "Retrieves paginated treatment history for a specific patient.",
+        summary = "Get patient visit history",
+        description = "Retrieves paginated visit history for a specific patient.",
         parameters = {
             @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
             @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
@@ -49,60 +49,60 @@ public interface VisitControllerApi {
     )
     @ApiResponse(responseCode = "200", description = "Visit history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
-    ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(
+    ResponseEntity<Page<VisitLogDto>> getPatientVisitHistory(
             @Parameter(name = "patientId", description = "Patient UUID", required = true)
             @PathVariable UUID patientId,
             @Parameter(hidden = true) @PageableDefault(sort = "visitDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Get treatment by ID",
-        description = "Retrieves a specific treatment by its UUID."
+        summary = "Get visit by ID",
+        description = "Retrieves a specific visit by its UUID."
     )
     @ApiResponse(responseCode = "200", description = "Visit found",
                 content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "404", description = "Visit not found")
-    ResponseEntity<VisitLogDto> getTreatmentById(
+    ResponseEntity<VisitLogDto> getVisitById(
             @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id);
 
     @PutMapping("/{id}")
     @Operation(
-        summary = "Update treatment",
-        description = "Updates an existing treatment record."
+        summary = "Update visit",
+        description = "Updates an existing visit record."
     )
     @ApiResponse(responseCode = "200", description = "Visit updated",
                 content = @Content(schema = @Schema(implementation = VisitLogDto.class)))
     @ApiResponse(responseCode = "404", description = "Visit not found")
     @ApiResponse(responseCode = "400", description = "Validation error")
-    ResponseEntity<VisitLogDto> updateTreatment(
+    ResponseEntity<VisitLogDto> updateVisit(
             @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody VisitCreateRequest request);
 
     @DeleteMapping("/{id}")
     @Operation(
-        summary = "Delete treatment",
-        description = "Deletes a treatment record by its UUID."
+        summary = "Delete visit",
+        description = "Deletes a visit record by its UUID."
     )
     @ApiResponse(responseCode = "204", description = "Visit deleted")
     @ApiResponse(responseCode = "404", description = "Visit not found")
-    ResponseEntity<Void> deleteTreatment(
+    ResponseEntity<Void> deleteVisit(
             @Parameter(name = "id", description = "Visit UUID", required = true)
             @PathVariable UUID id);
 
     @PostMapping("/search")
     @Operation(
-        summary = "Advanced treatment search",
-        description = "Search treatments with multiple criteria and filters.",
+        summary = "Advanced visit search",
+        description = "Search visits with multiple criteria and filters.",
         parameters = {
             @io.swagger.v3.oas.annotations.Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
             @io.swagger.v3.oas.annotations.Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
             @io.swagger.v3.oas.annotations.Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: visitDate", example = "visitDate")
         }
     )
-    @ApiResponse(responseCode = "200", description = "Treatments retrieved")
-    ResponseEntity<Page<VisitLogDto>> searchTreatments(
+    @ApiResponse(responseCode = "200", description = "Visits retrieved")
+    ResponseEntity<Page<VisitLogDto>> searchVisits(
             @Valid @RequestBody VisitSearchCriteria criteria,
             @Parameter(hidden = true) @PageableDefault(sort = "visitDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 }

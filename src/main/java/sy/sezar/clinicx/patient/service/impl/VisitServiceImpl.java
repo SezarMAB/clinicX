@@ -42,11 +42,11 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     @Transactional
-    public VisitLogDto createTreatment(UUID patientId, VisitCreateRequest request) {
+    public VisitLogDto createVisit(UUID patientId, VisitCreateRequest request) {
         log.info("Creating new visit for patient: {} with procedure: {}", patientId, request.procedureId());
         log.debug("Visit creation request: {}", request);
 
-        Visit visit = visitMapper.toTreatment(request);
+        Visit visit = visitMapper.toVisit(request);
 
         // Set patient, procedure, doctor from request IDs
         Patient patient = patientRepository.findById(patientId)
@@ -77,46 +77,46 @@ public class VisitServiceImpl implements VisitService {
         log.info("Successfully created visit with ID: {} for patient: {} (procedure: {}, cost: {})",
                 savedVisit.getId(), patientId, procedure.getName(), savedVisit.getCost());
 
-        return visitMapper.toTreatmentLogDto(savedVisit);
+        return visitMapper.toVisitLogDto(savedVisit);
     }
 
     @Override
-    public Page<VisitLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
-        log.info("Getting treatment history for patient: {} with pagination: {}", patientId, pageable);
+    public Page<VisitLogDto> getPatientVisitHistory(UUID patientId, Pageable pageable) {
+        log.info("Getting visit history for patient: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> treatments = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
-        log.info("Found {} treatments (page {} of {}) for patient: {}",
-                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
+        Page<Visit> visits = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
+        log.info("Found {} visits (page {} of {}) for patient: {}",
+                visits.getNumberOfElements(), visits.getNumber() + 1, visits.getTotalPages(), patientId);
 
-        return treatments.map(visitMapper::toTreatmentLogDto);
+        return visits.map(visitMapper::toVisitLogDto);
     }
 
     @Override
-    public VisitLogDto findTreatmentById(UUID treatmentId) {
-        log.info("Finding visit by ID: {}", treatmentId);
+    public VisitLogDto findVisitById(UUID visitId) {
+        log.info("Finding visit by ID: {}", visitId);
 
-        Visit visit = visitRepository.findById(treatmentId)
+        Visit visit = visitRepository.findById(visitId)
                 .orElseThrow(() -> {
-                    log.error("Visit not found with ID: {}", treatmentId);
-                    return new NotFoundException("Visit not found with ID: " + treatmentId);
+                    log.error("Visit not found with ID: {}", visitId);
+                    return new NotFoundException("Visit not found with ID: " + visitId);
                 });
 
         log.debug("Found visit: {} for patient: {} performed on: {}",
                 visit.getProcedure().getName(), visit.getPatient().getId(), visit.getVisitDate());
 
-        return visitMapper.toTreatmentLogDto(visit);
+        return visitMapper.toVisitLogDto(visit);
     }
 
     @Override
     @Transactional
-    public VisitLogDto updateTreatment(UUID treatmentId, VisitCreateRequest request) {
-        log.info("Updating visit with ID: {} - new cost: {}, status: {}", treatmentId, request.cost(), request.status());
+    public VisitLogDto updateVisit(UUID visitId, VisitCreateRequest request) {
+        log.info("Updating visit with ID: {} - new cost: {}, status: {}", visitId, request.cost(), request.status());
         log.debug("Visit update request: {}", request);
 
-        Visit visit = visitRepository.findById(treatmentId)
+        Visit visit = visitRepository.findById(visitId)
                 .orElseThrow(() -> {
-                    log.error("Visit not found with ID: {} during update", treatmentId);
-                    return new NotFoundException("Visit not found with ID: " + treatmentId);
+                    log.error("Visit not found with ID: {} during update", visitId);
+                    return new NotFoundException("Visit not found with ID: " + visitId);
                 });
 
         log.debug("Original visit - Cost: {}, Status: {}, Procedure: {}",
@@ -154,36 +154,36 @@ public class VisitServiceImpl implements VisitService {
 
         Visit updatedVisit = visitRepository.save(visit);
         log.info("Successfully updated visit with ID: {} - Final cost: {}, status: {}",
-                treatmentId, updatedVisit.getCost(), updatedVisit.getStatus());
+                visitId, updatedVisit.getCost(), updatedVisit.getStatus());
 
-        return visitMapper.toTreatmentLogDto(updatedVisit);
+        return visitMapper.toVisitLogDto(updatedVisit);
     }
 
     @Override
     @Transactional
-    public void deleteTreatment(UUID treatmentId) {
-        log.info("Deleting treatment with ID: {}", treatmentId);
+    public void deleteVisit(UUID visitId) {
+        log.info("Deleting visit with ID: {}", visitId);
 
-        if (!visitRepository.existsById(treatmentId)) {
-            log.error("Cannot delete - treatment not found with ID: {}", treatmentId);
-            throw new NotFoundException("Visit not found with ID: " + treatmentId);
+        if (!visitRepository.existsById(visitId)) {
+            log.error("Cannot delete - visit not found with ID: {}", visitId);
+            throw new NotFoundException("Visit not found with ID: " + visitId);
         }
 
-        visitRepository.deleteById(treatmentId);
-        log.info("Successfully deleted treatment with ID: {}", treatmentId);
+        visitRepository.deleteById(visitId);
+        log.info("Successfully deleted visit with ID: {}", visitId);
     }
 
     @Override
-    public Page<VisitLogDto> searchTreatments(VisitSearchCriteria criteria, Pageable pageable) {
-        log.info("Searching treatments with criteria: {}", criteria);
+    public Page<VisitLogDto> searchVisits(VisitSearchCriteria criteria, Pageable pageable) {
+        log.info("Searching visits with criteria: {}", criteria);
         log.debug("Search pagination: {}", pageable);
 
         Specification<Visit> spec = VisitSpecifications.byAdvancedCriteria(criteria);
-        Page<Visit> treatments = visitRepository.findAll(spec, pageable);
+        Page<Visit> visits = visitRepository.findAll(spec, pageable);
 
         log.info("Visit search found {} results (page {} of {})",
-                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages());
+                visits.getNumberOfElements(), visits.getNumber() + 1, visits.getTotalPages());
 
-        return treatments.map(visitMapper::toTreatmentLogDto);
+        return visits.map(visitMapper::toVisitLogDto);
     }
 }

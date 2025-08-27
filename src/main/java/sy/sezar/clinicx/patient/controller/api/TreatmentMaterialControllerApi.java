@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/treatment-materials")
-@Tag(name = "Treatment Materials", description = "Operations related to treatment material management")
+@Tag(name = "Visit Materials", description = "Operations related to treatment material management")
 public interface TreatmentMaterialControllerApi {
 
     @PostMapping
@@ -30,10 +30,10 @@ public interface TreatmentMaterialControllerApi {
         summary = "Create treatment material record",
         description = "Creates a new treatment material record."
     )
-    @ApiResponse(responseCode = "201", description = "Treatment material created",
+    @ApiResponse(responseCode = "201", description = "Visit material created",
                 content = @Content(schema = @Schema(implementation = TreatmentMaterialDto.class)))
     @ApiResponse(responseCode = "400", description = "Validation error")
-    @ApiResponse(responseCode = "404", description = "Treatment not found")
+    @ApiResponse(responseCode = "404", description = "Visit not found")
     ResponseEntity<TreatmentMaterialDto> createTreatmentMaterial(
             @Valid @RequestBody TreatmentMaterialCreateRequest request);
 
@@ -42,11 +42,11 @@ public interface TreatmentMaterialControllerApi {
         summary = "Get treatment material by ID",
         description = "Retrieves a specific treatment material by its ID."
     )
-    @ApiResponse(responseCode = "200", description = "Treatment material found",
+    @ApiResponse(responseCode = "200", description = "Visit material found",
                 content = @Content(schema = @Schema(implementation = TreatmentMaterialDto.class)))
-    @ApiResponse(responseCode = "404", description = "Treatment material not found")
+    @ApiResponse(responseCode = "404", description = "Visit material not found")
     ResponseEntity<TreatmentMaterialDto> getTreatmentMaterial(
-            @Parameter(description = "Treatment material ID") @PathVariable UUID id);
+            @Parameter(description = "Visit material ID") @PathVariable UUID id);
 
     @GetMapping("/treatment/{treatmentId}")
     @Operation(
@@ -55,7 +55,7 @@ public interface TreatmentMaterialControllerApi {
     )
     @ApiResponse(responseCode = "200", description = "Materials retrieved")
     ResponseEntity<List<TreatmentMaterialDto>> getMaterialsByTreatment(
-            @Parameter(description = "Treatment ID") @PathVariable UUID treatmentId);
+            @Parameter(description = "Visit ID") @PathVariable UUID treatmentId);
 
     @GetMapping("/treatment/{treatmentId}/paged")
     @Operation(
@@ -69,7 +69,7 @@ public interface TreatmentMaterialControllerApi {
     )
     @ApiResponse(responseCode = "200", description = "Materials retrieved")
     ResponseEntity<Page<TreatmentMaterialDto>> getMaterialsByTreatmentPaged(
-            @Parameter(description = "Treatment ID") @PathVariable UUID treatmentId,
+            @Parameter(description = "Visit ID") @PathVariable UUID treatmentId,
             @Parameter(hidden = true) @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 
     @GetMapping("/patient/{patientId}")
@@ -101,12 +101,12 @@ public interface TreatmentMaterialControllerApi {
         summary = "Update treatment material",
         description = "Updates an existing treatment material record."
     )
-    @ApiResponse(responseCode = "200", description = "Treatment material updated",
+    @ApiResponse(responseCode = "200", description = "Visit material updated",
                 content = @Content(schema = @Schema(implementation = TreatmentMaterialDto.class)))
     @ApiResponse(responseCode = "400", description = "Validation error")
-    @ApiResponse(responseCode = "404", description = "Treatment material not found")
+    @ApiResponse(responseCode = "404", description = "Visit material not found")
     ResponseEntity<TreatmentMaterialDto> updateTreatmentMaterial(
-            @Parameter(description = "Treatment material ID") @PathVariable UUID id,
+            @Parameter(description = "Visit material ID") @PathVariable UUID id,
             @Valid @RequestBody TreatmentMaterialCreateRequest request);
 
     @DeleteMapping("/{id}")
@@ -114,10 +114,10 @@ public interface TreatmentMaterialControllerApi {
         summary = "Delete treatment material",
         description = "Deletes a treatment material record."
     )
-    @ApiResponse(responseCode = "204", description = "Treatment material deleted")
-    @ApiResponse(responseCode = "404", description = "Treatment material not found")
+    @ApiResponse(responseCode = "204", description = "Visit material deleted")
+    @ApiResponse(responseCode = "404", description = "Visit material not found")
     ResponseEntity<Void> deleteTreatmentMaterial(
-            @Parameter(description = "Treatment material ID") @PathVariable UUID id);
+            @Parameter(description = "Visit material ID") @PathVariable UUID id);
 
     @GetMapping("/treatment/{treatmentId}/total-cost")
     @Operation(
@@ -126,7 +126,7 @@ public interface TreatmentMaterialControllerApi {
     )
     @ApiResponse(responseCode = "200", description = "Total cost calculated")
     ResponseEntity<BigDecimal> getTotalMaterialCostByTreatment(
-            @Parameter(description = "Treatment ID") @PathVariable UUID treatmentId);
+            @Parameter(description = "Visit ID") @PathVariable UUID treatmentId);
 
     @GetMapping("/patient/{patientId}/total-cost")
     @Operation(

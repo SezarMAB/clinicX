@@ -48,7 +48,7 @@ public interface AppointmentMapper {
     @Mapping(target = "patient", ignore = true)
     @Mapping(target = "doctor", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "treatments", ignore = true)
+    @Mapping(target = "visits", ignore = true)
     Appointment toEntity(AppointmentCreateRequest request);
 
     default String determineTreatmentType(Appointment appointment) {

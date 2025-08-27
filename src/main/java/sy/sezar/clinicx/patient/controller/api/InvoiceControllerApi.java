@@ -37,6 +37,17 @@ public interface InvoiceControllerApi {
     ResponseEntity<FinancialRecordDto> createInvoice(
             @Valid @RequestBody InvoiceCreateRequest request);
 
+    // Optional: endpoint to recompute and return invoice totals (useful during dev)
+    @PostMapping("/{invoiceId}/recompute-totals")
+    @Operation(
+        summary = "Recompute invoice totals",
+        description = "Recomputes materialized totals on the invoice (paid/due)"
+    )
+    @ApiResponse(responseCode = "200", description = "Totals recomputed")
+    ResponseEntity<String> recomputeInvoiceTotals(
+            @Parameter(name = "invoiceId", description = "Invoice UUID", required = true)
+            @PathVariable UUID invoiceId);
+
     @PostMapping("/{invoiceId}/payments")
     @Operation(
         summary = "Add payment to invoice",

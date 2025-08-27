@@ -34,7 +34,7 @@ This document provides a comprehensive analysis of the ClinicX patient module's 
   - patient_id → patients
   - procedure_id → procedures
   - doctor_id → staff
-- **Key Attributes**: tooth_number, status, cost, treatment_notes, treatment_date
+- **Key Attributes**: tooth_number, status, cost,  visit_notes,  visit_date
 - **Tooth Numbering**: International FDI notation (11-48)
 
 #### 4. **invoices & invoice_items**
@@ -269,8 +269,8 @@ erDiagram
         integer tooth_number
         varchar status
         numeric cost
-        text treatment_notes
-        date treatment_date
+        text  visit_notes
+        date  visit_date
         uuid created_by FK
         timestamp created_at
         timestamp updated_at

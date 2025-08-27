@@ -41,6 +41,27 @@ public class Invoice extends BaseEntity {
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(name = "sub_total", precision = 10, scale = 2)
+    private BigDecimal subTotal;
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "tax_amount", precision = 10, scale = 2)
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @Column(name = "adjustment_amount", precision = 10, scale = 2)
+    private BigDecimal adjustmentAmount = BigDecimal.ZERO;
+
+    @Column(name = "write_off_amount", precision = 10, scale = 2)
+    private BigDecimal writeOffAmount = BigDecimal.ZERO;
+
+    @Column(name = "amount_paid", precision = 10, scale = 2)
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @Column(name = "amount_due", precision = 10, scale = 2)
+    private BigDecimal amountDue = BigDecimal.ZERO;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)

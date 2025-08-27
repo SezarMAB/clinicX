@@ -136,14 +136,14 @@ public interface PatientControllerApi {
         parameters = {
             @Parameter(name = "page", description = "Zero-based page index (0..N)", example = "0"),
             @Parameter(name = "size", description = "The size of the page to be returned", example = "20"),
-            @Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: treatmentDate", example = "treatmentDate")
+            @Parameter(name = "sort", description = "Sorting criteria: property(,asc|desc). Default: visitDate", example = "visitDate")
         }
     )
-    @ApiResponse(responseCode = "200", description = "Treatment history retrieved")
+    @ApiResponse(responseCode = "200", description = "Visit history retrieved")
     @ApiResponse(responseCode = "404", description = "Patient not found")
-    ResponseEntity<Page<TreatmentLogDto>> getPatientTreatmentHistory(
+    ResponseEntity<Page<VisitLogDto>> getPatientTreatmentHistory(
             @Parameter(description = "Patient ID") @PathVariable UUID id,
-            @Parameter(hidden = true) @PageableDefault(sort = "treatmentDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
+            @Parameter(hidden = true) @PageableDefault(sort = "visitDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable);
 
     @GetMapping("/{id}/lab-requests")
     @Operation(

@@ -131,8 +131,8 @@ CREATE TABLE treatments (
                             tooth_number    INT,
                             status          VARCHAR(50) NOT NULL DEFAULT 'COMPLETED',
                             cost            DECIMAL(10,2) NOT NULL,
-                            treatment_notes TEXT,
-                            treatment_date  DATE NOT NULL,
+                             visit_notes TEXT,
+                             visit_date  DATE NOT NULL,
                             created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             created_by      UUID,
@@ -177,7 +177,7 @@ CREATE TABLE patient_teeth (
                                tooth_number         INT  NOT NULL CHECK (tooth_number BETWEEN 11 AND 48),
                                current_condition_id UUID,
                                notes                TEXT,
-                               last_treatment_date  DATE,
+                               last_ visit_date  DATE,
                                created_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                UNIQUE(patient_id,tooth_number),
@@ -331,7 +331,7 @@ SELECT
     tc.name  AS condition_name,
     tc.color_hex,
     pt.notes,
-    pt.last_treatment_date
+    pt.last_ visit_date
 FROM patient_teeth pt
          LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
 ORDER BY pt.tooth_number;
@@ -382,5 +382,5 @@ INSERT INTO specialties (name, description) VALUES ('Oral Surgery', 'Tooth extra
 INSERT INTO specialties (name, description) VALUES ('Pediatric Dentistry', 'Children''s dental care');
 
 -- Default system user for automated processes
-MERGE INTO staff (id, full_name, role, email, phone_number) KEY(id) 
+MERGE INTO staff (id, full_name, role, email, phone_number) KEY(id)
 VALUES ('00000000-0000-0000-0000-000000000000', 'System', 'ADMIN', 'system@clinic.sa', '0000000000');

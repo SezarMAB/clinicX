@@ -228,8 +228,10 @@ public class AppointmentServiceImpl implements AppointmentService {
   public List<AppointmentCardDto> getTodayAppointmentsForCurrentUser(LocalDate today) {
     log.info("Getting today's appointments for current user");
 
-    String keycloakUserId = SecurityUtils.getCurrentUserId()
-        .orElseThrow(() -> new AccessDeniedException("No authenticated user found"));
+    String keycloakUserId = SecurityUtils.getCurrentUserId();
+    if (keycloakUserId == null) {
+        throw new AccessDeniedException("No authenticated user found");
+    }
 
     String tenantId = Optional.ofNullable(TenantContext.getCurrentTenant())
         .orElseThrow(() -> new BusinessRuleException("No tenant context found"));

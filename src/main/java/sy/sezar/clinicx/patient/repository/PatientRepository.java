@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.projection.PatientSearchResultProjection;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,5 +38,14 @@ public interface PatientRepository extends JpaRepository<Patient, UUID>, JpaSpec
      * @return A Page of PatientSearchResultProjection.
      */
     Page<PatientSearchResultProjection> findBy(Specification<Patient> spec, Pageable pageable);
+    
+    /**
+     * Count patients created after a specific date.
+     * Used for tracking active patients.
+     * 
+     * @param createdAt The creation date threshold.
+     * @return Count of patients created after the date.
+     */
+    long countByCreatedAtAfter(Instant createdAt);
 }
 

@@ -41,7 +41,7 @@ public class ChartPayload {
         private String notes;
         private Flags flags = new Flags();
         
-        @JsonProperty("last_treatment_date")
+        @JsonProperty("last_ visit_date")
         private String lastTreatmentDate;
     }
     
@@ -52,7 +52,7 @@ public class ChartPayload {
         private String condition = "healthy";
         private String treatment;
         
-        @JsonProperty("treatment_date")
+        @JsonProperty(" visit_date")
         private String treatmentDate;
     }
     

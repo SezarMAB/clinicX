@@ -15,19 +15,19 @@ import java.util.UUID;
 @Repository
 public interface TreatmentMaterialRepository extends JpaRepository<TreatmentMaterial, UUID>, JpaSpecificationExecutor<TreatmentMaterial> {
 
-    List<TreatmentMaterial> findByTreatmentId(UUID treatmentId);
-    
-    Page<TreatmentMaterial> findByTreatmentId(UUID treatmentId, Pageable pageable);
+    List<TreatmentMaterial> findByVisitId(UUID visitsId);
 
-    @Query("SELECT tm FROM TreatmentMaterial tm WHERE tm.treatment.patient.id = :patientId")
+    Page<TreatmentMaterial> findByVisitId(UUID visitsId, Pageable pageable);
+
+    @Query("SELECT tm FROM TreatmentMaterial tm WHERE tm.visit.patient.id = :patientId")
     List<TreatmentMaterial> findByPatientId(@Param("patientId") UUID patientId);
 
-    @Query("SELECT tm FROM TreatmentMaterial tm WHERE tm.treatment.patient.id = :patientId")
+    @Query("SELECT tm FROM TreatmentMaterial tm WHERE tm.visit.patient.id = :patientId")
     Page<TreatmentMaterial> findByPatientId(@Param("patientId") UUID patientId, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(tm.totalCost), 0) FROM TreatmentMaterial tm WHERE tm.treatment.id = :treatmentId")
-    java.math.BigDecimal getTotalMaterialCostByTreatmentId(@Param("treatmentId") UUID treatmentId);
+    @Query("SELECT COALESCE(SUM(tm.totalCost), 0) FROM TreatmentMaterial tm WHERE tm.visit.id = :treatmentId")
+    java.math.BigDecimal getTotalMaterialCostByTreatmentId(@Param("visitId") UUID treatmentId);
 
-    @Query("SELECT COALESCE(SUM(tm.totalCost), 0) FROM TreatmentMaterial tm WHERE tm.treatment.patient.id = :patientId")
+    @Query("SELECT COALESCE(SUM(tm.totalCost), 0) FROM TreatmentMaterial tm WHERE tm.visit.patient.id = :patientId")
     java.math.BigDecimal getTotalMaterialCostByPatientId(@Param("patientId") UUID patientId);
 }

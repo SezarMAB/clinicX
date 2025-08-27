@@ -55,6 +55,6 @@ public class Appointment extends BaseEntity {
     private Staff createdBy;
 
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Treatment> treatments = new HashSet<>();
+    private Set<Visit> visits = new HashSet<>();
 }
 

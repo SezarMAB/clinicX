@@ -1,5 +1,5 @@
 # ClinicX - Dental Clinic Management System
-
+ClinicX is a multi-tenant SaaS clinic management system using Spring Boot and Keycloak.
 A comprehensive Spring Boot 3.x application for dental clinic management, built with PostgreSQL and featuring a complete treatment materials tracking system.
 
 ## 🏗️ Architecture
@@ -81,6 +81,7 @@ The application includes comprehensive test coverage:
 
 ## erDiagram
 ```mermaid
+
 erDiagram
     clinic_info {
         boolean id PK
@@ -93,76 +94,6 @@ erDiagram
         timestamp updated_at
     }
 
-    tenants {
-        uuid id PK
-        varchar tenant_id UK
-        varchar name
-        varchar subdomain UK
-        varchar realm_name
-        boolean is_active
-        varchar contact_email
-        varchar contact_phone
-        text address
-        timestamp subscription_start_date
-        timestamp subscription_end_date
-        varchar subscription_plan
-        integer max_users
-        integer max_patients
-        varchar specialty
-        timestamp created_at
-        timestamp updated_at
-        varchar created_by
-        varchar updated_by
-    }
-
-    specialty_types {
-        uuid id PK
-        varchar code UK
-        varchar name
-        varchar features
-        varchar realm_name
-        boolean is_active
-        timestamp created_at
-        timestamp updated_at
-        varchar created_by
-        varchar updated_by
-    }
-
-    staff {
-        uuid id PK
-        varchar full_name
-        varchar email
-        varchar phone_number
-        boolean is_active
-        varchar tenant_id
-        varchar keycloak_user_id
-        varchar source_realm
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    staff_roles {
-        uuid staff_id PK,FK
-        varchar role PK
-    }
-
-    user_tenant_access {
-        uuid id PK
-        varchar user_id
-        varchar tenant_id FK
-        boolean is_primary
-        boolean is_active
-        timestamp created_at
-        timestamp updated_at
-        varchar created_by
-        varchar updated_by
-    }
-
-    user_tenant_access_roles {
-        uuid user_tenant_access_id PK,FK
-        varchar role PK
-    }
-
     specialties {
         uuid id PK
         varchar name UK
@@ -172,9 +103,27 @@ erDiagram
         timestamp updated_at
     }
 
+    staff {
+        uuid id PK
+        varchar full_name
+        varchar email
+        varchar phone_number
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        varchar tenant_id
+        varchar keycloak_user_id
+        varchar source_realm
+    }
+
     staff_specialties {
         uuid staff_id PK,FK
         uuid specialty_id PK,FK
+    }
+
+    staff_roles {
+        uuid staff_id PK,FK
+        varchar role PK
     }
 
     patients {
@@ -191,31 +140,9 @@ erDiagram
         text important_medical_notes
         numeric balance
         boolean is_active
+        timestamp created_at
+        timestamp updated_at
         uuid created_by FK
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    dental_charts {
-        uuid id PK
-        uuid patient_id UK,FK
-        json chart_data
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    appointments {
-        uuid id PK
-        uuid specialty_id FK
-        uuid patient_id FK
-        uuid doctor_id FK
-        timestamp appointment_datetime
-        integer duration_minutes
-        varchar status
-        text notes
-        uuid created_by FK
-        timestamp created_at
-        timestamp updated_at
     }
 
     procedures {
@@ -231,6 +158,20 @@ erDiagram
         timestamp updated_at
     }
 
+    appointments {
+        uuid id PK
+        uuid specialty_id FK
+        uuid patient_id FK
+        uuid doctor_id FK
+        timestamp appointment_datetime
+        integer duration_minutes
+        varchar status
+        text notes
+        timestamp created_at
+        timestamp updated_at
+        uuid created_by FK
+    }
+
     treatments {
         uuid id PK
         uuid appointment_id FK
@@ -242,9 +183,9 @@ erDiagram
         numeric cost
         text treatment_notes
         date treatment_date
-        uuid created_by FK
         timestamp created_at
         timestamp updated_at
+        uuid created_by FK
     }
 
     treatment_materials {
@@ -262,16 +203,6 @@ erDiagram
         timestamp updated_at
     }
 
-    tooth_conditions {
-        uuid id PK
-        varchar code UK
-        varchar name
-        text description
-        varchar color_hex
-        boolean is_active
-        timestamp created_at
-    }
-
     invoices {
         uuid id PK
         uuid patient_id FK
@@ -280,15 +211,15 @@ erDiagram
         date due_date
         numeric total_amount
         varchar status
-        uuid created_by FK
         timestamp created_at
         timestamp updated_at
+        uuid created_by FK
     }
 
     invoice_items {
         uuid id PK
         uuid invoice_id FK
-        uuid treatment_id UK,FK
+        uuid treatment_id FK,UK
         varchar description
         numeric amount
         timestamp created_at
@@ -303,9 +234,10 @@ erDiagram
         varchar payment_method
         varchar type
         varchar description
-        varchar reference_number
-        uuid created_by FK
         timestamp created_at
+        uuid created_by FK
+        varchar reference_number
+        varchar status
     }
 
     lab_requests {
@@ -344,55 +276,149 @@ erDiagram
         timestamp updated_at
     }
 
-    flyway_schema_history {
-        integer installed_rank PK
-        varchar version
-        varchar description
-        varchar type
-        varchar script
-        integer checksum
-        varchar installed_by
-        timestamp installed_on
-        integer execution_time
-        boolean success
+    dental_charts {
+        uuid id PK
+        uuid patient_id FK,UK
+        json chart_data
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    tenants {
+        uuid id PK
+        varchar tenant_id UK
+        varchar name
+        varchar subdomain UK
+        varchar realm_name
+        boolean is_active
+        varchar contact_email
+        varchar contact_phone
+        text address
+        timestamp subscription_start_date
+        timestamp subscription_end_date
+        varchar subscription_plan
+        integer max_users
+        integer max_patients
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
+        varchar specialty
+    }
+
+    specialty_types {
+        uuid id PK
+        varchar code UK
+        varchar name
+        varchar features
+        varchar realm_name
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
+    }
+
+    user_tenant_access {
+        uuid id PK
+        varchar user_id
+        varchar tenant_id FK
+        boolean is_primary
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+        varchar created_by
+        varchar updated_by
+    }
+
+    user_tenant_access_roles {
+        uuid user_tenant_access_id PK,FK
+        varchar role PK
+    }
+
+    payment_plans {
+        uuid id PK
+        uuid patient_id FK
+        uuid invoice_id FK
+        varchar plan_name
+        numeric total_amount
+        integer installment_count
+        numeric installment_amount
+        date start_date
+        date end_date
+        integer frequency_days
+        varchar status
+        text notes
+        uuid created_by FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    payment_plan_installments {
+        uuid id PK
+        uuid payment_plan_id FK
+        integer installment_number
+        date due_date
+        numeric amount
+        numeric paid_amount
+        date paid_date
+        varchar status
+        text notes
     }
 
 %% Relationships
-    staff ||--o{ staff_roles : has
-    staff ||--o{ staff_specialties : has
-    specialties ||--o{ staff_specialties : has
-    specialties ||--o{ appointments : for
-    specialties ||--o{ procedures : contains
+    staff_specialties ||--o{ staff : "has"
+    staff_specialties ||--o{ specialties : "has"
 
-    patients ||--o{ appointments : has
-    patients ||--o{ treatments : receives
-    patients ||--o{ invoices : has
-    patients ||--o{ payments : makes
-    patients ||--o{ lab_requests : has
-    patients ||--o{ documents : has
-    patients ||--o{ notes : has
-    patients ||--|| dental_charts : has
+    staff_roles ||--o| staff : "belongs to"
 
-    staff ||--o{ appointments : conducts
-    staff ||--o{ treatments : performs
-    staff ||--o{ patients : creates
-    staff ||--o{ invoices : creates
-    staff ||--o{ payments : records
-    staff ||--o{ documents : uploads
-    staff ||--o{ notes : creates
-    staff ||--o{ appointments : creates
-    staff ||--o{ treatments : creates
+    patients ||--o| staff : "created by"
 
-    appointments ||--o{ treatments : generates
-    procedures ||--o{ treatments : used-in
-    treatments ||--o{ treatment_materials : uses
-    treatments ||--o| invoice_items : billed-in
+    procedures }o--|| specialties : "belongs to"
 
-    invoices ||--o{ invoice_items : contains
-    invoices ||--o{ payments : receives
+    appointments }o--|| specialties : "for"
+    appointments }o--|| patients : "for"
+    appointments }o--o| staff : "with doctor"
+    appointments }o--o| staff : "created by"
 
-    tenants ||--o{ user_tenant_access : has
-    user_tenant_access ||--o{ user_tenant_access_roles : has
+    treatments }o--|| appointments : "part of"
+    treatments }o--|| patients : "for"
+    treatments }o--|| procedures : "uses"
+    treatments }o--o| staff : "performed by"
+    treatments }o--o| staff : "created by"
+
+    treatment_materials }o--|| treatments : "used in"
+
+    invoices }o--|| patients : "for"
+    invoices }o--o| staff : "created by"
+
+    invoice_items }o--|| invoices : "part of"
+    invoice_items |o--o| treatments : "for"
+
+    payments }o--o| invoices : "for"
+    payments }o--|| patients : "from"
+    payments }o--o| staff : "created by"
+
+    lab_requests }o--|| patients : "for"
+
+    documents }o--|| patients : "for"
+    documents }o--o| staff : "uploaded by"
+
+    notes }o--|| patients : "about"
+    notes }o--o| staff : "created by"
+
+    dental_charts ||--|| patients : "has"
+
+    user_tenant_access }o--|| tenants : "accesses"
+
+    user_tenant_access_roles ||--o| user_tenant_access : "has"
+
+    payment_plans }o--|| patients : "for"
+    payment_plans }o--|| invoices : "for"
+    payment_plans }o--o| staff : "created by"
+
+    payment_plan_installments }o--|| payment_plans : "part of"
+        varchar subdomain UK
 
 ```
 ## 📚 API Documentation

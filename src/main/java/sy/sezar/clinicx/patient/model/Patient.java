@@ -95,6 +95,6 @@ public class Patient extends BaseEntity {
     private DentalChart dentalChart;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Treatment> treatments = new HashSet<>();
+    private Set<Visit> visits = new HashSet<>();
 }
 

@@ -7,12 +7,12 @@
 BEGIN;
 
 -- ====================================================================
--- TREATMENT MATERIALS TABLE
+-- visit MATERIALS TABLE
 -- ====================================================================
 
 CREATE TABLE treatment_materials (
     id               UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
-    treatment_id     UUID           NOT NULL REFERENCES treatments (id) ON DELETE CASCADE,
+    visit_id     UUID           NOT NULL REFERENCES visits (id) ON DELETE CASCADE,
     material_name    VARCHAR(100)   NOT NULL,
     quantity         DECIMAL(10, 3) NOT NULL,
     unit             VARCHAR(20),
@@ -23,17 +23,17 @@ CREATE TABLE treatment_materials (
     notes            TEXT,
     created_at       TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at       TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    
+
     CONSTRAINT chk_quantity_positive CHECK (quantity > 0),
     CONSTRAINT chk_cost_per_unit_positive CHECK (cost_per_unit >= 0),
     CONSTRAINT chk_total_cost_positive CHECK (total_cost >= 0)
 );
 
 -- ====================================================================
--- INDEXES FOR TREATMENT MATERIALS
+-- INDEXES FOR visit MATERIALS
 -- ====================================================================
 
-CREATE INDEX idx_treatment_materials_treatment ON treatment_materials(treatment_id);
+CREATE INDEX idx_treatment_materials_treatment ON treatment_materials(visit_id);
 CREATE INDEX idx_treatment_materials_name ON treatment_materials(material_name);
 CREATE INDEX idx_treatment_materials_supplier ON treatment_materials(supplier);
 CREATE INDEX idx_treatment_materials_created_at ON treatment_materials(created_at);
@@ -55,27 +55,27 @@ CREATE INDEX idx_treatment_materials_created_at ON treatment_materials(created_a
 -- Enhanced search capabilities (Note: CONCURRENTLY removed for transactional compatibility)
 CREATE INDEX IF NOT EXISTS idx_patients_full_name_lower ON patients(lower(full_name));
 CREATE INDEX IF NOT EXISTS idx_patients_email_lower ON patients(lower(email)) WHERE email IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_treatments_date ON treatments(treatment_date);
-CREATE INDEX IF NOT EXISTS idx_treatments_status ON treatments(status);
-CREATE INDEX IF NOT EXISTS idx_treatments_tooth_number ON treatments(tooth_number) WHERE tooth_number IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(visit_date);
+CREATE INDEX IF NOT EXISTS idx_visits_status ON visits(status);
+CREATE INDEX IF NOT EXISTS idx_visits_tooth_number ON visits(tooth_number) WHERE tooth_number IS NOT NULL;
 
 -- ====================================================================
--- ENHANCED VIEWS FOR TREATMENT MATERIALS
+-- ENHANCED VIEWS FOR visit MATERIALS
 -- ====================================================================
 
--- View to get treatment material summary by treatment
+-- View to get visit material summary by visit
 CREATE VIEW v_treatment_material_summary AS
-SELECT 
-    tm.treatment_id,
+SELECT
+    tm.visit_id,
     COUNT(tm.id) as material_count,
     SUM(tm.total_cost) as total_material_cost,
     STRING_AGG(tm.material_name, ', ' ORDER BY tm.material_name) as materials_used
 FROM treatment_materials tm
-GROUP BY tm.treatment_id;
+GROUP BY tm.visit_id;
 
 -- View to get material usage statistics
 CREATE VIEW v_material_usage_stats AS
-SELECT 
+SELECT
     tm.material_name,
     COUNT(tm.id) as usage_count,
     SUM(tm.quantity) as total_quantity_used,
@@ -97,25 +97,25 @@ SELECT
     COUNT(DISTINCT i.id) FILTER (WHERE i.status = 'UNPAID') AS unpaid_invoices,
     COALESCE(SUM(i.total_amount) FILTER (WHERE i.status = 'UNPAID'), 0) AS total_unpaid,
     COALESCE(SUM(tm.total_cost), 0) AS total_material_costs,
-    COUNT(DISTINCT t.id) AS total_treatments
+    COUNT(DISTINCT t.id) AS total_visits
 FROM patients p
     LEFT JOIN invoices i ON p.id = i.patient_id
-    LEFT JOIN treatments t ON p.id = t.patient_id
-    LEFT JOIN treatment_materials tm ON t.id = tm.treatment_id
+    LEFT JOIN visits t ON p.id = t.patient_id
+    LEFT JOIN treatment_materials tm ON t.id = tm.visit_id
 GROUP BY p.id, p.full_name, p.public_facing_id, p.balance;
 
 -- ====================================================================
 -- FUNCTIONS FOR MATERIAL COST CALCULATIONS
 -- ====================================================================
 
--- Function to calculate total material cost for a treatment
-CREATE OR REPLACE FUNCTION get_treatment_material_cost(treatment_uuid UUID)
+-- Function to calculate total material cost for a visit
+CREATE OR REPLACE FUNCTION get_treatment_material_cost(visits_uuid UUID)
 RETURNS DECIMAL(10,2) AS $$
 BEGIN
     RETURN COALESCE(
-        (SELECT SUM(total_cost) 
-         FROM treatment_materials 
-         WHERE treatment_id = treatment_uuid), 
+        (SELECT SUM(total_cost)
+         FROM treatment_materials
+         WHERE visit_id = visits_uuid),
         0.00
     );
 END;
@@ -126,10 +126,10 @@ CREATE OR REPLACE FUNCTION get_patient_material_cost(patient_uuid UUID)
 RETURNS DECIMAL(10,2) AS $$
 BEGIN
     RETURN COALESCE(
-        (SELECT SUM(tm.total_cost) 
+        (SELECT SUM(tm.total_cost)
          FROM treatment_materials tm
-         JOIN treatments t ON tm.treatment_id = t.id
-         WHERE t.patient_id = patient_uuid), 
+         JOIN visits t ON tm.visit_id = t.id
+         WHERE t.patient_id = patient_uuid),
         0.00
     );
 END;
@@ -154,10 +154,10 @@ CREATE TRIGGER trg_calculate_material_total_cost
     FOR EACH ROW EXECUTE FUNCTION calculate_material_total_cost();
 
 -- ====================================================================
--- UPDATE EXISTING TREATMENT STATUSES (IF NEEDED)
+-- UPDATE EXISTING visit STATUSES (IF NEEDED)
 -- ====================================================================
 
--- Ensure all treatments have valid statuses
+-- Ensure all visits have valid statuses
 -- This is handled by the Java enum, no database changes needed
 
 -- ====================================================================
@@ -165,8 +165,8 @@ CREATE TRIGGER trg_calculate_material_total_cost
 -- ====================================================================
 
 -- Add constraint to ensure material names are not empty
-ALTER TABLE treatment_materials 
-ADD CONSTRAINT chk_material_name_not_empty 
+ALTER TABLE treatment_materials
+ADD CONSTRAINT chk_material_name_not_empty
 CHECK (LENGTH(TRIM(material_name)) > 0);
 
 -- ====================================================================

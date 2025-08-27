@@ -1,6 +1,7 @@
 package sy.sezar.clinicx.patient.dto;
 
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
+import sy.sezar.clinicx.patient.model.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public record AdvancePaymentDto(
     BigDecimal amount,
     BigDecimal remainingCredit,
     LocalDate paymentDate,
-    String paymentMethod,
+    PaymentMethod paymentMethod,
     PaymentType type,
     String description,
     String referenceNumber,

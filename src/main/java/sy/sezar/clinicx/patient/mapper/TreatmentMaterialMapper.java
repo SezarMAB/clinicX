@@ -15,16 +15,16 @@ import java.util.List;
 public interface TreatmentMaterialMapper {
 
     // TreatmentMaterial -> TreatmentMaterialDto
-    @Mapping(source = "treatment.id", target = "treatmentId")
+    @Mapping(source = "visit.id", target = "visitId")
     TreatmentMaterialDto toDto(TreatmentMaterial treatmentMaterial);
-    
+
     List<TreatmentMaterialDto> toDtoList(List<TreatmentMaterial> treatmentMaterials);
 
     // TreatmentMaterialCreateRequest -> TreatmentMaterial
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "treatment", ignore = true)
+    @Mapping(target = "visit", ignore = true)
     @Mapping(target = "totalCost", ignore = true)
     TreatmentMaterial toEntity(TreatmentMaterialCreateRequest request);
 }

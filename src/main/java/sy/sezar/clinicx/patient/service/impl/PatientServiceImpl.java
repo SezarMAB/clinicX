@@ -228,7 +228,7 @@ public class PatientServiceImpl implements PatientService {
     public Page<VisitLogDto> getPatientVisitHistory(UUID patientId, Pageable pageable) {
         log.info("Getting visit history for patient ID: {} with pagination: {}", patientId, pageable);
 
-        Page<Visit> visits = visitRepository.findByPatientIdOrderByVisitDateDesc(patientId, pageable);
+        Page<Visit> visits = visitRepository.findByPatientIdOrderByDateDesc(patientId, pageable);
         log.debug("Found {} visits (page {} of {}) for patient: {}",
                 visits.getNumberOfElements(), visits.getNumber() + 1, visits.getTotalPages(), patientId);
 

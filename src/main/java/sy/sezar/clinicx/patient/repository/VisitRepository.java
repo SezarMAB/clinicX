@@ -21,7 +21,7 @@ public interface VisitRepository extends JpaRepository<Visit, UUID>, JpaSpecific
      * @param pageable  Pagination and sorting information.
      * @return A Page of visits.
      */
-    Page<Visit> findByPatientIdOrderByVisitDateDesc(UUID patientId, Pageable pageable);
+    Page<Visit> findByPatientIdOrderByDateDesc(UUID patientId, Pageable pageable);
 
     /**
      * Finds a list of visits for a specific patient.

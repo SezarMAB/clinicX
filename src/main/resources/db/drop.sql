@@ -62,6 +62,7 @@ DROP FUNCTION IF EXISTS update_patient_balance();
 
 
 
+
 -- ====================================================================
 -- STEP 3: DROP VIEWS (Optional - CASCADE on tables will drop these too)
 -- ====================================================================
@@ -146,8 +147,9 @@ DROP TABLE IF EXISTS user_tenant_access CASCADE;
 DROP TABLE IF EXISTS staff_roles CASCADE;
 DROP TABLE IF EXISTS user_tenant_access_roles;
 
+DROP FUNCTION IF EXISTS update_payment_plans_updated_at() CASCADE;
 -- Drop financial functions
-DROP FUNCTION IF EXISTS update_updated_at_column();
+-- DROP FUNCTION IF EXISTS update_updated_at_column();
 
 DROP TABLE IF EXISTS flyway_schema_history CASCADE;
 

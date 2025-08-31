@@ -28,9 +28,11 @@ public class InvoiceItem {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "visit_id", unique = true)
-    private Visit visit;
+    // Link invoice item to a specific procedure performed during a visit
+    // Nullable to allow ad-hoc items (adjustments/other)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "procedure_id", unique = true)
+    private VisitProcedure procedure;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "item_type", length = 30)
@@ -49,4 +51,3 @@ public class InvoiceItem {
     @Column(name = "created_at", updatable = false, nullable = false)
     private Instant createdAt;
 }
-

@@ -16,7 +16,7 @@ public record AddInvoiceItemsRequest(
     List<InvoiceItemRequest> items
 ) {
     public record InvoiceItemRequest(
-        UUID treatmentId,
+        UUID procedureId,
         String description,
         BigDecimal amount,
         Integer quantity,

@@ -10,7 +10,7 @@ import java.util.UUID;
 public record InvoiceItemDto(
     UUID id,
     UUID invoiceId,
-    UUID treatmentId,
+    UUID procedureId,
     String description,
     BigDecimal amount,
     Integer quantity,

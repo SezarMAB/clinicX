@@ -103,6 +103,15 @@ DROP TABLE IF EXISTS lab_requests CASCADE;
 DROP TABLE IF EXISTS patient_tags CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
 
+DROP TABLE IF EXISTS public.procedure_templates CASCADE;
+DROP TABLE IF EXISTS public.payment_plan_installments CASCADE;
+DROP TABLE IF EXISTS public.payment_plans CASCADE;
+DROP TABLE IF EXISTS public.ledger_entries CASCADE;
+DROP TABLE IF EXISTS public.payment_allocations CASCADE;
+DROP TABLE IF EXISTS public.procedure_surfaces CASCADE;
+DROP TABLE IF EXISTS public.lab_cases CASCADE;
+DROP TABLE IF EXISTS public.procedure_materials CASCADE;
+
 -- Drop financial tables
 DROP TABLE IF EXISTS insurance_authorizations CASCADE;
 DROP TABLE IF EXISTS payments CASCADE;
@@ -148,6 +157,9 @@ DROP TABLE IF EXISTS staff_roles CASCADE;
 DROP TABLE IF EXISTS user_tenant_access_roles;
 
 DROP FUNCTION IF EXISTS update_payment_plans_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS public.update_updated_at_column() CASCADE;
+
+
 -- Drop financial functions
 -- DROP FUNCTION IF EXISTS update_updated_at_column();
 

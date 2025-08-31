@@ -42,6 +42,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceMapper invoiceMapper;
     private final EntityManager entityManager;
     private final sy.sezar.clinicx.patient.service.LedgerService ledgerService;
+    private final sy.sezar.clinicx.patient.repository.VisitProcedureRepository visitProcedureRepository;
 
     @Override
     @Transactional
@@ -249,21 +250,54 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional
     public InvoiceDto generateInvoiceFromTreatments(GenerateInvoiceRequest request) {
-        log.info("Generating invoice from treatments for patient: {}", request.patientId());
-        
+        log.info("Generating invoice from procedures for patient: {}", request.patientId());
+
         Patient patient = findPatientById(request.patientId());
         String invoiceNumber = getNextInvoiceNumber();
-        
+
         Invoice invoice = new Invoice();
         invoice.setPatient(patient);
         invoice.setInvoiceNumber(invoiceNumber);
-        invoice.setTotalAmount(BigDecimal.ZERO); // Default amount - should be calculated from treatments
-        invoice.setIssueDate(LocalDate.now());
-        invoice.setDueDate(LocalDate.now().plusDays(30));
+        invoice.setIssueDate(request.issueDate() != null ? request.issueDate() : LocalDate.now());
+        invoice.setDueDate(request.dueDate() != null ? request.dueDate() : invoice.getIssueDate().plusDays(30));
         invoice.setStatus(InvoiceStatus.UNPAID);
-        
+
+        // Build items from provided procedure IDs
+        BigDecimal subTotal = BigDecimal.ZERO;
+        for (UUID procedureId : request.procedureIds()) {
+            var procedure = visitProcedureRepository.findById(procedureId)
+                .orElseThrow(() -> new NotFoundException("Procedure not found: " + procedureId));
+
+            // Ensure not already billed (unique index will also enforce)
+            boolean alreadyBilled = invoiceRepository
+                .findById(invoice.getId())
+                .isPresent(); // placeholder, rely on DB unique index after persist
+
+            var item = new sy.sezar.clinicx.patient.model.InvoiceItem();
+            item.setInvoice(invoice);
+            item.setProcedure(procedure);
+            item.setItemType(sy.sezar.clinicx.patient.model.enums.InvoiceItemType.PROCEDURE);
+            item.setDescription(procedure.getName());
+            var amount = procedure.getTotalFee();
+            item.setAmount(amount);
+
+            invoice.getItems().add(item);
+            subTotal = subTotal.add(amount);
+        }
+
+        invoice.setSubTotal(subTotal);
+        invoice.setTotalAmount(subTotal);
+        // initialize materialized totals
+        invoice.setAmountPaid(invoice.getAmountPaid() != null ? invoice.getAmountPaid() : BigDecimal.ZERO);
+        BigDecimal due = subTotal
+            .subtract(invoice.getDiscountAmount() != null ? invoice.getDiscountAmount() : BigDecimal.ZERO)
+            .add(invoice.getTaxAmount() != null ? invoice.getTaxAmount() : BigDecimal.ZERO)
+            .add(invoice.getAdjustmentAmount() != null ? invoice.getAdjustmentAmount() : BigDecimal.ZERO)
+            .subtract(invoice.getWriteOffAmount() != null ? invoice.getWriteOffAmount() : BigDecimal.ZERO)
+            .subtract(invoice.getAmountPaid());
+        invoice.setAmountDue(due.max(BigDecimal.ZERO));
+
         Invoice savedInvoice = invoiceRepository.save(invoice);
-        
         return mapToInvoiceDto(savedInvoice);
     }
     
@@ -346,10 +380,54 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional
     public InvoiceDto addItemsToInvoice(UUID invoiceId, AddInvoiceItemsRequest request) {
         log.info("Adding items to invoice: {}", invoiceId);
-        
+
         Invoice invoice = findInvoiceById(invoiceId);
-        // TODO: Add items when AddInvoiceItemsRequest DTO is properly defined
-        
+
+        BigDecimal addTotal = BigDecimal.ZERO;
+        for (var it : request.items()) {
+            var item = new sy.sezar.clinicx.patient.model.InvoiceItem();
+            item.setInvoice(invoice);
+
+            if (it.procedureId() != null) {
+                var procedure = visitProcedureRepository.findById(it.procedureId())
+                    .orElseThrow(() -> new NotFoundException("Procedure not found: " + it.procedureId()));
+                item.setProcedure(procedure);
+                item.setItemType(sy.sezar.clinicx.patient.model.enums.InvoiceItemType.PROCEDURE);
+                item.setDescription(it.description() != null ? it.description() : procedure.getName());
+                BigDecimal amount = it.amount();
+                if (amount == null) {
+                    // If quantity/unitPrice provided, compute; else use procedure total
+                    if (it.quantity() != null && it.unitPrice() != null) {
+                        amount = it.unitPrice().multiply(BigDecimal.valueOf(it.quantity()));
+                    } else {
+                        amount = procedure.getTotalFee();
+                    }
+                }
+                item.setAmount(amount);
+                addTotal = addTotal.add(amount);
+            } else {
+                // Ad-hoc item (OTHER/ADJUSTMENT/DISCOUNT)
+                item.setItemType(sy.sezar.clinicx.patient.model.enums.InvoiceItemType.OTHER);
+                item.setDescription(it.description());
+                item.setAmount(it.amount());
+                addTotal = addTotal.add(it.amount());
+            }
+
+            invoice.getItems().add(item);
+        }
+
+        // Update totals
+        BigDecimal subTotal = (invoice.getSubTotal() != null ? invoice.getSubTotal() : invoice.getTotalAmount()).add(addTotal);
+        invoice.setSubTotal(subTotal);
+        invoice.setTotalAmount(subTotal);
+        BigDecimal due = subTotal
+            .subtract(invoice.getDiscountAmount() != null ? invoice.getDiscountAmount() : BigDecimal.ZERO)
+            .add(invoice.getTaxAmount() != null ? invoice.getTaxAmount() : BigDecimal.ZERO)
+            .add(invoice.getAdjustmentAmount() != null ? invoice.getAdjustmentAmount() : BigDecimal.ZERO)
+            .subtract(invoice.getWriteOffAmount() != null ? invoice.getWriteOffAmount() : BigDecimal.ZERO)
+            .subtract(invoice.getAmountPaid() != null ? invoice.getAmountPaid() : BigDecimal.ZERO);
+        invoice.setAmountDue(due.max(BigDecimal.ZERO));
+
         Invoice savedInvoice = invoiceRepository.save(invoice);
         return mapToInvoiceDto(savedInvoice);
     }

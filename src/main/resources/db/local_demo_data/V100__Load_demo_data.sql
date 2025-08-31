@@ -536,37 +536,37 @@ ON CONFLICT DO NOTHING;
 -- =========================================================
 -- INVOICE ITEMS
 -- =========================================================
-INSERT INTO invoice_items (id, invoice_id, visit_id, description, amount, item_type)
+INSERT INTO invoice_items (id, invoice_id, procedure_id, description, amount, item_type)
 VALUES 
     -- Invoice 1 items (John Smith)
     ('e0000001-0000-0000-0000-000000000001', 'd0000001-0000-0000-0000-000000000001', 
-     '90000001-0000-0000-0000-000000000001', 'Periodic Oral Evaluation', 45.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000001', 'Periodic Oral Evaluation', 45.00, 'PROCEDURE'),
     ('e0000001-0000-0000-0000-000000000002', 'd0000001-0000-0000-0000-000000000001', 
-     NULL, 'Prophylaxis - Adult', 95.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000002', 'Prophylaxis - Adult', 95.00, 'PROCEDURE'),
     
     -- Invoice 2 items (Emma Johnson)
     ('e0000001-0000-0000-0000-000000000003', 'd0000001-0000-0000-0000-000000000002', 
-     '90000001-0000-0000-0000-000000000002', 'Crown - Porcelain/Ceramic', 1250.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000003', 'Crown - Porcelain/Ceramic', 1250.00, 'PROCEDURE'),
     ('e0000001-0000-0000-0000-000000000004', 'd0000001-0000-0000-0000-000000000002', 
-     NULL, 'Temporary Crown', 150.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000004', 'Temporary Crown', 150.00, 'PROCEDURE'),
     
     -- Invoice 3 items (Michael Brown)
     ('e0000001-0000-0000-0000-000000000005', 'd0000001-0000-0000-0000-000000000003', 
-     '90000001-0000-0000-0000-000000000003', 'Root Canal - Molar', 1150.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000005', 'Root Canal - Molar', 1150.00, 'PROCEDURE'),
     ('e0000001-0000-0000-0000-000000000006', 'd0000001-0000-0000-0000-000000000003', 
-     NULL, 'Core Buildup', 350.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000006', 'Core Buildup', 350.00, 'PROCEDURE'),
     
     -- Invoice 4 items (Sophia Davis)
     ('e0000001-0000-0000-0000-000000000007', 'd0000001-0000-0000-0000-000000000004', 
-     '90000001-0000-0000-0000-000000000004', 'Prophylaxis - Child', 75.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000007', 'Prophylaxis - Child', 75.00, 'PROCEDURE'),
     ('e0000001-0000-0000-0000-000000000008', 'd0000001-0000-0000-0000-000000000004', 
-     NULL, 'Topical Fluoride', 35.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000008', 'Topical Fluoride', 35.00, 'PROCEDURE'),
     
     -- Invoice 5 items (William Garcia)
     ('e0000001-0000-0000-0000-000000000009', 'd0000001-0000-0000-0000-000000000005', 
-     '90000001-0000-0000-0000-000000000005', 'Limited Oral Evaluation', 65.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000009', 'Limited Oral Evaluation', 65.00, 'PROCEDURE'),
     ('e0000001-0000-0000-0000-000000000010', 'd0000001-0000-0000-0000-000000000005', 
-     NULL, 'Periapical X-ray', 35.00, 'PROCEDURE'),
+     'a0000001-0000-0000-0000-000000000010', 'Periapical X-ray', 35.00, 'PROCEDURE'),
     
     -- Invoice 6 items (Lucas Thompson)
     ('e0000001-0000-0000-0000-000000000011', 'd0000001-0000-0000-0000-000000000006', 

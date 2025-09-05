@@ -33,7 +33,7 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
     private final DocumentRepository documentRepository;
-    private final TreatmentRepository treatmentRepository;
+    private final VisitRepository visitRepository;
     private final AppointmentRepository appointmentRepository;
     private final NoteRepository noteRepository;
     private final LabRequestRepository labRequestRepository;
@@ -43,7 +43,7 @@ public class PatientServiceImpl implements PatientService {
     private final PatientFinancialSummaryViewRepository financialSummaryViewRepository;
     private final PatientCentralMapper patientMapper;
     private final DocumentMapper documentMapper;
-    private final TreatmentMapper treatmentMapper;
+    private final VisitMapper visitMapper;
     private final AppointmentMapper appointmentMapper;
     private final NoteSummaryMapper noteSummaryMapper;
     private final LabRequestMapper labRequestMapper;
@@ -225,14 +225,14 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Page<TreatmentLogDto> getPatientTreatmentHistory(UUID patientId, Pageable pageable) {
-        log.info("Getting treatment history for patient ID: {} with pagination: {}", patientId, pageable);
+    public Page<VisitLogDto> getPatientVisitHistory(UUID patientId, Pageable pageable) {
+        log.info("Getting visit history for patient ID: {} with pagination: {}", patientId, pageable);
 
-        Page<Treatment> treatments = treatmentRepository.findByPatientIdOrderByTreatmentDateDesc(patientId, pageable);
-        log.debug("Found {} treatments (page {} of {}) for patient: {}",
-                treatments.getNumberOfElements(), treatments.getNumber() + 1, treatments.getTotalPages(), patientId);
+        Page<Visit> visits = visitRepository.findByPatientIdOrderByDateDesc(patientId, pageable);
+        log.debug("Found {} visits (page {} of {}) for patient: {}",
+                visits.getNumberOfElements(), visits.getNumber() + 1, visits.getTotalPages(), patientId);
 
-        return treatments.map(treatmentMapper::toTreatmentLogDto);
+        return visits.map(visitMapper::toVisitLogDto);
     }
 
     @Override

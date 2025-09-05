@@ -41,7 +41,7 @@ public interface PatientCentralMapper {
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
     @Mapping(target = "dentalChart", ignore = true)
-    @Mapping(target = "treatments", ignore = true)
+    @Mapping(target = "visits", ignore = true)
     Patient toPatient(PatientCreateRequest request);
 
     // Patient <-> PatientUpdateRequest
@@ -59,19 +59,19 @@ public interface PatientCentralMapper {
     @Mapping(target = "payments", ignore = true)
     @Mapping(target = "notes", ignore = true)
     @Mapping(target = "dentalChart", ignore = true)
-    @Mapping(target = "treatments", ignore = true)
+    @Mapping(target = "visits", ignore = true)
     void updatePatientFromRequest(PatientUpdateRequest request, @MappingTarget Patient patient);
 
     default Integer calculateAge(LocalDate dateOfBirth) {
         if (dateOfBirth == null) {
             return null;
         }
-        
+
         LocalDate today = LocalDate.now();
-        
+
         // Check if birthday hasn't occurred this year yet
         if (today.getMonthValue() < dateOfBirth.getMonthValue() ||
-            (today.getMonthValue() == dateOfBirth.getMonthValue() && 
+            (today.getMonthValue() == dateOfBirth.getMonthValue() &&
              today.getDayOfMonth() < dateOfBirth.getDayOfMonth())) {
             // Birthday hasn't occurred yet this year
             return today.getYear() - dateOfBirth.getYear() - 1;

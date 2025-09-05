@@ -18,8 +18,8 @@ public class TreatmentMaterial extends BaseEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "treatment_id", nullable = false)
-    private Treatment treatment;
+    @JoinColumn(name = "visit_id", nullable = false)
+    private Visit visit;
 
     @NotBlank
     @Column(name = "material_name", nullable = false, length = 100)

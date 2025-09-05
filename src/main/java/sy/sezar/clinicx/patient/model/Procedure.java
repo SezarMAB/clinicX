@@ -11,7 +11,7 @@ import sy.sezar.clinicx.core.model.BaseEntity;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "procedures")
+@Table(name = "procedure_templates")
 @Getter
 @Setter
 public class Procedure extends BaseEntity {

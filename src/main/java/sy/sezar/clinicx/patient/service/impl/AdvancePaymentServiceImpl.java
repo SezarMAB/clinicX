@@ -15,6 +15,7 @@ import sy.sezar.clinicx.patient.model.Patient;
 import sy.sezar.clinicx.patient.model.Payment;
 import sy.sezar.clinicx.patient.model.enums.InvoiceStatus;
 import sy.sezar.clinicx.patient.model.enums.PaymentType;
+import sy.sezar.clinicx.patient.model.enums.PaymentMethod;
 import sy.sezar.clinicx.patient.repository.InvoiceRepository;
 import sy.sezar.clinicx.patient.repository.PatientRepository;
 import sy.sezar.clinicx.patient.repository.PaymentRepository;

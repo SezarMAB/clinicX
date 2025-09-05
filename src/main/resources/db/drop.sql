@@ -13,18 +13,19 @@ BEGIN;
 -- ====================================================================
 
 -- Drop audit triggers
-DROP TRIGGER IF EXISTS audit_tooth_history ON tooth_history;
-DROP TRIGGER IF EXISTS audit_patient_teeth ON patient_teeth;
+DROP TRIGGER IF EXISTS audit_tooth_history ON payment_plans;
+DROP TRIGGER IF EXISTS audit_patient_teeth ON payment_allocations;
+DROP TRIGGER IF EXISTS audit_patient_teeth ON ledger_entries;
+DROP TRIGGER IF EXISTS audit_patient_teeth ON payment_plan_installments;
 DROP TRIGGER IF EXISTS audit_payments ON payments;
 DROP TRIGGER IF EXISTS audit_invoices ON invoices;
-DROP TRIGGER IF EXISTS audit_treatments ON treatments;
+DROP TRIGGER IF EXISTS audit_treatments ON visits;
 DROP TRIGGER IF EXISTS audit_appointments ON appointments;
 DROP TRIGGER IF EXISTS audit_patients ON patients;
 
 -- Drop tooth-related triggers
-DROP TRIGGER IF EXISTS trg_update_tooth_from_treatment ON treatments;
-DROP TRIGGER IF EXISTS trg_link_treatment_to_tooth ON treatments;
-DROP TRIGGER IF EXISTS trg_track_tooth_history ON patient_teeth;
+DROP TRIGGER IF EXISTS trg_update_tooth_from_treatment ON visits;
+DROP TRIGGER IF EXISTS trg_link_treatment_to_tooth ON visits;
 DROP TRIGGER IF EXISTS trg_initialize_patient_teeth ON patients;
 
 -- Drop other triggers
@@ -57,6 +58,7 @@ DROP FUNCTION IF EXISTS audit_trigger_function();
 DROP FUNCTION IF EXISTS validate_appointment_schedule();
 DROP FUNCTION IF EXISTS update_appointment_slot();
 DROP FUNCTION IF EXISTS update_patient_balance();
+
 
 
 
@@ -101,6 +103,15 @@ DROP TABLE IF EXISTS lab_requests CASCADE;
 DROP TABLE IF EXISTS patient_tags CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
 
+DROP TABLE IF EXISTS public.procedure_templates CASCADE;
+DROP TABLE IF EXISTS public.payment_plan_installments CASCADE;
+DROP TABLE IF EXISTS public.payment_plans CASCADE;
+DROP TABLE IF EXISTS public.ledger_entries CASCADE;
+DROP TABLE IF EXISTS public.payment_allocations CASCADE;
+DROP TABLE IF EXISTS public.procedure_surfaces CASCADE;
+DROP TABLE IF EXISTS public.lab_cases CASCADE;
+DROP TABLE IF EXISTS public.procedure_materials CASCADE;
+
 -- Drop financial tables
 DROP TABLE IF EXISTS insurance_authorizations CASCADE;
 DROP TABLE IF EXISTS payments CASCADE;
@@ -121,7 +132,7 @@ DROP TABLE IF EXISTS dental_charts CASCADE;
 DROP TABLE IF EXISTS tooth_conditions CASCADE;
 
 -- Drop medical records tables
-DROP TABLE IF EXISTS treatments CASCADE;
+DROP TABLE IF EXISTS visits CASCADE;
 DROP TABLE IF EXISTS appointments CASCADE;
 DROP TABLE IF EXISTS procedures CASCADE;
 
@@ -145,8 +156,12 @@ DROP TABLE IF EXISTS user_tenant_access CASCADE;
 DROP TABLE IF EXISTS staff_roles CASCADE;
 DROP TABLE IF EXISTS user_tenant_access_roles;
 
+DROP FUNCTION IF EXISTS update_payment_plans_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS public.update_updated_at_column() CASCADE;
+
+
 -- Drop financial functions
-DROP FUNCTION IF EXISTS update_updated_at_column();
+-- DROP FUNCTION IF EXISTS update_updated_at_column();
 
 DROP TABLE IF EXISTS flyway_schema_history CASCADE;
 

@@ -122,7 +122,7 @@ class TreatmentMaterialControllerTest {
     void createTreatmentMaterial_InvalidRequest_ShouldReturnOk() throws Exception {
         // Given - Invalid request with null required fields
         TreatmentMaterialCreateRequest invalidRequest = new TreatmentMaterialCreateRequest(
-            null, // treatmentId is null
+            null, // visitId is null
             "", // materialName is empty
             null, // quantity is null
             "grams",

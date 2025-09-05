@@ -23,9 +23,8 @@ ALTER TABLE staff
 ADD COLUMN IF NOT EXISTS keycloak_user_id VARCHAR(255);
 
 -- Copy user_id to keycloak_user_id if user_id exists (for existing data)
-MERGE INTO staff KEY(id) 
-SELECT id, user_id AS keycloak_user_id 
-FROM staff 
+UPDATE staff 
+SET keycloak_user_id = user_id 
 WHERE user_id IS NOT NULL AND keycloak_user_id IS NULL;
 
 -- Migrate existing staff data to user_tenant_access
@@ -47,6 +46,9 @@ WHERE s.user_id IS NOT NULL
     WHERE uta.user_id = s.user_id 
       AND uta.tenant_id = s.tenant_id
   );
+
+-- Drop indexes that reference the columns we're about to drop
+DROP INDEX IF EXISTS IDX_STAFF_USER_TENANT;
 
 -- Drop the old multi-tenant fields that now live in user_tenant_access
 ALTER TABLE staff 

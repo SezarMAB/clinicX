@@ -249,7 +249,7 @@ ALTER TABLE tooth_conditions ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT 
 ALTER TABLE tooth_conditions ADD COLUMN created_by UUID REFERENCES staff(id);
 ALTER TABLE tooth_conditions ADD COLUMN updated_by UUID REFERENCES staff(id);
 
-ALTER TABLE patient_teeth ADD COLUMN next_scheduled_treatment_date DATE;
+ALTER TABLE patient_teeth ADD COLUMN next_scheduled_ visit_date DATE;
 ALTER TABLE patient_teeth ADD COLUMN is_monitored BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE patient_teeth ADD COLUMN created_by UUID REFERENCES staff(id);
 ALTER TABLE patient_teeth ADD COLUMN updated_by UUID REFERENCES staff(id);
@@ -547,7 +547,7 @@ SELECT
     pt.tooth_number,
     tc.name as condition_name,
     pt.notes,
-    pt.last_treatment_date,
+    pt.last_ visit_date,
     CASE
         WHEN tc.code IN ('CAVITY', 'FRACTURED') THEN 'HIGH'
         WHEN pt.is_monitored THEN 'MEDIUM'
@@ -558,7 +558,7 @@ FROM patient_teeth pt
          JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
 WHERE (tc.code IN ('CAVITY', 'FRACTURED', 'IMPACTED')
     OR pt.is_monitored = TRUE
-    OR pt.next_scheduled_treatment_date < CURRENT_DATE)
+    OR pt.next_scheduled_ visit_date < CURRENT_DATE)
   AND p.deleted_at IS NULL
 ORDER BY priority DESC, p.full_name;
 
@@ -572,7 +572,7 @@ SELECT
     COUNT(DISTINCT pt.id) FILTER (WHERE tc.code = 'FILLED') as filled_teeth,
     COUNT(DISTINCT pt.id) FILTER (WHERE tc.code IN ('EXTRACTED', 'MISSING')) as missing_teeth,
     COUNT(DISTINCT pt.id) FILTER (WHERE pt.is_monitored = TRUE) as monitored_teeth,
-    MAX(pt.last_treatment_date) as last_dental_treatment
+    MAX(pt.last_ visit_date) as last_dental_treatment
 FROM patients p
          LEFT JOIN patient_teeth pt ON p.id = pt.patient_id
          LEFT JOIN tooth_conditions tc ON pt.current_condition_id = tc.id
@@ -694,7 +694,7 @@ ORDER BY
 
 -- Composite indexes for common queries
 CREATE INDEX idx_appointments_composite ON appointments(patient_id, appointment_datetime, status);
-CREATE INDEX idx_treatments_composite ON treatments(patient_id, treatment_date, status);
+CREATE INDEX idx_treatments_composite ON treatments(patient_id,  visit_date, status);
 CREATE INDEX idx_invoices_composite ON invoices(patient_id, issue_date, status);
 CREATE INDEX idx_payments_composite ON payments(patient_id, payment_date);
 

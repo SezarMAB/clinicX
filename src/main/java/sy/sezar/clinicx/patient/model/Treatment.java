@@ -2,66 +2,48 @@ package sy.sezar.clinicx.patient.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import sy.sezar.clinicx.core.model.BaseEntity;
-import sy.sezar.clinicx.patient.model.enums.TreatmentStatus;
-import sy.sezar.clinicx.clinic.model.Staff;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "treatments")
+@Table(name = "treatments", indexes = {
+        @Index(name = "ux_treatments_patient", columnList = "patient_id", unique = true)
+})
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(exclude = {"patient", "visits"})
+@EqualsAndHashCode(callSuper = true, exclude = {"patient", "visits"})
 public class Treatment extends BaseEntity {
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_id", nullable = false)
-    private Appointment appointment;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false, unique = true)
     private Patient patient;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "procedure_id", nullable = false)
-    private Procedure procedure;
+    @Column(name = "name", length = 150)
+    private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id")
-    private Staff doctor;
+    @Column(name = "status", length = 50)
+    private String status;
 
-    @Column(name = "tooth_number")
-    private Integer toothNumber;
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
-    private TreatmentStatus status = TreatmentStatus.COMPLETED;
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
-    @NotNull
-    @Column(name = "cost", nullable = false, precision = 10, scale = 2)
-    private BigDecimal cost;
+    @Column(name = "notes", length = 1000)
+    private String notes;
 
-    @Column(name = "treatment_notes")
-    private String treatmentNotes;
-
-    @NotNull
-    @Column(name = "treatment_date", nullable = false)
-    private LocalDate treatmentDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private Staff createdBy;
-
-    @OneToMany(mappedBy = "treatment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<TreatmentMaterial> materials = new HashSet<>();
+    @OneToMany(mappedBy = "treatment", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Visit> visits = new HashSet<>();
 }
 

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import sy.sezar.clinicx.patient.model.enums.InvoiceItemType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,9 +28,15 @@ public class InvoiceItem {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "treatment_id", unique = true)
-    private Treatment treatment;
+    // Link invoice item to a specific procedure performed during a visit
+    // Nullable to allow ad-hoc items (adjustments/other)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "procedure_id", unique = true)
+    private VisitProcedure procedure;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_type", length = 30)
+    private InvoiceItemType itemType = InvoiceItemType.PROCEDURE;
 
     @NotNull
     @Size(max = 255)
@@ -44,4 +51,3 @@ public class InvoiceItem {
     @Column(name = "created_at", updatable = false, nullable = false)
     private Instant createdAt;
 }
-

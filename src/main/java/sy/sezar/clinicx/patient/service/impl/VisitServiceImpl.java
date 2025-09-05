@@ -45,6 +45,7 @@ public class VisitServiceImpl implements VisitService {
     private final PatientRepository patientRepository;
     private final ProcedureRepository procedureRepository;
     private final StaffRepository staffRepository;
+    private final sy.sezar.clinicx.patient.repository.TreatmentRepository treatmentRepository;
 
     @Override
     @Transactional
@@ -58,6 +59,19 @@ public class VisitServiceImpl implements VisitService {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new NotFoundException("Patient not found: " + patientId));
         visit.setPatient(patient);
+
+        // Ensure patient Treatment exists and link it
+        var treatment = treatmentRepository.findByPatientId(patientId)
+                .orElseGet(() -> {
+                    var t = sy.sezar.clinicx.patient.model.Treatment.builder()
+                            .patient(patient)
+                            .name("Default Treatment Plan")
+                            .status("ACTIVE")
+                            .startDate(java.time.LocalDate.now())
+                            .build();
+                    return treatmentRepository.save(t);
+                });
+        visit.setTreatment(treatment);
         
         // Set provider (doctor)
         Staff provider = staffRepository.findById(request.doctorId())

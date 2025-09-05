@@ -29,8 +29,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"procedures", "patient", "appointment", "provider"})
-@EqualsAndHashCode(callSuper = true, exclude = {"procedures", "patient", "appointment", "provider"})
+@ToString(exclude = {"procedures", "patient", "treatment", "appointment", "provider"})
+@EqualsAndHashCode(callSuper = true, exclude = {"procedures", "patient", "treatment", "appointment", "provider"})
 public class Visit extends BaseEntity {
 
     @NotNull
@@ -41,6 +41,10 @@ public class Visit extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "treatment_id")
+    private Treatment treatment;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -139,4 +143,3 @@ public class Visit extends BaseEntity {
         return procedures.size();
     }
 }
-
